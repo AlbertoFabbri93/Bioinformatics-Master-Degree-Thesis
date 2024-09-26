@@ -157,8 +157,7 @@ tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
   return(seurat_object_cleaned_features)
 }
 
-breast_cancer_patients_cleaned_features <- tidy_seurat_object_assay(breast_cancer_patients_mixed_features, "Nanostring")
-# rm(breast_cancer_patients_mixed_features)
+breast_cancer_patients <- tidy_seurat_object_assay(breast_cancer_patients_mixed_features, "Nanostring")
 ```
 
 ## General overview of the data
@@ -170,7 +169,6 @@ Create a table with an entry for every FOV in the Seurat object analyzed in this
 #| echo: false
 
 # Cohort of all the patients
-breast_cancer_patients <- breast_cancer_patients_cleaned_features
 immunofluorescence <- breast_cancer_patients@meta.data %>% 
                       dplyr::select("Mean.PanCK", "Mean.CD45", "Mean.CD68")
 
