@@ -34,12 +34,18 @@ To run this file it is necessary to have `quarto` installed. `quarto` is a softw
 
 # Work with single cell and spatial omics data
 library("Seurat")
+
 # Replace this future symbols with others because they conflict with the zeallot package
 library (future, exclude = c("%->%", "%<-%"));
 `%<--%` = future::`%<-%` ;
 `%-->%` = future::`%->%` ;
 # Parallelize the computation with several worker processes that will run in their own R session
 plan("multisession", workers = 6)
+# Set the maximum size of the future globals
+options(future.globals.maxSize = 6.5 * 2^30)
+# Ensure proper random number seeding globally
+options(future.seed = TRUE)
+
 # Unpack multiple values without temporary variables
 library("zeallot")
 # Sane way to declare file paths
