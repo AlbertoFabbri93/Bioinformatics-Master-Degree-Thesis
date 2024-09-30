@@ -72,7 +72,7 @@ library("tidyr")
 # Prefer dplyr in case of conflict
 library("conflicted")
 
-# Import utility functions
+# Import custom written functions
 source("Utils.R")
 source("Plotting.R")
 
