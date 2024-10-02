@@ -465,13 +465,21 @@ The individual script of every patient generates a list with all the images and 
 
 # Clusters column names
 protein_cluster_var <- "protein_clusters"
+
 louvain_cluster_var <- "rna_louvain_clusters"
+louvain_cluster_var_ann <- "rna_louvain_clusters_ann"
+
 ist_cluster_var <- "ist_semisup_clusters"
+ist_cluster_var_ann <- "ist_semisup_clusters_ann"
 
 # Clusters plotting names
 protein_cluster_name <- "Protein Clusters"
+
 louvain_cluster_name <- "Louvain Clusters"
+louvain_cluster_name_ann <- "Louvain Clusters Annotated"
+
 ist_cluster_name <- "Insitutype Clusters"
+ist_cluster_name_ann <- "Insitutype Clusters Annotated"
 
 # Collect all patients' data in a list
 patients_rna_data <- list()
