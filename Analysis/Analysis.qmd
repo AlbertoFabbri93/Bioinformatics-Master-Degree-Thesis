@@ -61,9 +61,9 @@ library("patchwork")
 # Used to arrange plots in a common grid
 library("ggpubr")
 # Extension of ggplot2 supporting relational data structures such as networks, graphs, and trees
-library(ggraph)
+library("ggraph")
 # Used to plot the cluster tree created by running FindClusters at several resolutions
-library(clustree)
+library("clustree")
 
 ###### TIDYVERSE ######
 # Data manipulation
