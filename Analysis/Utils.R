@@ -101,7 +101,8 @@ find_most_significant_markers <- function(
 ####### INSITUTYPE SEMISUPERVISED #######
 
 run_ist_semisup_extract_data <- function(
-    patient_data) {
+    patient_data,
+    ...) {
  
   # Get the data necessary to run insitutype
   patient_rna_data <- patient_data[["RNA"]]
@@ -114,7 +115,8 @@ run_ist_semisup_extract_data <- function(
     patient_data = patient_rna_data,
     patient_cohort = patient_cohort,
     patient_rna_counts = patient_rna_counts,
-    patient_avg_neg_probes = patient_avg_neg_probes)
+    patient_avg_neg_probes = patient_avg_neg_probes,
+    ...)
   
   # Return the Seurat object with the added clusters
   return(patient_semisup)
@@ -125,7 +127,13 @@ run_Insitutype_semisupervised <- function(
     patient_cohort,
     patient_rna_counts,
     patient_avg_neg_probes,
-    io_profiles = NULL) {
+    io_profiles = NULL,
+    clusts_search_space = 1:8,
+    phase_1_size = 20,
+    phase_2_size = 50,
+    phase_3_size = 200,
+    iter_num = 1,
+    max_iter = 5) {
   
   if (is.null(io_profiles)) {
     # Get cell reference profile data from NanoString
@@ -162,7 +170,7 @@ run_Insitutype_semisupervised <- function(
     counts = patient_rna_counts,
     neg = patient_avg_neg_probes,
     fixed_profiles = io_profiles,
-    n_clusts = 1:8)
+    n_clusts = clusts_search_space)
   
   # Semi-supervised learning with insitutype and reference profiles
   # Insitutype needs integers, if given floating point numbers it fails with misleading errors
@@ -184,11 +192,11 @@ run_Insitutype_semisupervised <- function(
     # choosing inadvisably low numbers to speed the vignette; using the defaults
     # in recommended.
     # This is the number of cells used in each phase, because of random sampling
-    n_phase1 = 20,
-    n_phase2 = 50,
-    n_phase3 = 200,
-    n_starts = 1,
-    max_iters = 5
+    n_phase1 = phase_1_size,
+    n_phase2 = phase_2_size,
+    n_phase3 = phase_3_size,
+    n_starts = iter_num,
+    max_iters = max_iter
   )
   
   return(patient_semisup)
