@@ -526,7 +526,7 @@ rm(this_patient_protein_color_table)
 # Remove red blood cells
 patient_1_data <- remove_clusters(patient_1_data, "protein_clusters", c(5))
 
-### UNANOTATED LOUVAIN CLUSTERING ###
+### UNANNOTATED LOUVAIN CLUSTERING ###
 # Analyze RNA data
 patient_1_data <- normalize_cluster_data(patient_1_data)
 patient_1_plots <- c(patient_1_plots, generate_variance_elbow_plots(patient_1_data, "pca_rna", 50))
@@ -589,6 +589,7 @@ patient_1_plots <- c(patient_1_plots, generate_dyn_text_heatmap(
 # Remove the color palette for the ist clusters
 rm(this_patient_ist_color_table)
 
+### ANNOTATED LOUVAIN CLUSTERING ###
 # Luovain clusters annotations
 patient_1_data$rna_louvain_clusters_ann <- case_match(
   patient_1_data$rna_louvain_clusters,
@@ -599,6 +600,7 @@ patient_1_data$rna_louvain_clusters_ann <- case_match(
   "7" ~ "Fibroblast"
 )
 
+### ANNOTATED INSITUTYPE CLUSTERING ###
 # Annotate the insitutype clusters
 patient_1_data$ist_semisup_clusters_ann <- case_match(
   patient_1_data$ist_semisup_clusters,
