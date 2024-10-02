@@ -607,6 +607,19 @@ patient_1_data$rna_louvain_clusters_ann <- case_match(
   "6" ~ "T cell",
   "7" ~ "Fibroblast"
 )
+# Spatial plot with annotated louvain clusters colors
+patient_1_plots <- c(patient_1_plots, generate_spatial_plots(
+  patient_data = patient_1_data,
+  cluster_var = louvain_cluster_var_ann,
+  cluster_name = louvain_cluster_name_ann,
+  color_lookup_table = known_clusters_colors))
+# Generate the umap with the annotated clusters
+patient_1_plots <- c(patient_1_plots, generate_umap(
+  patient_1_data,
+  louvain_cluster_var_ann,
+  "umap_rna",
+  cluster_name = louvain_cluster_name_ann,
+  color_lookup_table = known_clusters_colors))
 
 ### ANNOTATED INSITUTYPE CLUSTERING ###
 # Annotate the insitutype clusters
@@ -616,14 +629,19 @@ patient_1_data$ist_semisup_clusters_ann <- case_match(
   "g" ~ "Endothelial",
   .default = unname(patient_1_data$ist_semisup_clusters)
 )
-# Generate the annotated insitutype plots
-patient_1_plots <- c(patient_1_plots, generate_clustering_plots(patient_1_data, "ist_semisup_clusters_ann",
-    cluster_assay = "RNA", 
-    cluster_reduction = "umap_rna",
-    create_heatmap = FALSE,
-    cluster_name = "Insitutype Semisupervised Clusters Annotated",
-    color_lookup_table = known_clusters_colors))
-patient_1_plots <- c(patient_1_plots, generate_comparison_plots(patient_1_data))
+# Spatial plot with annotated insitutype clusters colors
+patient_1_plots <- c(patient_1_plots, generate_spatial_plots(
+  patient_data = patient_1_data,
+  cluster_var = ist_cluster_var_ann,
+  cluster_name = ist_cluster_name_ann,
+  color_lookup_table = known_clusters_colors))
+# Generate the umap with the annotated clusters
+patient_1_plots <- c(patient_1_plots, generate_umap(
+  patient_1_data,
+  ist_cluster_var_ann,
+  "umap_rna",
+  cluster_name = ist_cluster_name_ann,
+  color_lookup_table = known_clusters_colors))
 
 # Saving and printing
 patients_rna_data[[1]] <- patient_1_data
