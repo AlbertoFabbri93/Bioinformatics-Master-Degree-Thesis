@@ -69,6 +69,9 @@ get_patient_dir_rds <- function(patient_num) {
 
 ###### MARKERS ######
 
+# Returns a matrix containing a ranked list of putative markers, and associated statistics (p-values, ROC score, etc.)
+# It uses a Wilcoxon Rank Sum Test and only returns positive markers
+# By default, it returns the top 10 markers per cluster with a log2 fold change greater than 1
 find_most_significant_markers <- function(
     patient_data,
     cluster_var,
