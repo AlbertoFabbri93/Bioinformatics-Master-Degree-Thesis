@@ -682,6 +682,22 @@ generate_clustering_plots <- function(
   return(clustering_plots)
 }
 
+### EXTRACT/REMOVE CLUSTERS ###
+
+# Return a new Seurat object with only the cells that belong to the specified clusters of the given metadata column
+extract_clusters <- function(patient_data, cluster_col, cluster_vals) {
+  
+  # Identify cells that belong to the clusters specified in cluster_vals
+  cells_to_keep <- patient_data[[cluster_col, drop=TRUE]] %in% cluster_vals
+  
+  # Subset the Seurat object to keep only the desired cells
+  patient_data_clusters <- subset(patient_data, cells = Cells(patient_data)[cells_to_keep])
+  
+  return(patient_data_clusters)
+}
+
+# Remove a set of clusters from a Seurat object 
+# given the name of the metadata column containing the clusters and the name of the clusters to be removed
 remove_clusters <- function(patient_data, cluster_col, cluster_vals) {
   
   # Identify cells that do not belong to the clusters specified in cluster_vals
