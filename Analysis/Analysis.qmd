@@ -169,6 +169,183 @@ tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
 breast_cancer_patients <- tidy_seurat_object_assay(breast_cancer_patients_mixed_features, "Nanostring")
 ```
 
+## Integrate patients
+
+```{r}
+# Create empty vector to store the plots
+integration_plot_list <- c()
+
+# Check if there are mitochondrial genes
+mt_gene_count <- sum(grepl("^MT-", rownames(breast_cancer_patients[["RNA"]])))
+if (mt_gene_count > 0) {
+  cat("TRUE. Number of mitochondrial genes:", mt_gene_count)
+} else {
+  cat("FALSE. No mitochondrial genes found.")
+}
+
+# Check the quantity and the expression level of genes
+integration_plot_list <- c(integration_plot_list, list(VlnPlot(
+  breast_cancer_patients,
+  features = c("nFeature_RNA", "nCount_RNA"),
+  ncol = 2,
+  pt.size = 0) + labs(title = "Gene count and expression level")))
+
+# Normalize all the data
+breast_cancer_patients <- SCTransform(breast_cancer_patients, vars.to.regress = c("nFeature_RNA"), return.only.var.genes = FALSE, verbose = FALSE)
+# Run PCA
+breast_cancer_patients <- RunPCA(breast_cancer_patients, verbose = FALSE, assay = "SCT")
+# Generate variance elbow plots
+generate_variance_elbow_plots(breast_cancer_patients, "pca", 50)
+# Run UMAP
+breast_cancer_patients <- RunUMAP(breast_cancer_patients, reduction = "pca", dims = 1:18, verbose = FALSE)
+# View UMAP with all patients together
+integration_plot_list <- c(integration_plot_list, list(DimPlot(breast_cancer_patients, reduction = "umap", group.by = "Patient.ID")))
+
+# Split the global Seurat object by patient
+breast_cancer_patients_split <- SplitObject(breast_cancer_patients, split.by = "Patient.ID")
+bcp_split_project_names <- names(breast_cancer_patients_split)
+# Set the project name for each patient
+breast_cancer_patients_split <- lapply(bcp_split_project_names, function(seurat_object_name) {
+  breast_cancer_patients_split[[seurat_object_name]]@project.name <- seurat_object_name
+  breast_cancer_patients_split[[seurat_object_name]]
+})
+
+# RUN SCTransform for every patient
+breast_cancer_patients_split <- lapply(breast_cancer_patients_split, function(x) {
+  x <- SCTransform(x, vars.to.regress = c("nFeature_RNA"), verbose = FALSE)
+  x <- RunPCA(x, verbose = FALSE, assay = "SCT")
+  return(x)
+})
+# Find integration features
+features <- SelectIntegrationFeatures(object.list = breast_cancer_patients_split, nfeatures = 1000)
+# Prepare for integration
+breast_cancer_patients_split <- PrepSCTIntegration(object.list = breast_cancer_patients_split, anchor.features = features)
+# Find integration anchors
+object_anchors <- FindIntegrationAnchors(
+  object.list = breast_cancer_patients_split,
+  normalization.method = "SCT",
+  anchor.features = features,
+  verbose = TRUE
+)
+# Integrate the data
+breast_cancer_patients_integrated <- IntegrateData(
+  anchorset = object_anchors,
+  new.assay.name = "integrated",
+  normalization.method = "SCT",
+  verbose = TRUE,
+)
+# Re-join layers after integration otherwise you have 7 count layers,
+breast_cancer_patients_integrated[["RNA"]] <- JoinLayers(breast_cancer_patients_integrated[["RNA"]])
+# do the same for the SystemControl assay
+breast_cancer_patients_integrated[["SystemControl"]] <- JoinLayers(breast_cancer_patients_integrated[["SystemControl"]])
+# and the negative probes assay
+breast_cancer_patients_integrated[["NegativeProbes"]] <- JoinLayers(breast_cancer_patients_integrated[["NegativeProbes"]])
+
+# Set DefaultAssay
+DefaultAssay(breast_cancer_patients_integrated) <- "integrated"
+# Run pca and umap
+breast_cancer_patients_integrated <- RunPCA(breast_cancer_patients_integrated, verbose = TRUE)
+breast_cancer_patients_integrated <- RunUMAP(breast_cancer_patients_integrated, dims = 1:10, verbose = TRUE)
+# View UMAP with all patients together after per patient normalization
+integration_plot_list <- c(integration_plot_list, list(DimPlot(
+  breast_cancer_patients_integrated,
+  reduction = "umap",
+  group.by = "Patient.ID") + 
+  labs(title = "UMAP with all patients together after per patient normalization")))
+```
+
+## Clustering with Seurat
+
+```{r}
+# Generate clusters with different resolutions
+breast_cancer_patients_integrated <- FindNeighbors(breast_cancer_patients_integrated, dims = 1:10)
+res_to_try <- seq(0.1,0.3,by = 0.1)
+# Create custom names based on the actual resolution values
+cluster_name_prefix <- "cluster_integrated_res_"
+cluster_names <- paste0(cluster_name_prefix, res_to_try)
+breast_cancer_patients_integrated <- FindClusters(
+  object = breast_cancer_patients_integrated,
+  resolution = res_to_try,
+  verbose = TRUE,
+  cluster.name = cluster_names)
+# Visualize cluster results
+cluster_plot <- clustree(breast_cancer_patients_integrated, prefix = cluster_name_prefix) + 
+  theme(legend.position = "right") + 
+  guides(colourbar = "none", edge_colour = "none", edge_alpha = "none",
+         size = guide_legend("Number of Cells"),
+         colour = guide_legend("Resolution"))
+plot(cluster_plot)
+# Select the correct resolution
+res.chosen <- 0.2
+clustering.chosen <- paste0(cluster_name_prefix, res.chosen)
+Idents(breast_cancer_patients_integrated) <- clustering.chosen
+# Check the number and names of the clusters
+levels(breast_cancer_patients_integrated)
+# View UMAP with clusters
+DimPlot(breast_cancer_patients_integrated,reduction = "umap", group.by = clustering.chosen)
+# Make QC plots
+FeaturePlot(breast_cancer_patients_integrated,features = c("nFeature_RNA", "nCount_RNA"),
+                          reduction = "umap",combine = FALSE)
+```
+
+### Clustering with Insitutype
+
+```{r}
+ist_cluster_var <- "ist_semisup_clusters"
+# Execute insitutype
+integration_ist_semisup <- run_ist_semisup_extract_data(
+  breast_cancer_patients_integrated,
+  clusts_search_space = 1:12,
+    phase_1_size = 200,
+    phase_2_size = 500,
+    phase_3_size = 2000,
+    iter_num = 10,
+    max_iter = 25)
+breast_cancer_patients_integrated[[ist_cluster_var]] <- integration_ist_semisup$clust
+# Colors for the ist plots
+integration_ist_color_table <- generate_colors_lookup_table(breast_cancer_patients_integrated, ist_cluster_var, known_clusters_colors)
+# Generate the umap with the unannotated clusters
+DimPlot(
+  object = breast_cancer_patients_integrated,
+  group.by = ist_cluster_var,
+  reduction = "umap",
+  # cluster_name = ist_cluster_name,
+  cols = integration_ist_color_table) +
+  labs(title = "UMAP with Insitutype clusters")
+create_cluster_summary(breast_cancer_patients_integrated, ist_cluster_var)
+get_cluster_info(breast_cancer_patients_integrated, ist_cluster_var)
+# Prepare object to run differential expression on SCT assay
+breast_cancer_patients_integrated <- PrepSCTFindMarkers(breast_cancer_patients_integrated, assay = "SCT", verbose = TRUE)
+# Find the most significant markers using the integrated data normalized with SCT
+marks <- find_most_significant_markers(breast_cancer_patients_integrated, ist_cluster_var, "SCT")
+print(integration_plot_list)
+breast_cancer_patients_tumor_cells <- extract_clusters(breast_cancer_patients_integrated, ist_cluster_var, c("a", "b", "c", "d", "e", "f"))
+breast_cancer_patients_tumor_cells <- SCTransform(breast_cancer_patients_tumor_cells, vars.to.regress = c("nFeature_RNA", "nCount_RNA", "Patient.ID"), verbose = FALSE)
+# Run UMAP and PCA
+breast_cancer_patients_tumor_cells <- RunPCA(
+  breast_cancer_patients_tumor_cells,
+  reduction.key = "TCPC_",
+  reduction.name = "pca_tumor_cells",
+  verbose = TRUE)
+breast_cancer_patients_tumor_cells <- RunUMAP(
+  breast_cancer_patients_tumor_cells,
+  reduction = "pca_tumor_cells",
+  reduction.key = "TCUMAP_",
+  reduction.name = "umap_tumor_cells",
+  dims = 1:10,
+  verbose = TRUE)
+# Generate the umap with the unannotated clusters
+DimPlot(
+  object = breast_cancer_patients_tumor_cells,
+  group.by = ist_cluster_var,
+  reduction = "umap_tumor_cells",
+  cols = integration_ist_color_table)
+p1 = DimPlot(breast_cancer_patients_tumor_cells, reduction = "umap_tumor_cells", label = TRUE, group.by = "Patient.ID")
+p2 = DimPlot(breast_cancer_patients_tumor_cells, reduction = "umap_tumor_cells", label = TRUE, group.by = ist_cluster_var,
+  cols = integration_ist_color_table)
+p1 + p2
+```
+
 ## General overview of the data
 
 Create a table with an entry for every FOV in the Seurat object analyzed in this study. The table will contain the patient ID, the serial core, the stamp, and the FOV.
