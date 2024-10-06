@@ -340,10 +340,28 @@ DimPlot(
   group.by = ist_cluster_var,
   reduction = "umap_tumor_cells",
   cols = integration_ist_color_table)
-p1 = DimPlot(breast_cancer_patients_tumor_cells, reduction = "umap_tumor_cells", label = TRUE, group.by = "Patient.ID")
-p2 = DimPlot(breast_cancer_patients_tumor_cells, reduction = "umap_tumor_cells", label = TRUE, group.by = ist_cluster_var,
-  cols = integration_ist_color_table)
-p1 + p2
+breast_cancer_patients_tumor_cells <- FindNeighbors(
+  breast_cancer_patients_tumor_cells,
+  reduction = "pca_tumor_cells",
+  dims = 1:10,
+  verbose = TRUE)
+cluster_name <- "louvain_tumor_cells_clusters"
+breast_cancer_patients_tumor_cells <- FindClusters(
+  breast_cancer_patients_tumor_cells,
+  dims = 1:10,
+  verbose = TRUE,
+  graph.name = paste0("integrated", "_snn"),
+  cluster.name = cluster_name)
+DimPlot(
+  breast_cancer_patients_tumor_cells,
+  reduction = "umap_tumor_cells",
+  label = TRUE,
+  group.by = "Patient.ID") +
+DimPlot(
+  breast_cancer_patients_tumor_cells,
+  reduction = "umap_tumor_cells",
+  label = TRUE,
+  group.by = cluster_name)
 ```
 
 ## General overview of the data
