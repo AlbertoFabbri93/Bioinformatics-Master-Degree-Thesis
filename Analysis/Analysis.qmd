@@ -343,6 +343,11 @@ DimPlot(
   labs(title = "UMAP with Insitutype clusters")
 create_cluster_summary(breast_cancer_patients_integrated, ist_cluster_var)
 get_cluster_info(breast_cancer_patients_integrated, ist_cluster_var)
+```
+
+### Extract tumor clusters
+
+```{r}
 # Prepare object to run differential expression on SCT assay
 breast_cancer_patients_integrated <- PrepSCTFindMarkers(breast_cancer_patients_integrated, assay = "SCT", verbose = TRUE)
 # Find the most significant markers using the integrated data normalized with SCT
