@@ -227,6 +227,38 @@ breast_cancer_patients_split <- lapply(breast_cancer_patients_split, function(pa
   return(patient_object)
 })
 
+# Find integration features
+features <- SelectIntegrationFeatures(
+  object.list = breast_cancer_patients_split,
+  nfeatures = 1000,
+  verbose = TRUE)
+# Prepare for integration
+breast_cancer_patients_split <- PrepSCTIntegration(
+  object.list = breast_cancer_patients_split,
+  anchor.features = features,
+  assay = "SCT",
+  verbose = TRUE)
+# Find integration anchors
+object_anchors <- FindIntegrationAnchors(
+  object.list = breast_cancer_patients_split,
+  normalization.method = "SCT",
+  anchor.features = features,
+  verbose = TRUE
+)
+# Integrate the data
+breast_cancer_patients_integrated <- IntegrateData(
+  anchorset = object_anchors,
+  new.assay.name = "integrated",
+  normalization.method = "SCT",
+  verbose = TRUE,
+)
+# Re-join layers after integration otherwise you have 7 count layers,
+breast_cancer_patients_integrated[["RNA"]] <- JoinLayers(breast_cancer_patients_integrated[["RNA"]])
+# do the same for the SystemControl assay
+breast_cancer_patients_integrated[["SystemControl"]] <- JoinLayers(breast_cancer_patients_integrated[["SystemControl"]])
+# and the negative probes assay
+breast_cancer_patients_integrated[["NegativeProbes"]] <- JoinLayers(breast_cancer_patients_integrated[["NegativeProbes"]])
+
 # Check the quantity and the expression level of genes after normalization
 vln_plot_nrm <- VlnPlot(
   breast_cancer_patients,
@@ -252,34 +284,6 @@ generate_variance_elbow_plots(breast_cancer_patients, "pca", 50)
 breast_cancer_patients <- RunUMAP(breast_cancer_patients, reduction = "pca", dims = 1:18, verbose = FALSE)
 # View UMAP with all patients together
 integration_plot_list <- c(integration_plot_list, list(DimPlot(breast_cancer_patients, reduction = "umap", group.by = "Patient.ID")))
-
-
-
-
-# Find integration features
-features <- SelectIntegrationFeatures(object.list = breast_cancer_patients_split, nfeatures = 1000)
-# Prepare for integration
-breast_cancer_patients_split <- PrepSCTIntegration(object.list = breast_cancer_patients_split, anchor.features = features)
-# Find integration anchors
-object_anchors <- FindIntegrationAnchors(
-  object.list = breast_cancer_patients_split,
-  normalization.method = "SCT",
-  anchor.features = features,
-  verbose = TRUE
-)
-# Integrate the data
-breast_cancer_patients_integrated <- IntegrateData(
-  anchorset = object_anchors,
-  new.assay.name = "integrated",
-  normalization.method = "SCT",
-  verbose = TRUE,
-)
-# Re-join layers after integration otherwise you have 7 count layers,
-breast_cancer_patients_integrated[["RNA"]] <- JoinLayers(breast_cancer_patients_integrated[["RNA"]])
-# do the same for the SystemControl assay
-breast_cancer_patients_integrated[["SystemControl"]] <- JoinLayers(breast_cancer_patients_integrated[["SystemControl"]])
-# and the negative probes assay
-breast_cancer_patients_integrated[["NegativeProbes"]] <- JoinLayers(breast_cancer_patients_integrated[["NegativeProbes"]])
 
 # Set DefaultAssay
 DefaultAssay(breast_cancer_patients_integrated) <- "integrated"
