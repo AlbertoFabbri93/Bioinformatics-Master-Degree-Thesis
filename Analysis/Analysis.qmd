@@ -346,8 +346,10 @@ FeaturePlot(breast_cancer_patients_integrated,features = c("nFeature_RNA", "nCou
 ### Clustering with Insitutype
 
 ```{r}
+# Define the variable name for the Insitutype column on the metadata
 ist_cluster_var <- "ist_semisup_clusters"
-# Execute insitutype
+# Execute insitutype clustering
+# The phase and iter parameters have been set to higher values to get a better clustering
 integration_ist_semisup <- run_ist_semisup_extract_data(
   breast_cancer_patients_integrated,
   clusts_search_space = 1:12,
@@ -356,8 +358,9 @@ integration_ist_semisup <- run_ist_semisup_extract_data(
     phase_3_size = 2000,
     iter_num = 10,
     max_iter = 25)
+# Add the Insitutype clusters to the Seurat object metadata
 breast_cancer_patients_integrated[[ist_cluster_var]] <- integration_ist_semisup$clust
-# Colors for the ist plots
+# Colors for the insitutype plots
 integration_ist_color_table <- generate_colors_lookup_table(breast_cancer_patients_integrated, ist_cluster_var, known_clusters_colors)
 # Generate the umap with the unannotated clusters
 DimPlot(
@@ -367,6 +370,8 @@ DimPlot(
   # cluster_name = ist_cluster_name,
   cols = integration_ist_color_table) +
   labs(title = "UMAP with Insitutype clusters")
+
+# Generate summy statistics for the Insitutype clusters
 create_cluster_summary(breast_cancer_patients_integrated, ist_cluster_var)
 get_cluster_info(breast_cancer_patients_integrated, ist_cluster_var)
 ```
