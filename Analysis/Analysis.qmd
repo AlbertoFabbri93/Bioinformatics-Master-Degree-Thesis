@@ -259,10 +259,43 @@ breast_cancer_patients_integrated[["SystemControl"]] <- JoinLayers(breast_cancer
 # and the negative probes assay
 breast_cancer_patients_integrated[["NegativeProbes"]] <- JoinLayers(breast_cancer_patients_integrated[["NegativeProbes"]])
 
+# Set DefaultAssay
+DefaultAssay(breast_cancer_patients_integrated) <- "integrated"
+# FindVariableFeatures
+# breast_cancer_patients_integrated <- FindVariableFeatures(
+#   breast_cancer_patients_integrated,
+#   selection.method = "vst",
+#   nfeatures = 1000,
+#   verbose = TRUE
+# )
+# Run PCA
+breast_cancer_patients_integrated <- RunPCA(
+  breast_cancer_patients_integrated,
+  assay = "integrated",
+  reduction.key = "IPC_",
+  reduction.name = "integrated_pca",
+  verbose = TRUE, )
+# Generate variance elbow plots
+generate_variance_elbow_plots(breast_cancer_patients_integrated, "integrated_pca", 50)
+# Run UMAP
+breast_cancer_patients_integrated <- RunUMAP(
+  breast_cancer_patients_integrated,
+  reduction = "integrated_pca",
+  dims = 1:22,
+  reduction.key = "IUMAP_",
+  reduction.name = "integrated_umap",
+  verbose = FALSE)
+# View UMAP with all patients together
+DimPlot(
+  breast_cancer_patients_integrated,
+  reduction = "integrated_umap",
+  group.by = "Patient.ID") + 
+  labs(title = "UMAP with all patients together after per patient normalization")
+
 # Check the quantity and the expression level of genes after normalization
 vln_plot_nrm <- VlnPlot(
-  breast_cancer_patients,
-  assay = "SCT",
+  breast_cancer_patients_integrated,
+  assay = "integrated",
   layer = "data",
   features = c("nFeature_SCT", "nCount_SCT"),
   ncol = 2,
@@ -275,27 +308,6 @@ vln_plot_nrm[[2]] <- vln_plot_nrm[[2]] + labs(subtitle = "Total expression level
 vln_plot_nrm <- vln_plot_nrm + plot_annotation(title = "After normalization")
 # Display the plot
 vln_plot_nrm
-
-# Run PCA
-breast_cancer_patients <- RunPCA(breast_cancer_patients, verbose = FALSE, assay = "SCT")
-# Generate variance elbow plots
-generate_variance_elbow_plots(breast_cancer_patients, "pca", 50)
-# Run UMAP
-breast_cancer_patients <- RunUMAP(breast_cancer_patients, reduction = "pca", dims = 1:18, verbose = FALSE)
-# View UMAP with all patients together
-integration_plot_list <- c(integration_plot_list, list(DimPlot(breast_cancer_patients, reduction = "umap", group.by = "Patient.ID")))
-
-# Set DefaultAssay
-DefaultAssay(breast_cancer_patients_integrated) <- "integrated"
-# Run pca and umap
-breast_cancer_patients_integrated <- RunPCA(breast_cancer_patients_integrated, verbose = TRUE)
-breast_cancer_patients_integrated <- RunUMAP(breast_cancer_patients_integrated, dims = 1:10, verbose = TRUE)
-# View UMAP with all patients together after per patient normalization
-integration_plot_list <- c(integration_plot_list, list(DimPlot(
-  breast_cancer_patients_integrated,
-  reduction = "umap",
-  group.by = "Patient.ID") + 
-  labs(title = "UMAP with all patients together after per patient normalization")))
 ```
 
 ## Clustering with Seurat
