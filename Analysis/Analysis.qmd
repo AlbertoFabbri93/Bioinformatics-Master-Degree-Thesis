@@ -212,12 +212,20 @@ breast_cancer_patients_split <- setNames(
   bcp_split_project_names
 )
 
-# Normalize all the data
-breast_cancer_patients <- SCTransform(
-  breast_cancer_patients,
-  vars.to.regress = c("nFeature_RNA"),
-  return.only.var.genes = FALSE,
-  verbose = FALSE)
+# RUN SCTransform for every patient
+breast_cancer_patients_split <- lapply(breast_cancer_patients_split, function(patient_object) {
+  # Print object name
+  print(patient_object@project.name)
+  # SCTransform
+  patient_object <- SCTransform(
+    patient_object,
+    vars.to.regress = c("nFeature_RNA"),
+    return.only.var.genes = FALSE,
+    assay = "RNA",
+    new.assay.name = "SCT",
+    verbose = TRUE)
+  return(patient_object)
+})
 
 # Check the quantity and the expression level of genes after normalization
 vln_plot_nrm <- VlnPlot(
@@ -247,12 +255,7 @@ integration_plot_list <- c(integration_plot_list, list(DimPlot(breast_cancer_pat
 
 
 
-# RUN SCTransform for every patient
-breast_cancer_patients_split <- lapply(breast_cancer_patients_split, function(x) {
-  x <- SCTransform(x, vars.to.regress = c("nFeature_RNA"), verbose = FALSE)
-  x <- RunPCA(x, verbose = FALSE, assay = "SCT")
-  return(x)
-})
+
 # Find integration features
 features <- SelectIntegrationFeatures(object.list = breast_cancer_patients_split, nfeatures = 1000)
 # Prepare for integration
