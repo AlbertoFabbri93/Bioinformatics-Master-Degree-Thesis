@@ -184,7 +184,7 @@ if (mt_gene_count > 0) {
 vln_plot_raw <- VlnPlot(
   breast_cancer_patients,
   assay = "RNA",
-  layer = "data",
+  layer = "counts",
   features = c("nFeature_RNA", "nCount_RNA"),
   ncol = 2,
   pt.size = 0
