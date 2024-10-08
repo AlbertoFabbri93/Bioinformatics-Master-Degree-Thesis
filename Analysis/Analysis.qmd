@@ -373,6 +373,24 @@ DimPlot(
 # Generate summy statistics for the Insitutype clusters
 create_cluster_summary(breast_cancer_patients_integrated, ist_cluster_var)
 get_cluster_info(breast_cancer_patients_integrated, ist_cluster_var)
+
+# Specify the clusters to remove
+clusters_to_remove <- c("a", "b", "c", "d", "e", "f", "g")
+# Filter, extract, calculate percentages and plot
+breast_cancer_patients_integrated@meta.data %>%
+  # Filter out unwanted clusters
+  dplyr::filter(!(!!sym(ist_cluster_var) %in% clusters_to_remove)) %>%
+  # Count the number of cells per cluster
+  count(!!sym(ist_cluster_var)) %>%
+  # Calculate percentage for each cluster
+  mutate(Percentage = n / sum(n) * 100) %>%
+  # Plot the data in a barplot
+  ggplot(aes(x = !!sym(ist_cluster_var), y = Percentage)) +  # Create the bar plot
+  geom_bar(stat = "identity", fill = "steelblue") +         
+  theme_minimal() + 
+  labs(x = "Cluster", y = "Percentage of Total Cells", title = "Immune cells clusters distribution") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 ### Extract tumor clusters
