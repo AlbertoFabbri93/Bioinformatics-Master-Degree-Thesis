@@ -366,8 +366,7 @@ integration_ist_color_table <- generate_colors_lookup_table(breast_cancer_patien
 DimPlot(
   object = breast_cancer_patients_integrated,
   group.by = ist_cluster_var,
-  reduction = "umap",
-  # cluster_name = ist_cluster_name,
+  reduction = "integrated_umap",
   cols = integration_ist_color_table) +
   labs(title = "UMAP with Insitutype clusters")
 
