@@ -307,6 +307,13 @@ vln_plot_nrm[[2]] <- vln_plot_nrm[[2]] + labs(subtitle = "Total expression level
 vln_plot_nrm <- vln_plot_nrm + plot_annotation(title = "After normalization")
 # Display the plot
 vln_plot_nrm
+
+# QC the normalization
+FeaturePlot(
+  breast_cancer_patients_integrated,
+  features = c("nFeature_RNA", "nCount_RNA"),
+  reduction = "integrated_umap",
+  combine = TRUE)
 ```
 
 ## Clustering with Seurat
