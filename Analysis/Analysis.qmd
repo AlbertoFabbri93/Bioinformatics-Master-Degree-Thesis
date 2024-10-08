@@ -261,13 +261,6 @@ breast_cancer_patients_integrated[["NegativeProbes"]] <- JoinLayers(breast_cance
 
 # Set DefaultAssay
 DefaultAssay(breast_cancer_patients_integrated) <- "integrated"
-# FindVariableFeatures
-# breast_cancer_patients_integrated <- FindVariableFeatures(
-#   breast_cancer_patients_integrated,
-#   selection.method = "vst",
-#   nfeatures = 1000,
-#   verbose = TRUE
-# )
 # Run PCA
 breast_cancer_patients_integrated <- RunPCA(
   breast_cancer_patients_integrated,
