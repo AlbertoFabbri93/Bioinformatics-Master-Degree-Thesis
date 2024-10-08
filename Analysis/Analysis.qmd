@@ -197,6 +197,21 @@ vln_plot_raw <- vln_plot_raw + plot_annotation(title = "Before normalization")
 # Display the plot
 vln_plot_raw
 
+# Split the global Seurat object by patient
+breast_cancer_patients_split <- SplitObject(breast_cancer_patients, split.by = "Patient.ID")
+# Extract the names from the named list
+bcp_split_project_names <- names(breast_cancer_patients_split)
+# Set the project name for each patient
+breast_cancer_patients_split <- setNames(
+  lapply(bcp_split_project_names, function(seurat_object_name) {
+    # Change the project name of each seurat object in the list
+    breast_cancer_patients_split[[seurat_object_name]]@project.name <- paste0("patient", seurat_object_name)
+    breast_cancer_patients_split[[seurat_object_name]]
+  }),
+  # Preserve the original names
+  bcp_split_project_names
+)
+
 # Normalize all the data
 breast_cancer_patients <- SCTransform(
   breast_cancer_patients,
@@ -230,14 +245,7 @@ breast_cancer_patients <- RunUMAP(breast_cancer_patients, reduction = "pca", dim
 # View UMAP with all patients together
 integration_plot_list <- c(integration_plot_list, list(DimPlot(breast_cancer_patients, reduction = "umap", group.by = "Patient.ID")))
 
-# Split the global Seurat object by patient
-breast_cancer_patients_split <- SplitObject(breast_cancer_patients, split.by = "Patient.ID")
-bcp_split_project_names <- names(breast_cancer_patients_split)
-# Set the project name for each patient
-breast_cancer_patients_split <- lapply(bcp_split_project_names, function(seurat_object_name) {
-  breast_cancer_patients_split[[seurat_object_name]]@project.name <- seurat_object_name
-  breast_cancer_patients_split[[seurat_object_name]]
-})
+
 
 # RUN SCTransform for every patient
 breast_cancer_patients_split <- lapply(breast_cancer_patients_split, function(x) {
