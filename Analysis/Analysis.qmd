@@ -65,6 +65,10 @@ library("ggraph")
 # Used to plot the cluster tree created by running FindClusters at several resolutions
 library("clustree")
 
+## GENE SET ENRICHMENT ANALYSIS
+library(clusterProfiler)
+library(org.Hs.eg.db)
+
 ###### TIDYVERSE ######
 # Data manipulation
 library("dplyr")
