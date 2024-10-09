@@ -413,13 +413,36 @@ breast_cancer_patients_tumor_cells <- subset(
   idents = clusters_to_keep
 )
 
-# Prepare object to run differential expression on SCT assay
-breast_cancer_patients_integrated <- PrepSCTFindMarkers(breast_cancer_patients_integrated, assay = "SCT", verbose = TRUE)
-# Find the most significant markers using the integrated data normalized with SCT
-marks <- find_most_significant_markers(breast_cancer_patients_integrated, ist_cluster_var, "SCT")
-print(integration_plot_list)
-breast_cancer_patients_tumor_cells <- extract_clusters(breast_cancer_patients_integrated, ist_cluster_var, c("a", "b", "c", "d", "e", "f"))
-breast_cancer_patients_tumor_cells <- SCTransform(breast_cancer_patients_tumor_cells, vars.to.regress = c("nFeature_RNA", "nCount_RNA", "Patient.ID"), verbose = FALSE)
+# After subsetting a Seurat object it is good to normalize it again
+breast_cancer_patients_tumor_cells <- SCTransform(
+  breast_cancer_patients_tumor_cells,
+  vars.to.regress = c("nFeature_RNA", "nCount_RNA"),
+  return.only.var.genes = FALSE,
+  assay = "RNA",
+  new.assay.name = "SCTtumors",
+  verbose = FALSE)
+
+# Prepare object to run differential expression on SCTtumor assay
+# breast_cancer_patients_tumor_cells <- PrepSCTFindMarkers(
+#   breast_cancer_patients_tumor_cells,
+#   assay = "SCTtumors",
+#   verbose = TRUE)
+
+# Find all markers of the tumor clusters
+tumor_markers_data <- FindAllMarkers(
+  breast_cancer_patients_tumor_cells,
+  test.use = "wilcox",
+  assay = "SCTtumors",
+  only.pos = TRUE,
+  random.seed = 5)
+# Filter markers to get the most significant ones per cluster
+most_significant_tumor_markers <- tumor_markers_data %>%
+  group_by(cluster) %>%
+  dplyr::filter(avg_log2FC > 1) %>%
+  slice_head(n = 10) %>%
+  ungroup()
+print(most_significant_tumor_markers)
+
 # Run UMAP and PCA
 breast_cancer_patients_tumor_cells <- RunPCA(
   breast_cancer_patients_tumor_cells,
