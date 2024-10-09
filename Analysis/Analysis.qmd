@@ -381,6 +381,7 @@ DimPlot(
 create_cluster_summary(breast_cancer_patients_integrated, ist_cluster_var)
 get_cluster_info(breast_cancer_patients_integrated, ist_cluster_var)
 
+# Plot the percentages of the various types of cells (except cancer cells)
 # Specify the clusters to remove
 clusters_to_remove <- c("a", "b", "c", "d", "e", "f", "g")
 # Filter, extract, calculate percentages and plot
@@ -403,6 +404,15 @@ breast_cancer_patients_integrated@meta.data %>%
 ### Extract tumor clusters
 
 ```{r}
+# Specify the clusters to keep in the subsetted Seurat object
+Idents(breast_cancer_patients_integrated) <- ist_cluster_var
+clusters_to_keep <- c("a", "b", "c", "d", "e", "f")
+# Subset the Seurat object by keeping only the specified clusters
+breast_cancer_patients_tumor_cells <- subset(
+  breast_cancer_patients_integrated,
+  idents = clusters_to_keep
+)
+
 # Prepare object to run differential expression on SCT assay
 breast_cancer_patients_integrated <- PrepSCTFindMarkers(breast_cancer_patients_integrated, assay = "SCT", verbose = TRUE)
 # Find the most significant markers using the integrated data normalized with SCT
