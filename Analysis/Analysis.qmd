@@ -471,12 +471,6 @@ tumor_cells_clusters_plot <- DimPlot(
   labs(title = "Tumor cells clusters")
 tumor_cells_patient_id_plot + tumor_cells_clusters_plot
 
-# Prepare object to run differential expression on SCTtumor assay
-# breast_cancer_patients_tumor_cells <- PrepSCTFindMarkers(
-#   breast_cancer_patients_tumor_cells,
-#   assay = "SCTtumors",
-#   verbose = TRUE)
-
 # Set identity to tumor clusters
 Idents(breast_cancer_patients_tumor_cells) <- tumor_cluster_name
 
