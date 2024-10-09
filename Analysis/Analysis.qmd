@@ -422,11 +422,63 @@ breast_cancer_patients_tumor_cells <- SCTransform(
   new.assay.name = "SCTtumors",
   verbose = FALSE)
 
+# Run PCA
+breast_cancer_patients_tumor_cells <- RunPCA(
+  breast_cancer_patients_tumor_cells,
+  reduction.key = "TCPC_",
+  reduction.name = "pca_tumor_cells",
+  verbose = TRUE)
+# Generate variance elbow plots
+generate_variance_elbow_plots(breast_cancer_patients_tumor_cells, "pca_tumor_cells", 50)
+# Dimension to use for subsequent analysis, decided lokking at the elbow plot
+tumor_cells_dims <- 1:19
+# Find neighbors of tumor cells
+breast_cancer_patients_tumor_cells <- FindNeighbors(
+  breast_cancer_patients_tumor_cells,
+  reduction = "pca_tumor_cells",
+  dims = tumor_cells_dims,
+  verbose = TRUE)
+# Name of the metadata column with the tumor clusters
+tumor_cluster_name <- "louvain_tumor_cells_clusters"
+# Find clusters of tumor cells
+breast_cancer_patients_tumor_cells <- FindClusters(
+  breast_cancer_patients_tumor_cells,
+  resolution = 1.0,
+  cluster.name = tumor_cluster_name,
+  random.seed = 5,
+  verbose = TRUE
+)
+# Run UMAP
+breast_cancer_patients_tumor_cells <- RunUMAP(
+  breast_cancer_patients_tumor_cells,
+  reduction = "pca_tumor_cells",
+  reduction.key = "TCUMAP_",
+  reduction.name = "umap_tumor_cells",
+  dims = tumor_cells_dims,
+  verbose = TRUE)
+# View UMAP with tumor cells and patient clusters
+tumor_cells_patient_id_plot <- DimPlot(
+  breast_cancer_patients_tumor_cells,
+  reduction = "umap_tumor_cells",
+  label = TRUE,
+  group.by = "Patient.ID") +
+  labs(title = "Patient ID clusters")
+tumor_cells_clusters_plot <- DimPlot(
+  breast_cancer_patients_tumor_cells,
+  reduction = "umap_tumor_cells",
+  label = TRUE,
+  group.by = tumor_cluster_name) +
+  labs(title = "Tumor cells clusters")
+tumor_cells_patient_id_plot + tumor_cells_clusters_plot
+
 # Prepare object to run differential expression on SCTtumor assay
 # breast_cancer_patients_tumor_cells <- PrepSCTFindMarkers(
 #   breast_cancer_patients_tumor_cells,
 #   assay = "SCTtumors",
 #   verbose = TRUE)
+
+# Set identity to tumor clusters
+Idents(breast_cancer_patients_tumor_cells) <- tumor_cluster_name
 
 # Find all markers of the tumor clusters
 tumor_markers_data <- FindAllMarkers(
@@ -443,47 +495,9 @@ most_significant_tumor_markers <- tumor_markers_data %>%
   ungroup()
 print(most_significant_tumor_markers)
 
-# Run UMAP and PCA
-breast_cancer_patients_tumor_cells <- RunPCA(
-  breast_cancer_patients_tumor_cells,
-  reduction.key = "TCPC_",
-  reduction.name = "pca_tumor_cells",
-  verbose = TRUE)
-breast_cancer_patients_tumor_cells <- RunUMAP(
-  breast_cancer_patients_tumor_cells,
-  reduction = "pca_tumor_cells",
-  reduction.key = "TCUMAP_",
-  reduction.name = "umap_tumor_cells",
-  dims = 1:10,
-  verbose = TRUE)
-# Generate the umap with the unannotated clusters
-DimPlot(
-  object = breast_cancer_patients_tumor_cells,
-  group.by = ist_cluster_var,
-  reduction = "umap_tumor_cells",
-  cols = integration_ist_color_table)
-breast_cancer_patients_tumor_cells <- FindNeighbors(
-  breast_cancer_patients_tumor_cells,
-  reduction = "pca_tumor_cells",
-  dims = 1:10,
-  verbose = TRUE)
-cluster_name <- "louvain_tumor_cells_clusters"
-breast_cancer_patients_tumor_cells <- FindClusters(
-  breast_cancer_patients_tumor_cells,
-  dims = 1:10,
-  verbose = TRUE,
-  graph.name = paste0("integrated", "_snn"),
-  cluster.name = cluster_name)
-DimPlot(
-  breast_cancer_patients_tumor_cells,
-  reduction = "umap_tumor_cells",
-  label = TRUE,
-  group.by = "Patient.ID") +
-DimPlot(
-  breast_cancer_patients_tumor_cells,
-  reduction = "umap_tumor_cells",
-  label = TRUE,
-  group.by = cluster_name)
+# Generate summy statistics for the Insitutype clusters
+create_cluster_summary(breast_cancer_patients_tumor_cells, tumor_cluster_name)
+get_cluster_info(breast_cancer_patients_tumor_cells, tumor_cluster_name)
 ```
 
 ## General overview of the data
