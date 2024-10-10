@@ -503,6 +503,66 @@ create_cluster_summary(breast_cancer_patients_tumor_cells, tumor_cluster_name)
 get_cluster_info(breast_cancer_patients_tumor_cells, tumor_cluster_name)
 ```
 
+## Gene Set Enrichment Analysis
+
+```{r}
+# Set identity to tumor clusters
+Idents(breast_cancer_patients_tumor_cells) <- tumor_cluster_name
+# Set default assay to RNA
+DefaultAssay(breast_cancer_patients_tumor_cells) <- "RNA"
+
+# How to create the gene list
+# http://yulab-smu.top/biomedical-knowledge-mining-book/faq.html#genelist
+tumor_cluster_number <- 0
+# Get the markers for the tumor cluster
+tumor_cluster_markers <- tumor_markers_data %>%
+  dplyr::filter(cluster == tumor_cluster_number)
+
+# Count the number of upregulated genes
+num_upreg_genes <- tumor_cluster_markers %>%
+  dplyr::filter(avg_log2FC > 0, p_val < 0.05) %>%
+  nrow()
+# Count the number of downregulated genes
+num_downreg_genes <- tumor_cluster_markers %>%
+  dplyr::filter(avg_log2FC < 0, p_val < 0.05) %>%
+  nrow()
+
+# Gene list creation
+gsea_gene_list <- tumor_cluster_markers %>%
+  dplyr::mutate(rank = rank(avg_log2FC, ties.method = "random")) %>%
+  dplyr::arrange(desc(rank)) %>%
+  with(setNames(avg_log2FC, gene))
+
+# Run GSEA
+gsea <- gseGO(geneList     = gsea_gene_list,,
+                  keyType      = "SYMBOL",
+                  OrgDb        = org.Hs.eg.db, 
+                  ont          = "BP",
+                  minGSSize    = 10,
+                  maxGSSize    = 500,
+                  pvalueCutoff = 0.10,
+                  verbose      = TRUE,
+                  pAdjustMethod = "fdr")
+# Simplify GSEA results by grouping together or eliminating terms that are very similar or redundant
+gsea_simplified <- simplify(gsea, cutoff = 0.7)
+
+#Prepare plot aesthetics
+GSEAlabels <- labs(
+  title = paste("Significant Pathways in Tumor Cluster", tumor_cluster_number), 
+  subtitle = "by Gene Set Enrichment Analysis",
+  caption = paste0("Based on ", num_upreg_genes," up-regulated genes and ", num_downreg_genes," down-regulated genes."))
+GSEAtheme <- theme(
+  plot.title = element_text(hjust = 0.5,size=20),
+  plot.subtitle = element_text(hjust = 0.5,size=15),
+  axis.text.x = element_text(angle = 0, size = 11),
+  axis.text.y = element_text(angle = 0, size = 8)) 
+#Make the GSEA plots
+GSEADotPlot <- dotplot(gsea_simplified, showCategory = 25) +
+  GSEAlabels + labs(x = "Gene Ratio",y = "Biological Pathway") +
+  GSEAtheme
+print(GSEADotPlot)
+```
+
 ## General overview of the data
 
 Create a table with an entry for every FOV in the Seurat object analyzed in this study. The table will contain the patient ID, the serial core, the stamp, and the FOV.
