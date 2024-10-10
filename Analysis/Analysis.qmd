@@ -66,8 +66,12 @@ library("ggraph")
 library("clustree")
 
 ## GENE SET ENRICHMENT ANALYSIS
+# Used to perform gene set enrichment analysis
 library("clusterProfiler")
+# Database with the gene information
 library("org.Hs.eg.db")
+# List all supported types
+keytypes(org.Hs.eg.db)
 
 ###### TIDYVERSE ######
 # Data manipulation
