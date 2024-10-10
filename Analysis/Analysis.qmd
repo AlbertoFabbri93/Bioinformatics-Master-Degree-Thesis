@@ -66,8 +66,8 @@ library("ggraph")
 library("clustree")
 
 ## GENE SET ENRICHMENT ANALYSIS
-library(clusterProfiler)
-library(org.Hs.eg.db)
+library("clusterProfiler")
+library("org.Hs.eg.db")
 
 ###### TIDYVERSE ######
 # Data manipulation
