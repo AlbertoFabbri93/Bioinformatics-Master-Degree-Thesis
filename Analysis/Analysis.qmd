@@ -511,9 +511,10 @@ Idents(breast_cancer_patients_tumor_cells) <- tumor_cluster_name
 # Set default assay to RNA
 DefaultAssay(breast_cancer_patients_tumor_cells) <- "RNA"
 
-# How to create the gene list
-# http://yulab-smu.top/biomedical-knowledge-mining-book/faq.html#genelist
-tumor_cluster_number <- 0
+for (cluster in levels(breast_cancer_patients_tumor_cells)) {
+  tumor_cluster_number <- cluster
+  print(paste("GSEA analysis of cluster:", tumor_cluster_number))
+
 # Get the markers for the tumor cluster
 tumor_cluster_markers <- tumor_markers_data %>%
   dplyr::filter(cluster == tumor_cluster_number)
@@ -527,6 +528,8 @@ num_downreg_genes <- tumor_cluster_markers %>%
   dplyr::filter(avg_log2FC < 0, p_val < 0.05) %>%
   nrow()
 
+# How to create the gene list
+# http://yulab-smu.top/biomedical-knowledge-mining-book/faq.html#genelist
 # Gene list creation
 gsea_gene_list <- tumor_cluster_markers %>%
   dplyr::mutate(rank = rank(avg_log2FC, ties.method = "random")) %>%
@@ -561,6 +564,7 @@ GSEADotPlot <- dotplot(gsea_simplified, showCategory = 25) +
   GSEAlabels + labs(x = "Gene Ratio",y = "Biological Pathway") +
   GSEAtheme
 print(GSEADotPlot)
+}
 ```
 
 ## General overview of the data
