@@ -439,8 +439,21 @@ breast_cancer_patients_tumor_cells <- RunPCA(
 # Generate variance elbow plots
 generate_variance_elbow_plots(breast_cancer_patients_tumor_cells, "pca_tumor_cells", 50)
 # Dimension to use for subsequent analysis, decided lokking at the elbow plot
-tumor_cells_dims <- 1:19
+tumor_cells_dims <- 1:23
 # Find neighbors of tumor cells
+# Number of PCA dimensions used in Seurat's FindNeighbors function
+#
+# Using MORE dimensions:
+# Captures more subtle biological variation
+# Includes more complex relationships between genes
+# May include more noise/technical artifacts
+# Computationally more intensive
+#
+# Using FEWER dimensions:
+# Focuses on major sources of variation
+# More robust to technical noise
+# May miss subtle biological signals
+# Computationally faster
 breast_cancer_patients_tumor_cells <- FindNeighbors(
   breast_cancer_patients_tumor_cells,
   reduction = "pca_tumor_cells",
