@@ -498,7 +498,7 @@ most_significant_tumor_markers <- tumor_markers_data %>%
   ungroup()
 print(most_significant_tumor_markers)
 
-# Generate summy statistics for the Insitutype clusters
+# Generate summy statistics for the tumor clusters
 create_cluster_summary(breast_cancer_patients_tumor_cells, tumor_cluster_name)
 get_cluster_info(breast_cancer_patients_tumor_cells, tumor_cluster_name)
 ```
