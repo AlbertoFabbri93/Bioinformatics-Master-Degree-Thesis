@@ -566,11 +566,12 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
 
   # Do not plot if no pathways have been found
   if (nrow(gsea_simplified@result) > 0) {
-    #Prepare plot aesthetics
+    # Prepare plot labels
     GSEAlabels <- labs(
       title = paste("Significant Pathways in Tumor Cluster", tumor_cluster_number), 
       subtitle = "by Gene Set Enrichment Analysis",
       caption = paste0("Based on ", num_upreg_genes," up-regulated genes and ", num_downreg_genes," down-regulated genes."))
+    # Prepare plot aesthetics
     GSEAtheme <- theme(
       plot.title = element_text(hjust = 0.5,size=20),
       plot.subtitle = element_text(hjust = 0.5,size=15),
