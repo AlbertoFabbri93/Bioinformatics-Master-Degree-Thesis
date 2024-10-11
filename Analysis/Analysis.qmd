@@ -573,13 +573,13 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
       caption = paste0("Based on ", num_upreg_genes," up-regulated genes and ", num_downreg_genes," down-regulated genes."))
     # Prepare plot aesthetics
     GSEAtheme <- theme(
-      plot.title = element_text(hjust = 0.5,size=20),
-      plot.subtitle = element_text(hjust = 0.5,size=15),
+      plot.title = element_text(hjust = 0.5, size = 20),
+      plot.subtitle = element_text(hjust = 0.5, size = 15),
       axis.text.x = element_text(angle = 0, size = 11),
       axis.text.y = element_text(angle = 0, size = 8)) 
-    #Make the GSEA plots
+    # Make the GSEA plots
     GSEADotPlot <- dotplot(gsea_simplified, showCategory = 25) +
-      GSEAlabels + labs(x = "Gene Ratio",y = "Biological Pathway") +
+      GSEAlabels + labs(x = "Gene Ratio", y = "Biological Pathway") +
       GSEAtheme
     print(GSEADotPlot)
   } else {
