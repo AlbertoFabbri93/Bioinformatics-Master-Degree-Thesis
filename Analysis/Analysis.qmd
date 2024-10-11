@@ -552,7 +552,7 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
     with(setNames(avg_log2FC, gene))
   
   # Run GSEA
-  gsea <- gseGO(geneList     = gsea_gene_list,,
+  gsea <- gseGO(geneList     = gsea_gene_list,
                     keyType      = "SYMBOL",
                     OrgDb        = org.Hs.eg.db, 
                     ont          = "BP",
@@ -563,7 +563,7 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
                     pAdjustMethod = "fdr")
   # Simplify GSEA results by grouping together or eliminating terms that are very similar or redundant
   gsea_simplified <- simplify(gsea, cutoff = 0.7)
-  
+
   # Do not plot if no pathways have been found
   if (nrow(gsea_simplified@result) > 0) {
     #Prepare plot aesthetics
@@ -582,7 +582,7 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
       GSEAtheme
     print(GSEADotPlot)
   } else {
-    message(paste("No significant pathways found for cluster", tumor_cluster_number))
+    print(paste("No significant pathways found for cluster", tumor_cluster_number))
   }
 }
 ```
