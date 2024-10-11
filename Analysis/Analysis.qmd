@@ -462,9 +462,10 @@ breast_cancer_patients_tumor_cells <- FindNeighbors(
 # Name of the metadata column with the tumor clusters
 tumor_cluster_name <- "louvain_tumor_cells_clusters"
 # Find clusters of tumor cells
+# The default resolution is 1, increase it to get more clusters or decrease it to get fewer clusters
 breast_cancer_patients_tumor_cells <- FindClusters(
   breast_cancer_patients_tumor_cells,
-  resolution = 1.0,
+  resolution = 0.8,
   cluster.name = tumor_cluster_name,
   random.seed = 5,
   verbose = TRUE
