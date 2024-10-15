@@ -520,6 +520,9 @@ get_cluster_info(breast_cancer_patients_tumor_cells, tumor_cluster_name)
 ## Gene Set Enrichment Analysis
 
 ```{r}
+#| fig-width: 9
+#| fig-height: 6
+
 # Set identity to tumor clusters
 Idents(breast_cancer_patients_tumor_cells) <- tumor_cluster_name
 # Set default assay to RNA
