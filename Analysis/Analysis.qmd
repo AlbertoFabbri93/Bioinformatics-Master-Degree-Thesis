@@ -412,6 +412,47 @@ breast_cancer_patients_immune_cells@meta.data %>%
   labs(x = "Cluster", y = "Percentage of Total Cells", title = "Immune cells clusters distribution") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+breast_cancer_patients_immune_cells@meta.data %>%
+  # Group by patient and cluster, then calculate percentage
+  group_by(Patient.ID, !!sym(ist_cluster_var)) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(Patient.ID) %>%
+  mutate(Percentage = count / sum(count) * 100) %>%
+  ungroup() %>%
+  # Ensure Patient.ID is a factor
+  mutate(Patient.ID = as.factor(Patient.ID)) %>%
+  # Calculate mean and sd for each cluster
+  group_by(!!sym(ist_cluster_var)) %>%
+  mutate(
+    MeanPercentage = mean(Percentage),
+    SDPercentage = sd(Percentage)
+  ) %>%
+  ungroup() %>%
+  # Plot the data
+  ggplot(aes(x = Percentage, y = !!sym(ist_cluster_var))) +
+  # Add dots for each patient
+  geom_point(aes(color = Patient.ID), size = 3, alpha = 0.7) +
+  # Add mean percentage point
+  stat_summary(aes(shape = "Mean"), fun = mean, geom = "point", size = 5, color = "black", alpha = 0.7) +
+  # Add standard deviation error bars
+  geom_errorbarh(aes(xmin = MeanPercentage - SDPercentage, 
+                     xmax = MeanPercentage + SDPercentage, 
+                     y = !!sym(ist_cluster_var),
+                     linetype = "Standard Deviation"), 
+                 color = "black", alpha = 0.7, height = 0.5, size = 0.2) +
+  theme_minimal() +
+  labs(x = "Percentage of Cells", y = "Cluster", 
+       title = "Immune Cell Clusters Distribution by Patient",
+       color = "Patient ID") +
+  theme(legend.position = "right") +
+  scale_color_brewer(palette = "Set1") +
+  scale_shape_manual(values = c("Mean" = 18), labels = c("Mean")) +
+  scale_linetype_manual(values = c("Standard Deviation" = "solid"), labels = c("Standard Deviation")) +
+  guides(
+    color = guide_legend(order = 1),
+    shape = guide_legend(order = 2, title = "Statistics"),
+    linetype = guide_legend(order = 3, title = "Statistics")
+  )
 ```
 
 ### Extract tumor clusters
