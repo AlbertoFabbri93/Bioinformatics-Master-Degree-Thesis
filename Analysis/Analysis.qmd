@@ -609,7 +609,7 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
                     ont          = "BP",
                     minGSSize    = 10,
                     maxGSSize    = 500,
-                    pvalueCutoff = 0.10,
+                    pvalueCutoff = 0.05,
                     verbose      = TRUE,
                     pAdjustMethod = "fdr")
   # Simplify GSEA results by grouping together or eliminating terms that are very similar or redundant
