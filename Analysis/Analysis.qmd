@@ -389,13 +389,18 @@ DimPlot(
 create_cluster_summary(breast_cancer_patients_integrated, ist_cluster_var)
 get_cluster_info(breast_cancer_patients_integrated, ist_cluster_var)
 
+# Cancer clusters
+cancer_clusters <- c("a", "b", "c", "d", "e", "f", "g")
+# Specify the identity column
+Idents(breast_cancer_patients_integrated) <- ist_cluster_var
+# Remove the cancer clusters
+breast_cancer_patients_immune_cells <- subset(
+  breast_cancer_patients_integrated,
+  idents = dplyr::setdiff(unique(Idents(breast_cancer_patients_integrated)), cancer_clusters)
+)
+
 # Plot the percentages of the various types of cells (except cancer cells)
-# Specify the clusters to remove
-clusters_to_remove <- c("a", "b", "c", "d", "e", "f", "g")
-# Filter, extract, calculate percentages and plot
-breast_cancer_patients_integrated@meta.data %>%
-  # Filter out unwanted clusters
-  dplyr::filter(!(!!sym(ist_cluster_var) %in% clusters_to_remove)) %>%
+breast_cancer_patients_immune_cells@meta.data %>%
   # Count the number of cells per cluster
   count(!!sym(ist_cluster_var)) %>%
   # Calculate percentage for each cluster
