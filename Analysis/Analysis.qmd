@@ -327,6 +327,8 @@ FeaturePlot(
 ## Clustering with Seurat
 
 ```{r}
+#| eval: false
+
 # Generate clusters with different resolutions
 breast_cancer_patients_integrated <- FindNeighbors(breast_cancer_patients_integrated, dims = 1:10)
 res_to_try <- seq(0.1,0.3,by = 0.1)
