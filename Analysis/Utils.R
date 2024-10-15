@@ -164,7 +164,7 @@ run_Insitutype_semisupervised <- function(
         `T cell regulatory` = col_double()
       ))
     row_name = io_profiles$Gene
-    io_profiles %<>% select(-Gene) %>% as.matrix
+    io_profiles %<>% dplyr::select(-Gene) %>% as.matrix
     rownames(io_profiles) = row_name
   }
   
@@ -244,7 +244,7 @@ get_patient_cohort <- function(patient_data) {
   # Features to be used for the cohorting
   features <- c("Mean.PanCK", "Mean.CD45", "Mean.CD68")
   # Cohort of the patient
-  patient_immunofluorescence <- patient_data@meta.data %>% select(all_of(features))
+  patient_immunofluorescence <- patient_data@meta.data %>% dplyr::select(all_of(features))
   # fastCohorting is stochastic, so set the seed for reproducibility
   set.seed(42);
   # "Gaussian_transform = TRUE" maps variables to gaussians in order to place dramatically different variables on the same scale

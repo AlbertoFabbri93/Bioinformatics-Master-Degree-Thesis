@@ -31,7 +31,7 @@ generate_colors_lookup_table <- function(
     color_palette = DiscretePalette(36, palette = "polychrome")) {
   
   # Remove the colors that are used by the known clusters
-  usable_color_palette <- setdiff(color_palette, known_clusters_colors)
+  usable_color_palette <- base::setdiff(color_palette, known_clusters_colors)
   
   # Random colors for the unknown clusters
   # The cluster 0 in Seurat for example is different for every patient
@@ -47,7 +47,7 @@ generate_colors_lookup_table <- function(
   clusters <- unique(dplyr::pull(data, cluster_column_name))
   
   # Remove the known clusters from the list of clusters as they already have a color assigned
-  unknown_clusters <- setdiff(clusters, names(known_clusters_colors))
+  unknown_clusters <- base::setdiff(clusters, names(known_clusters_colors))
   
   # Assign a random colors to the unknown clusters
   unknown_clusters_colors <- setNames(usable_color_palette[1:length(unknown_clusters)], unknown_clusters)
