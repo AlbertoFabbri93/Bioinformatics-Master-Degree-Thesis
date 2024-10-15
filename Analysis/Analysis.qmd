@@ -115,7 +115,7 @@ tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
   # Extract features for the "Gene", "Negative Probes" and "System Control" assays
   system_control_features <- grep("^SystemControl", rownames(assay), value = TRUE)
   negative_probes_features <- grep("^Negative", rownames(assay), value = TRUE)
-  gene_features <- setdiff(rownames(assay), c(system_control_features, negative_probes_features))
+  gene_features <- dplyr::setdiff(rownames(assay), c(system_control_features, negative_probes_features))
   
   # Subset the count data for the various groups of features
   system_control_counts <- assay$counts[system_control_features, ]
