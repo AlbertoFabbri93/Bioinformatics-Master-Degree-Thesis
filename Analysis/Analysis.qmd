@@ -580,6 +580,11 @@ Idents(breast_cancer_patients_tumor_cells) <- tumor_cluster_name
 # Set default assay to RNA
 DefaultAssay(breast_cancer_patients_tumor_cells) <- "RNA"
 
+# Set the colors for the p adjust gradient bar
+max_color <- rgb(238,	197,	194, maxColorValue = 255)
+min_color <- rgb(215,	102,	86, maxColorValue = 255)
+options(enrichplot.colours = c(min_color, max_color))
+
 # Run GSEA for each tumor cluster
 for (cluster in levels(breast_cancer_patients_tumor_cells)) {
   tumor_cluster_number <- cluster
