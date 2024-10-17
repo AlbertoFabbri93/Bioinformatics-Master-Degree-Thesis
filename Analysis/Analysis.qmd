@@ -873,7 +873,7 @@ data <- read_excel(
 
 # Create an empty tibble to store the filtered data
 # Only the total cell data is kept
-akoya_data <- data %>% slice(0)
+akoya_data <- data %>% dplyr::slice(0)
 
 # Add only the rows with the total cell count to the tibble
 for (i in seq(3, nrow(data), by = 3)) {
@@ -882,7 +882,7 @@ for (i in seq(3, nrow(data), by = 3)) {
 }
 
 # Rename columns to align with the nomenclaure used in the rest of the analysis
-akoya_data <- akoya_data %>% rename(
+akoya_data <- akoya_data %>% dplyr::rename(
   "Tumor" = "Pan-CK+/CD4-/CD8-/CD20-/CD68-/FOXP3-",
   "T cell CD4" = "Pan-CK-/CD4+/FOXP3-",
   "T cell regulatory" = "Pan-CK-/CD4+/FOXP3+",
@@ -906,7 +906,7 @@ map_TMA_row_column_to_core <- tibble(
 # Merge the data data about the cores with the Akoya data and make it the first column
 akoya_data <- akoya_data %>%
   left_join(map_TMA_row_column_to_core, by = c("TMA Row", "TMA Column")) %>%
-  select(all_of(names(map_TMA_row_column_to_core)), everything())
+  dplyr::select(all_of(names(map_TMA_row_column_to_core)), everything())
 
 # Subset the TMA_METBRA_COSMX data frame to only the useful columns
 TMA_METBRA_COSMX_subset <- TMA_METBRA_COSMX[, c("Full Serial Number", "Patient ID")]
@@ -915,16 +915,16 @@ TMA_METBRA_COSMX_subset <- TMA_METBRA_COSMX[, c("Full Serial Number", "Patient I
 akoya_data <- akoya_data %>%
   left_join(TMA_METBRA_COSMX_subset, by = join_by("core" == "Full Serial Number")) %>%
   mutate(`Patient ID` = as.factor(`Patient ID`)) %>%
-  select(`Patient ID`, everything()) %>%
+  dplyr::select(`Patient ID`, everything()) %>%
   arrange(`core`)
 
 # Remove columns that were only used for merging
 akoya_data <- akoya_data %>%
-  select(-`TMA Column`, -`TMA Row`)
+  dplyr::select(-`TMA Column`, -`TMA Row`)
 
 # Sum the data for each patient
 akoya_by_patient <- akoya_data %>%
-  select(-core) %>%
+  dplyr::select(-core) %>%
   group_by(`Patient ID`) %>%
   summarise(across(where(is.numeric), \(x) sum(x, na.rm = TRUE)))
 
