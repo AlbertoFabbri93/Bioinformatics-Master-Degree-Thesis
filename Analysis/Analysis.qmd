@@ -91,8 +91,9 @@ library("tidyr")
 library("conflicted")
 
 # Import custom written functions
-source("Utils.R")
-source("Plotting.R")
+source_files_dir <- ("Analysis")
+source(here(source_files_dir, "Utils.R"))
+source(here(source_files_dir, "Plotting.R"))
 
 # Import environment variables as global variables
 objects_dir <- Sys.getenv("OBJECTS_DIR")
