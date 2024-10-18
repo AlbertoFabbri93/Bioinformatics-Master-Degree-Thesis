@@ -394,9 +394,21 @@ FeaturePlot(breast_cancer_patients_integrated,features = c("nFeature_RNA", "nCou
 
 ## Insitutype Clustering
 
+### Read from drive
+
 ```{r}
-# Define the variable name for the Insitutype column on the metadata
-ist_cluster_var <- "ist_semisup_clusters"
+#| label: insitutype-read-from-drive
+
+# Read the Insitutype data from the drive
+insitutype_data <- readRDS(here(objects_dir, "integration_ist_semisup.rds"))
+```
+
+### Calculate
+
+```{r}
+#| label: insitutype-calculate-clustering
+#| eval: false
+
 # Execute insitutype clustering
 # The phase and iter parameters have been set to higher values to get a better clustering
 integration_ist_semisup <- run_ist_semisup_extract_data(
@@ -407,6 +419,18 @@ integration_ist_semisup <- run_ist_semisup_extract_data(
     phase_3_size = 5000,
     iter_num = 12,
     max_iter = 25)
+
+# Save the Insitutype clustering results
+saveRDS(integration_ist_semisup, here(objects_dir, "integration_ist_semisup.rds"))
+```
+
+### Plots
+
+````{r}
+#| label: insitutype-plots
+
+# Define the variable name for the Insitutype column on the metadata
+ist_cluster_var <- "ist_semisup_clusters"
 # Add the Insitutype clusters to the Seurat object metadata
 breast_cancer_patients_integrated[[ist_cluster_var]] <- integration_ist_semisup$clust
 # Colors for the insitutype plots
