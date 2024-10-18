@@ -185,7 +185,11 @@ breast_cancer_patients <- tidy_seurat_object_assay(breast_cancer_patients_mixed_
 
 ## Integrate patients
 
+### Check the data before integration
+
 ```{r}
+#| label: qa-before-integration
+
 # Check if there are mitochondrial genes
 mt_gene_count <- sum(grepl("^MT-", rownames(breast_cancer_patients[["RNA"]])))
 if (mt_gene_count > 0) {
@@ -210,6 +214,22 @@ vln_plot_raw[[2]] <- vln_plot_raw[[2]] + labs(subtitle = "Total expression level
 vln_plot_raw <- vln_plot_raw + plot_annotation(title = "Before normalization")
 # Display the plot
 vln_plot_raw
+```
+
+### Read integrated object from memory
+
+```{r}
+#| label: load-integrated-object
+
+# Load integrated object from memory
+breast_cancer_patients_integrated <- readRDS(here(objects_dir, "breast_cancer_patients_integrated.rds"))
+```
+
+### Create integrated object from scratch
+
+```{r}
+#| label: create-integrated-object
+#| eval: false
 
 # Split the global Seurat object by patient
 breast_cancer_patients_split <- SplitObject(breast_cancer_patients, split.by = "Patient.ID")
@@ -272,6 +292,15 @@ breast_cancer_patients_integrated[["RNA"]] <- JoinLayers(breast_cancer_patients_
 breast_cancer_patients_integrated[["SystemControl"]] <- JoinLayers(breast_cancer_patients_integrated[["SystemControl"]])
 # and the negative probes assay
 breast_cancer_patients_integrated[["NegativeProbes"]] <- JoinLayers(breast_cancer_patients_integrated[["NegativeProbes"]])
+
+# Save the integrated object
+saveRDS(breast_cancer_patients_integrated, here(objects_dir, "breast_cancer_patients_integrated.rds"))
+```
+
+### Check the data after integration
+
+```{r}
+#| label: qa-after-integration
 
 # Set DefaultAssay
 DefaultAssay(breast_cancer_patients_integrated) <- "integrated"
