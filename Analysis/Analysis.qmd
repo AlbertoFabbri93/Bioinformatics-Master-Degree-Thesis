@@ -354,7 +354,7 @@ FeaturePlot(
   combine = TRUE)
 ```
 
-## Clustering with Seurat
+## Seurat Clustering
 
 ```{r}
 #| eval: false
@@ -390,7 +390,7 @@ FeaturePlot(breast_cancer_patients_integrated,features = c("nFeature_RNA", "nCou
                           reduction = "umap",combine = FALSE)
 ```
 
-### Clustering with Insitutype
+## Insitutype Clustering
 
 ```{r}
 # Define the variable name for the Insitutype column on the metadata
