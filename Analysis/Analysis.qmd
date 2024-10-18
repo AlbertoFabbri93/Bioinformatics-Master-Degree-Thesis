@@ -106,7 +106,7 @@ images_ext <- Sys.getenv("IMAGES_EXT")
 #| label: tidy-seurat-object
 
 # Load the Seurat object
-breast_cancer_patients_mixed_features <- readRDS(here(rds_dir, "breast_cancer_patients.rds"))
+breast_cancer_patients_mixed_features <- readRDS(here(objects_dir, "breast_cancer_patients.rds"))
 
 tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
 
