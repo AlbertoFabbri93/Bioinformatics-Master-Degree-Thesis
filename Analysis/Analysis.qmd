@@ -2,6 +2,8 @@
 title: "A study on brain metastases from primary breast cancer"
 author: "Alberto Fabbri"
 format: html
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ## Set up the environment
