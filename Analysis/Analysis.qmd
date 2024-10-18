@@ -494,7 +494,7 @@ breast_cancer_patients_immune_cells@meta.data %>%
 ```{r}
 # Specify the clusters to keep in the subsetted Seurat object
 Idents(breast_cancer_patients_integrated) <- ist_cluster_var
-clusters_to_keep <- c("a", "b", "c", "d", "e", "f")
+clusters_to_keep <- c("a", "b", "c", "d", "e", "f", "g")
 # Subset the Seurat object by keeping only the specified clusters
 breast_cancer_patients_tumor_cells <- subset(
   breast_cancer_patients_integrated,
