@@ -95,9 +95,9 @@ source("Utils.R")
 source("Plotting.R")
 
 # Import environment variables as global variables
-rds_dir <- Sys.getenv("RDS_DIR")
-image_dir <- Sys.getenv("IMAGE_DIR")
-image_ext <- Sys.getenv("IMAGE_EXT")
+objects_dir <- Sys.getenv("OBJECTS_DIR")
+images_dir <- Sys.getenv("IMAGES_DIR")
+images_ext <- Sys.getenv("IMAGES_EXT")
 ```
 
 ## Tidy Seurat object
@@ -857,7 +857,7 @@ print(c(TMA_info_to_display, TMA_info_to_save))
 #| echo: false
 #| eval: false
 
-save_plots(TMA_info_to_save, here(image_dir), image_ext)
+save_plots(TMA_info_to_save, here(images_dir), images_ext)
 ```
 
 ### Read Akoya Data
@@ -1533,7 +1533,7 @@ Compare the patients by plotting the proportion of cells according to the Insitu
 #| label: compare-patients
 
 # Save plots comparing patients in this subfolder
-compare_patients_subfolder <- here(image_dir, "Compare_patients")
+compare_patients_subfolder <- here(images_dir, "Compare_patients")
 compare_patients_to_save <- list()
 
 # Create folder for the plots id it does not exist
