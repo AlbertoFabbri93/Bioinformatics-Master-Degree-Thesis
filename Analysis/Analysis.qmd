@@ -585,6 +585,8 @@ max_color <- rgb(238,	197,	194, maxColorValue = 255)
 min_color <- rgb(215,	102,	86, maxColorValue = 255)
 options(enrichplot.colours = c(min_color, max_color))
 
+# List to save the GSEA results
+GSEA_results <- list()
 # Run GSEA for each tumor cluster
 for (cluster in levels(breast_cancer_patients_tumor_cells)) {
   tumor_cluster_number <- cluster
@@ -623,6 +625,8 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
                     pAdjustMethod = "fdr")
   # Simplify GSEA results by grouping together or eliminating terms that are very similar or redundant
   gsea_simplified <- simplify(gsea, cutoff = 0.7)
+  # Save the GSEA results
+  GSEA_results[[tumor_cluster_number]] <- gsea_simplified
 
   # Do not plot if no pathways have been found
   if (nrow(gsea_simplified@result) > 0) {
@@ -642,6 +646,8 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
       GSEAlabels + labs(x = "Gene Ratio", y = "Biological Pathway") +
       GSEAtheme
     print(GSEADotPlot)
+    # Print a tibble with the GSEA results
+    print(as_tibble(gsea_simplified@result))
   } else {
     print(paste("No significant pathways found for cluster", tumor_cluster_number))
   }
