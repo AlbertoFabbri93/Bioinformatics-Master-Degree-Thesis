@@ -402,10 +402,10 @@ ist_cluster_var <- "ist_semisup_clusters"
 integration_ist_semisup <- run_ist_semisup_extract_data(
   breast_cancer_patients_integrated,
   clusts_search_space = 1:12,
-    phase_1_size = 200,
-    phase_2_size = 500,
-    phase_3_size = 2000,
-    iter_num = 10,
+    phase_1_size = 500,
+    phase_2_size = 1000,
+    phase_3_size = 5000,
+    iter_num = 12,
     max_iter = 25)
 # Add the Insitutype clusters to the Seurat object metadata
 breast_cancer_patients_integrated[[ist_cluster_var]] <- integration_ist_semisup$clust
