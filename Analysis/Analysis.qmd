@@ -478,8 +478,7 @@ DimPlot(
   labs(title = "UMAP with Insitutype clusters")
 
 # Generate summy statistics for the Insitutype clusters
-create_cluster_summary(breast_cancer_patients_integrated, ist_cluster_var)
-get_cluster_info(breast_cancer_patients_integrated, ist_cluster_var)
+create_cluster_summary_per_patient(breast_cancer_patients_integrated, ist_cluster_var)
 ```
 
 ### Split the Seurat object using the Insitutype clusters
@@ -719,8 +718,7 @@ most_significant_tumor_markers <- tumor_markers_data %>%
 print(most_significant_tumor_markers)
 
 # Generate summy statistics for the tumor clusters
-create_cluster_summary(breast_cancer_patients_tumor_cells, chosen_tumor_cluster)
-get_cluster_info(breast_cancer_patients_tumor_cells, chosen_tumor_cluster)
+create_cluster_summary_per_patient(breast_cancer_patients_tumor_cells, chosen_tumor_cluster)
 ```
 
 ## Gene Set Enrichment Analysis
