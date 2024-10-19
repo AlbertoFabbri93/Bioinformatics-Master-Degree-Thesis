@@ -541,19 +541,17 @@ breast_cancer_patients_immune_cells <- AddMetaData(
 
 # Plot the percentages of the various types of cells (except cancer cells)
 breast_cancer_patients_immune_cells@meta.data %>%
-  # Count the number of cells per cluster
-  count(!!sym(ist_cluster_var)) %>%
+  # Count the number of cells per cluster and cell type group
+  count(!!sym(ist_cluster_var), CellTypeGroup) %>%
   # Calculate percentage for each cluster
   mutate(Percentage = n / sum(n) * 100) %>%
-  # Add a grouping variable using the assign_group function
-  mutate(Group = sapply(!!sym(ist_cluster_var), assign_group)) %>%
   # Plot the data in a grouped barplot
-  ggplot(aes(x = !!sym(ist_cluster_var), y = Percentage, fill = Group)) +
+  ggplot(aes(x = !!sym(ist_cluster_var), y = Percentage, fill = CellTypeGroup)) +
   geom_bar(stat = "identity") +
-  facet_grid(~ Group, scales = "free_x", space = "free") +
+  facet_grid(~ CellTypeGroup, scales = "free_x", space = "free") +
   theme_minimal() +
   labs(x = "Cluster", y = "Percentage of Total Cells", 
-       title = "Immune cells clusters distribution",
+       title = "Immune Cells Clusters Distribution",
        fill = "Cell Group") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.spacing = unit(1, "lines")) +
