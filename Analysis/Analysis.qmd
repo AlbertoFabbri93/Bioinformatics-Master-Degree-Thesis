@@ -363,6 +363,25 @@ vln_plot_nrm <- vln_plot_nrm + plot_annotation(title = "After normalization")
 # Display the plot
 vln_plot_nrm
 
+# Check the quantity and the expression level of genes per patient after normalization
+vln_plot_nrm_patients <- VlnPlot(
+  breast_cancer_patients_integrated,
+  assay = "integrated",
+  layer = "data",
+  features = c("nFeature_SCT","nCount_SCT"),
+  ncol = 2,
+  pt.size = 0,
+  group.by = "Patient.ID",
+  cols = patient_colors
+)
+# Customize the titles for each plot
+vln_plot_nrm_patients[[1]] <- vln_plot_nrm_patients[[1]] + labs(subtitle = "Gene count")
+vln_plot_nrm_patients[[2]] <- vln_plot_nrm_patients[[2]] + labs(subtitle = "Total expression level")
+# Add global title
+vln_plot_nrm_patients <- vln_plot_nrm_patients + plot_annotation(title = "After normalization")
+# Display the plot
+vln_plot_nrm_patients
+
 # QC the normalization
 FeaturePlot(
   breast_cancer_patients_integrated,
