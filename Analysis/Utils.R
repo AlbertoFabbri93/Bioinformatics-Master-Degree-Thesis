@@ -345,7 +345,7 @@ get_cluster_info <- function(seurat_obj, clustering_column) {
 }
 
 # Define function to create cluster summary dataframe with dynamic columns
-create_cluster_summary <- function(patient_data, clustering_column) {
+create_cluster_summary_per_stamp <- function(patient_data, clustering_column) {
   
   # Check if clustering_column is valid
   if (!clustering_column %in% colnames(patient_data@meta.data)) {
