@@ -528,6 +528,17 @@ assign_group <- function(cell_type) {
   return("Other")
 }
 
+# Create a new column in the existing metadata
+breast_cancer_patients_immune_cells@meta.data$CellTypeGroup <- 
+  sapply(breast_cancer_patients_immune_cells@meta.data[[ist_cluster_var]], assign_group)
+
+# Assign it back to the Seurat object
+breast_cancer_patients_immune_cells <- AddMetaData(
+  object = breast_cancer_patients_immune_cells,
+  metadata = breast_cancer_patients_immune_cells@meta.data$CellTypeGroup,
+  col.name = "CellTypeGroup"
+)
+
 # Plot the percentages of the various types of cells (except cancer cells)
 breast_cancer_patients_immune_cells@meta.data %>%
   # Count the number of cells per cluster
