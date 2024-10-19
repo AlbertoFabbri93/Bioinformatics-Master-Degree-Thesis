@@ -509,18 +509,43 @@ breast_cancer_patients_tumor_cells <- subset(
 ```{r}
 #| label: immune-cells
 
+# Define the groups
+cell_groups <- list(
+  "Myeloid" = c("Macrophage", "Mast cell", "Monocyte", "Neutrophil", "Dendritic cell"),
+  "Stromal cells" = c("Endothelial", "Fibroblast"),
+  "Lymphocites" = c("B cell", "T cell CD4", "T cell CD8", "T cell regulatory", "NK cell", "Plasma", "Plasmablast", "Plasmacytoid dendritic cell")
+)
+
+# Function to assign the groups to the cell types
+assign_group <- function(cell_type) {
+  for (group_name in names(cell_groups)) {
+    if (cell_type %in% cell_groups[[group_name]]) {
+      return(group_name)
+    }
+  }
+  return("Other")
+}
+
 # Plot the percentages of the various types of cells (except cancer cells)
 breast_cancer_patients_immune_cells@meta.data %>%
   # Count the number of cells per cluster
   count(!!sym(ist_cluster_var)) %>%
   # Calculate percentage for each cluster
   mutate(Percentage = n / sum(n) * 100) %>%
-  # Plot the data in a barplot
-  ggplot(aes(x = !!sym(ist_cluster_var), y = Percentage)) +  # Create the bar plot
-  geom_bar(stat = "identity", fill = "steelblue") +         
-  theme_minimal() + 
-  labs(x = "Cluster", y = "Percentage of Total Cells", title = "Immune cells clusters distribution") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  # Add a grouping variable using the assign_group function
+  mutate(Group = sapply(!!sym(ist_cluster_var), assign_group)) %>%
+  # Plot the data in a grouped barplot
+  ggplot(aes(x = !!sym(ist_cluster_var), y = Percentage, fill = Group)) +
+  geom_bar(stat = "identity") +
+  facet_grid(~ Group, scales = "free_x", space = "free") +
+  theme_minimal() +
+  labs(x = "Cluster", y = "Percentage of Total Cells", 
+       title = "Immune cells clusters distribution",
+       fill = "Cell Group") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.spacing = unit(1, "lines")) +
+  scale_fill_brewer(palette = "Set2") +
+  guides(fill = "none")
 
 # Plot the distribution of immune cell clusters by patient
 breast_cancer_patients_immune_cells@meta.data %>%
