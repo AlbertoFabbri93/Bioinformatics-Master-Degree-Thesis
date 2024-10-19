@@ -89,7 +89,7 @@ library("tibble")
 # Pivot tibbles
 library("tidyr")
 
-# Prefer dplyr in case of conflict
+# Make every conflict trigger an error
 library("conflicted")
 
 # Import custom written functions
