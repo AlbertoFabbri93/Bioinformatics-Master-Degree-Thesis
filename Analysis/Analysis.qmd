@@ -561,7 +561,7 @@ breast_cancer_patients_immune_cells@meta.data %>%
 # Plot the distribution of immune cell clusters by patient
 breast_cancer_patients_immune_cells@meta.data %>%
   # Group by patient and cluster, then calculate percentage
-  group_by(Patient.ID, !!sym(ist_cluster_var)) %>%
+  group_by(Patient.ID, !!sym(ist_cluster_var), CellTypeGroup) %>%
   summarise(count = n(), .groups = "drop") %>%
   group_by(Patient.ID) %>%
   mutate(Percentage = count / sum(count) * 100) %>%
@@ -588,10 +588,16 @@ breast_cancer_patients_immune_cells@meta.data %>%
                      linetype = "Standard Deviation"), 
                  color = "black", alpha = 0.7, height = 0.5, size = 0.2) +
   theme_minimal() +
+  ggforce::facet_col(
+    ~ CellTypeGroup,
+    scales = "free_y",
+    space = "free",
+    drop = TRUE,
+    strip.position = "top"
+  ) +
   labs(x = "Percentage of Cells", y = "Cluster", 
        title = "Immune Cell Clusters Distribution by Patient",
        color = "Patient ID") +
-  theme(legend.position = "right") +
   scale_color_manual(values = patient_colors) +
   scale_shape_manual(values = c("Mean" = 18), labels = c("Mean")) +
   scale_linetype_manual(values = c("Standard Deviation" = "solid"), labels = c("Standard Deviation")) +
