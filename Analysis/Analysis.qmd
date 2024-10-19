@@ -70,6 +70,8 @@ library("ggraph")
 library("clustree")
 # Nicer color palettes
 library("RColorBrewer")
+# Add more layout options to ggplot
+library("ggforce")
 
 ## GENE SET ENRICHMENT ANALYSIS
 # Used to perform gene set enrichment analysis
