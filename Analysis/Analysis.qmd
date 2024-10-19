@@ -470,6 +470,7 @@ breast_cancer_patients_immune_cells@meta.data %>%
   labs(x = "Cluster", y = "Percentage of Total Cells", title = "Immune cells clusters distribution") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+# Plot the distribution of immune cell clusters by patient
 breast_cancer_patients_immune_cells@meta.data %>%
   # Group by patient and cluster, then calculate percentage
   group_by(Patient.ID, !!sym(ist_cluster_var)) %>%
