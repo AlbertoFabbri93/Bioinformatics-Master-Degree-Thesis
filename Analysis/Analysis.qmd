@@ -400,7 +400,7 @@ FeaturePlot(breast_cancer_patients_integrated,features = c("nFeature_RNA", "nCou
 #| label: insitutype-read-from-drive
 
 # Read the Insitutype data from the drive
-insitutype_data <- readRDS(here(objects_dir, "integration_ist_semisup.rds"))
+integration_ist_semisup <- readRDS(here(objects_dir, "integration_ist_semisup.rds"))
 ```
 
 ### Calculate
