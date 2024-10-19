@@ -557,7 +557,7 @@ breast_cancer_patients_immune_cells@meta.data %>%
        title = "Immune Cell Clusters Distribution by Patient",
        color = "Patient ID") +
   theme(legend.position = "right") +
-  scale_color_brewer(palette = "Set1") +
+  scale_color_manual(values = patient_colors) +
   scale_shape_manual(values = c("Mean" = 18), labels = c("Mean")) +
   scale_linetype_manual(values = c("Standard Deviation" = "solid"), labels = c("Standard Deviation")) +
   guides(
@@ -656,7 +656,8 @@ tumor_cells_patient_id_plot <- DimPlot(
   breast_cancer_patients_tumor_cells,
   reduction = "umap_tumor_cells",
   label = TRUE,
-  group.by = "Patient.ID") +
+  group.by = "Patient.ID",
+  cols = patient_colors) +
   labs(title = "Patient ID clusters")
 print(tumor_cells_patient_id_plot)
 
