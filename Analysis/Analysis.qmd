@@ -446,16 +446,35 @@ DimPlot(
 # Generate summy statistics for the Insitutype clusters
 create_cluster_summary(breast_cancer_patients_integrated, ist_cluster_var)
 get_cluster_info(breast_cancer_patients_integrated, ist_cluster_var)
+```
 
-# Cancer clusters
-cancer_clusters <- c("a", "b", "c", "d", "e", "f", "g")
+### Split the Seurat object using the Insitutype clusters
+
+```{r}
+#| label: insitutype-split
+
 # Specify the identity column
 Idents(breast_cancer_patients_integrated) <- ist_cluster_var
-# Remove the cancer clusters
+# Specify the clusters with the cancer cells
+cancer_clusters <- c("a", "b", "c", "d", "e", "f", "g")
+
+# Create Seurat objects with the non-cancerous cells
 breast_cancer_patients_immune_cells <- subset(
   breast_cancer_patients_integrated,
   idents = dplyr::setdiff(unique(Idents(breast_cancer_patients_integrated)), cancer_clusters)
 )
+
+# Create Seurat objects with the cancerous cells
+breast_cancer_patients_tumor_cells <- subset(
+  breast_cancer_patients_integrated,
+  idents = cancer_clusters
+)
+```
+
+## Immune cells
+
+```{r}
+#| label: immune-cells
 
 # Plot the percentages of the various types of cells (except cancer cells)
 breast_cancer_patients_immune_cells@meta.data %>%
@@ -514,17 +533,10 @@ breast_cancer_patients_immune_cells@meta.data %>%
   )
 ```
 
-### Extract tumor clusters
+### Cancerous cells
 
 ```{r}
-# Specify the clusters to keep in the subsetted Seurat object
-Idents(breast_cancer_patients_integrated) <- ist_cluster_var
-clusters_to_keep <- c("a", "b", "c", "d", "e", "f", "g")
-# Subset the Seurat object by keeping only the specified clusters
-breast_cancer_patients_tumor_cells <- subset(
-  breast_cancer_patients_integrated,
-  idents = clusters_to_keep
-)
+#| label: tumor-cells
 
 # After subsetting a Seurat object it is good to normalize it again
 breast_cancer_patients_tumor_cells <- SCTransform(
