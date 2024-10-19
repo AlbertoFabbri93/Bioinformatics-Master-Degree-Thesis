@@ -341,7 +341,8 @@ breast_cancer_patients_integrated <- RunUMAP(
 DimPlot(
   breast_cancer_patients_integrated,
   reduction = "integrated_umap",
-  group.by = "Patient.ID") + 
+  group.by = "Patient.ID",
+  cols = patient_colors) + 
   labs(title = "UMAP with all patients together after per patient normalization")
 
 # Check the quantity and the expression level of genes after normalization
