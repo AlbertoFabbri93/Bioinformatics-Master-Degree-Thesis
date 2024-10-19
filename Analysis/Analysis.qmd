@@ -100,11 +100,20 @@ library("conflicted")
 source_files_dir <- ("Analysis")
 source(here(source_files_dir, "Utils.R"))
 source(here(source_files_dir, "Plotting.R"))
+```
+
+## Declare global variables
+
+```{r}
+#| label: global-variables
 
 # Import environment variables as global variables
 objects_dir <- Sys.getenv("OBJECTS_DIR")
 images_dir <- Sys.getenv("IMAGES_DIR")
 images_ext <- Sys.getenv("IMAGES_EXT")
+
+# Create color vector for patients
+patient_colors <- setNames(brewer.pal(7, "Set1"), as.character(1:7))
 ```
 
 ## Tidy Seurat object
