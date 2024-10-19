@@ -633,6 +633,40 @@ chosen_tumor_cluster <- glue::glue("{tumor_cluster_name}.{chosen_tumor_cluster_r
 # Set identity to tumor clusters
 Idents(breast_cancer_patients_tumor_cells) <- chosen_tumor_cluster
 
+# Generate DimPlot of chosen resolution
+tumor_cells_chosen_resolution_plot <- DimPlot(
+  breast_cancer_patients_tumor_cells,
+  reduction = "umap_tumor_cells",
+  group.by = chosen_tumor_cluster,
+  label = TRUE) +
+  labs(title = "Tumor Cell Clusters")
+# Print DimPlots side by side
+print(tumor_cells_patient_id_plot + tumor_cells_chosen_resolution_plot)
+
+# Plot the distribution of immune cell clusters by patient
+breast_cancer_patients_tumor_cells@meta.data %>%
+  # Group by patient and cluster, then calculate percentage
+  group_by(Patient.ID, !!sym(chosen_tumor_cluster)) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(Patient.ID) %>%
+  mutate(Percentage = count / sum(count) * 100) %>%
+  ungroup() %>%
+  # Ensure Patient.ID is a factor
+  mutate(Patient.ID = as.factor(Patient.ID)) %>%
+  # Plot the data
+  ggplot(aes(x = Percentage, y = !!sym(chosen_tumor_cluster))) +
+  # Add dots for each patient
+  geom_point(aes(color = Patient.ID), size = 3, alpha = 0.7) +
+  theme_minimal() +
+  labs(x = "Percentage of Cells", y = "Cluster", 
+       title = "Tumor Cell Clusters Distribution by Patient",
+       color = "Patient ID") +
+  theme(legend.position = "right") +
+  scale_color_brewer(palette = "Set1") +
+  guides(
+    color = guide_legend(order = 1),
+  )
+
 # Find all markers of the tumor clusters
 # GSEA needs both positive and negative markers
 tumor_markers_data <- FindAllMarkers(
