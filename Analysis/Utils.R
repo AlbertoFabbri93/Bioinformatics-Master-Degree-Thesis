@@ -402,6 +402,33 @@ create_cluster_summary <- function(patient_data, clustering_column) {
   return(cluster_summary)
 }
 
+# Function to create cluster summary tibble with dynamic columns based on Patient.ID
+create_cluster_summary_per_patient <- function(patient_data, clustering_column) {
+  
+  # Check if clustering_column is valid
+  if (!clustering_column %in% colnames(patient_data@meta.data)) {
+    stop(paste("Column", clustering_column, "not found in meta.data of Seurat object."))
+  }
+  
+  # Extract metadata once to avoid repeated access
+  meta_data <- patient_data@meta.data
+  
+  # Create a table that counts cells for each combination of cluster and Patient.ID
+  count_table <- table(meta_data[[clustering_column]], meta_data$Patient.ID)
+  
+  # Convert the table to a tibble and reshape it
+  cluster_summary <- as_tibble(as.data.frame(count_table)) %>%
+    # Rename columns for clarity
+    dplyr::rename(cluster_name = Var1, Patient.ID = Var2, cell_count = Freq) %>%
+    # Spread the Patient.ID into columns
+    pivot_wider(names_from = Patient.ID, values_from = cell_count, values_fill = 0) %>%
+    # Add a total_cells column summing across patients
+    mutate(total_cells = rowSums(dplyr::select(., -cluster_name))) %>%
+    # Sort by cluster_name alphabetically
+    arrange(cluster_name)
+  
+  return(cluster_summary)
+}
 
 ####### ANALYZE RNA #######
 
