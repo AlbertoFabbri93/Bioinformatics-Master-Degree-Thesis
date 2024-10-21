@@ -479,7 +479,7 @@ DimPlot(
   cols = integration_ist_color_table) +
   labs(title = "UMAP with Insitutype clusters")
 
-# Generate summy statistics for the Insitutype clusters
+# Generate summary statistics for the Insitutype clusters
 create_cluster_summary_per_patient(breast_cancer_patients_integrated, ist_cluster_var)
 ```
 
