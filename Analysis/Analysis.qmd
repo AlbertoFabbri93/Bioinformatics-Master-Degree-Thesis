@@ -513,9 +513,9 @@ breast_cancer_patients_tumor_cells <- subset(
 
 # Define the groups
 cell_groups <- list(
-  "Myeloid" = c("Macrophage", "Mast cell", "Monocyte", "Neutrophil", "Dendritic cell"),
+  "Myeloid" = c("Macrophage", "Mast cell", "Monocyte", "Neutrophil", "Dendritic cell", "Plasmacytoid dendritic cell"),
   "Stromal cells" = c("Endothelial", "Fibroblast"),
-  "Lymphocites" = c("B cell", "T cell CD4", "T cell CD8", "T cell regulatory", "NK cell", "Plasma", "Plasmablast", "Plasmacytoid dendritic cell")
+  "Lymphocites" = c("B cell", "T cell CD4", "T cell CD8", "T cell regulatory", "NK cell", "Plasma", "Plasmablast")
 )
 
 # Function to assign the groups to the cell types
