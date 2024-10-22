@@ -743,8 +743,8 @@ tumor_cells_cluster_statistics %>%
 # Print tibble with the count of cells in each cluster per patient
 tumor_cells_cluster_statistics %>%
   # Specify id_cols so the Percentage column is dropped
-  dplyr::mutate(Count = replace_na(Count, 0)) %>%
   pivot_wider(names_from = Patient.ID, values_from = Count, id_cols = `Tumor cluster`) %>%
+  mutate(across(2:8, ~replace_na(.x, 0))) %>%
   group_by(`Tumor cluster`) %>%
   mutate(`Tot. clust. cells` = sum(across(where(is.numeric)))) %>%
   ungroup() %>%
