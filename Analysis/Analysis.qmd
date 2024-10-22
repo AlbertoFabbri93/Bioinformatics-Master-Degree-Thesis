@@ -609,7 +609,7 @@ immune_cells_cluster_distribution_plot <- immune_cells_cluster_statistics %>%
 print(immune_cells_cluster_distribution_plot)
 ```
 
-### Cancerous cells
+## Cancerous cells
 
 ```{r}
 #| label: tumor-cells
@@ -666,8 +666,8 @@ breast_cancer_patients_tumor_cells <- FindClusters(
   resolution = seq_res,
   cluster.name = tumor_cluster_seq_res,
   random.seed = 5,
-  verbose = TRUE
-)
+  verbose = TRUE)
+
 # Run UMAP
 breast_cancer_patients_tumor_cells <- RunUMAP(
   breast_cancer_patients_tumor_cells,
@@ -719,6 +719,16 @@ tumor_cells_chosen_resolution_plot <- DimPlot(
   labs(title = "Tumor Cell Clusters")
 # Print DimPlots side by side
 print(tumor_cells_patient_id_plot + tumor_cells_chosen_resolution_plot)
+
+# Generate FeaturePlot of tumor clusters
+tumor_cells_feature_plot <- (FeaturePlot(
+  object = breast_cancer_patients_tumor_cells,
+  reduction = "umap_tumor_cells",
+  features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
+  max.cutoff = "q95") &
+  NoAxes()) +
+  plot_annotation(title = "Tumor Cells")
+print(tumor_cells_feature_plot)
 
 # Calculate statistics for the tumor clusters
 tumor_cells_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %>%
