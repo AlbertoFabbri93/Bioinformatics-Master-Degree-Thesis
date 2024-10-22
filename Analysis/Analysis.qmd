@@ -574,7 +574,7 @@ immune_cells_cluster_statistics %>%
   guides(fill = "none")
 
 # Plot the distribution of immune cell clusters by patient
-immune_cells_cluster_distrinution_plot <- immune_cells_cluster_statistics %>%
+immune_cells_cluster_distribution_plot <- immune_cells_cluster_statistics %>%
   # Plot the data
   ggplot(aes(x = Percentage, y = !!sym(ist_cluster_var))) +
   # Add dots for each patient
@@ -606,7 +606,7 @@ immune_cells_cluster_distrinution_plot <- immune_cells_cluster_statistics %>%
     shape = guide_legend(order = 2, title = "Statistics"),
     linetype = guide_legend(order = 3, title = "Statistics")
   )
-print(immune_cells_cluster_distrinution_plot)
+print(immune_cells_cluster_distribution_plot)
 ```
 
 ### Cancerous cells
@@ -760,7 +760,7 @@ most_significant_tumor_markers <- tumor_markers_data %>%
   ungroup()
 print(most_significant_tumor_markers)
 
-# Generate summy statistics for the tumor clusters
+# Generate summary statistics for the tumor clusters
 create_cluster_summary_per_patient(breast_cancer_patients_tumor_cells, chosen_tumor_cluster)
 ```
 
