@@ -720,18 +720,37 @@ tumor_cells_chosen_resolution_plot <- DimPlot(
 # Print DimPlots side by side
 print(tumor_cells_patient_id_plot + tumor_cells_chosen_resolution_plot)
 
-# Plot the distribution of immune cell clusters by patient
-breast_cancer_patients_tumor_cells@meta.data %>%
+# Calculate statistics for the tumor clusters
+tumor_cells_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %>%
+  dplyr::rename(`Tumor cluster` = !!sym(chosen_tumor_cluster)) %>%
   # Group by patient and cluster, then calculate percentage
-  group_by(Patient.ID, !!sym(chosen_tumor_cluster)) %>%
-  summarise(count = n(), .groups = "drop") %>%
+  group_by(Patient.ID, `Tumor cluster`) %>%
+  summarise(Count = n(), .groups = "drop") %>%
   group_by(Patient.ID) %>%
-  mutate(Percentage = count / sum(count) * 100) %>%
+  mutate(Percentage = Count / sum(Count) * 100) %>%
   ungroup() %>%
   # Ensure Patient.ID is a factor
-  mutate(Patient.ID = as.factor(Patient.ID)) %>%
+  mutate(Patient.ID = as.factor(Patient.ID))
+
+# Print tibble with the percentages of cells in each cluster per patient
+tumor_cells_cluster_statistics %>%
+  # Specify id_cols so the Count column is dropped
+  pivot_wider(names_from = Patient.ID, values_from = Percentage, id_cols = `Tumor cluster`) %>%
+  mutate(across(2:8, round, 2)) %>%
+  arrange(`Tumor cluster`) %>%
+  print()
+
+# Print tibble with the count of cells in each cluster per patient
+tumor_cells_cluster_statistics %>%
+  # Specify id_cols so the Percentage column is dropped
+  pivot_wider(names_from = Patient.ID, values_from = Count, id_cols = `Tumor cluster`) %>%
+  arrange(`Tumor cluster`) %>%
+  print()
+
+# Plot the distribution of tumor cell clusters by patient
+tumor_cells_cluster_distribution_plot <- tumor_cells_cluster_statistics %>%
   # Plot the data
-  ggplot(aes(x = Percentage, y = !!sym(chosen_tumor_cluster))) +
+  ggplot(aes(x = Percentage, y = `Tumor cluster`)) +
   # Add dots for each patient
   geom_point(aes(color = Patient.ID), size = 3, alpha = 0.7) +
   theme_minimal() +
@@ -743,6 +762,7 @@ breast_cancer_patients_tumor_cells@meta.data %>%
   guides(
     color = guide_legend(order = 1),
   )
+print(tumor_cells_cluster_distribution_plot)
 
 # Find all markers of the tumor clusters
 # GSEA needs both positive and negative markers
