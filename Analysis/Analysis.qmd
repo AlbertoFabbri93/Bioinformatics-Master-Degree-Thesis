@@ -736,7 +736,9 @@ tumor_cells_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %
 tumor_cells_cluster_statistics %>%
   # Specify id_cols so the Count column is dropped
   pivot_wider(names_from = Patient.ID, values_from = Percentage, id_cols = `Tumor cluster`) %>%
+  # Round the values to two decimal places
   mutate(across(2:8, round, 2)) %>%
+  # Sort according to the Tumor cluster column
   arrange(`Tumor cluster`) %>%
   print()
 
@@ -744,6 +746,7 @@ tumor_cells_cluster_statistics %>%
 tumor_cells_cluster_statistics %>%
   # Specify id_cols so the Percentage column is dropped
   pivot_wider(names_from = Patient.ID, values_from = Count, id_cols = `Tumor cluster`) %>%
+  # Replace NA values with 0 so that the total cells per cluster can be calculated
   mutate(across(2:8, ~replace_na(.x, 0))) %>%
   group_by(`Tumor cluster`) %>%
   mutate(`Tot. clust. cells` = sum(across(where(is.numeric)))) %>%
