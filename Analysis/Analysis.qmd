@@ -471,14 +471,20 @@ saveRDS(integration_ist_semisup, here(objects_dir, "integration_ist_semisup.rds"
 ist_cluster_var <- "ist_semisup_clusters"
 # Add the Insitutype clusters to the Seurat object metadata
 breast_cancer_patients_integrated[[ist_cluster_var]] <- integration_ist_semisup$clust
-# Colors for the insitutype plots
-integration_ist_color_table <- generate_colors_lookup_table(breast_cancer_patients_integrated, ist_cluster_var, known_clusters_colors)
+# Specify the clusters with the cancer cells
+cancer_clusters <- c("a", "b", "c", "d", "e", "f", "g")
+# Replace the various cancer clusters with a global cluster called "Tumor"
+breast_cancer_patients_integrated$ist_semisup_clusters_ann <- case_match(
+  breast_cancer_patients_integrated$ist_semisup_clusters,
+  cancer_clusters ~ "Tumor",
+  .default = unname(breast_cancer_patients_integrated$ist_semisup_clusters)
+)
 # Generate the umap with the unannotated clusters
 DimPlot(
   object = breast_cancer_patients_integrated,
-  group.by = ist_cluster_var,
+  group.by = "ist_semisup_clusters_ann",
   reduction = "integrated_umap",
-  cols = integration_ist_color_table) +
+  cols = known_clusters_colors) +
   labs(title = "UMAP with Insitutype clusters")
 
 # Generate summary statistics for the Insitutype clusters
@@ -492,8 +498,6 @@ create_cluster_summary_per_patient(breast_cancer_patients_integrated, ist_cluste
 
 # Specify the identity column
 Idents(breast_cancer_patients_integrated) <- ist_cluster_var
-# Specify the clusters with the cancer cells
-cancer_clusters <- c("a", "b", "c", "d", "e", "f", "g")
 
 # Create Seurat objects with the non-cancerous cells
 breast_cancer_patients_immune_cells <- subset(
