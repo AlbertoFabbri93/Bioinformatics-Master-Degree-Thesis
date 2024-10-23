@@ -804,9 +804,6 @@ most_significant_tumor_markers <- tumor_markers_data %>%
   slice_head(n = 10) %>%
   ungroup()
 print(most_significant_tumor_markers)
-
-# Generate summary statistics for the tumor clusters
-create_cluster_summary_per_patient(breast_cancer_patients_tumor_cells, chosen_tumor_cluster)
 ```
 
 ## Gene Set Enrichment Analysis
