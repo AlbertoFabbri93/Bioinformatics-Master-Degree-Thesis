@@ -60,6 +60,8 @@ library("dittoSeq")
 library("EBImage")
 # For faster estimation when using SCTransform
 library("glmGamPoi")
+# For fast Wilcoxon rank sum test
+library("presto")
 
 ## PLOTTING
 # Used to annotate images with multiple plots
