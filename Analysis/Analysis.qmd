@@ -58,6 +58,8 @@ library("InSituType")
 library("dittoSeq")
 # Used to visualize the raw images from AtoMx
 library("EBImage")
+# For faster estimation when using SCTransform
+library("glmGamPoi")
 
 ## PLOTTING
 # Used to annotate images with multiple plots
