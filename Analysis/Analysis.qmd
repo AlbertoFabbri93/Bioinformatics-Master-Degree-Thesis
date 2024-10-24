@@ -747,11 +747,13 @@ print(tumor_cells_patient_id_plot + tumor_cells_chosen_resolution_plot)
 # Generate FeaturePlot of tumor clusters
 # max.cutoff q95 is set so any values above the 95th percentile will be set to the 95th percentile value,
 # this helps prevent extreme outliers from dominating the color scale
+# min.cutoff 0 is set so any positive value will be highlighted
 tumor_cells_feature_plot <- (FeaturePlot(
   object = breast_cancer_patients_tumor_cells,
   reduction = "umap_tumor_cells",
   features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
-  max.cutoff = "q95") &
+  max.cutoff = "q95",
+  min.cutoff = 0) &
   NoAxes()) +
   plot_annotation(title = "Tumor Cells")
 print(tumor_cells_feature_plot)
