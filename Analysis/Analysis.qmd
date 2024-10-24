@@ -229,7 +229,7 @@ breast_cancer_patients_no_rbc <- subset(breast_cancer_patients, cells = cells_to
 #| label: qa-before-integration
 
 # Check if there are mitochondrial genes
-mt_gene_count <- sum(grepl("^MT-", rownames(breast_cancer_patients[["RNA"]])))
+mt_gene_count <- sum(grepl("^MT-", rownames(breast_cancer_patients_no_rbc[["RNA"]])))
 if (mt_gene_count > 0) {
   cat("TRUE. Number of mitochondrial genes:", mt_gene_count)
 } else {
@@ -238,7 +238,7 @@ if (mt_gene_count > 0) {
 
 # Check the quantity and the expression level of genes
 vln_plot_raw <- VlnPlot(
-  breast_cancer_patients,
+  breast_cancer_patients_no_rbc,
   assay = "RNA",
   layer = "counts",
   features = c("nFeature_RNA", "nCount_RNA"),
@@ -270,7 +270,7 @@ breast_cancer_patients_integrated <- readRDS(here(objects_dir, "breast_cancer_pa
 #| eval: false
 
 # Split the global Seurat object by patient
-breast_cancer_patients_split <- SplitObject(breast_cancer_patients, split.by = "Patient.ID")
+breast_cancer_patients_split <- SplitObject(breast_cancer_patients_no_rbc, split.by = "Patient.ID")
 # Extract the names from the named list
 bcp_split_project_names <- names(breast_cancer_patients_split)
 # Set the project name for each patient
@@ -490,7 +490,7 @@ ist_cluster_var <- "ist_semisup_clusters"
 # Add the Insitutype clusters to the Seurat object metadata
 breast_cancer_patients_integrated[[ist_cluster_var]] <- integration_ist_semisup$clust
 # Specify the clusters with the cancer cells
-cancer_clusters <- c("a", "b", "c", "d", "e", "f", "g")
+cancer_clusters <- c("a", "b", "c", "d", "e", "f", "g", "h", "i")
 # Replace the various cancer clusters with a global cluster called "Tumor"
 breast_cancer_patients_integrated$ist_semisup_clusters_ann <- case_match(
   breast_cancer_patients_integrated$ist_semisup_clusters,
