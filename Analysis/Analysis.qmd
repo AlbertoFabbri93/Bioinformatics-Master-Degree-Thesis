@@ -742,7 +742,8 @@ tumor_cells_chosen_resolution_plot <- DimPlot(
   label = TRUE) +
   labs(title = "Tumor Cell Clusters")
 # Print DimPlots side by side
-print(tumor_cells_patient_id_plot + tumor_cells_chosen_resolution_plot)
+tumor_clusters_patient_clusters <- tumor_cells_patient_id_plot + tumor_cells_chosen_resolution_plot
+print(tumor_clusters_patient_clusters)
 
 # Generate FeaturePlot of tumor clusters
 # max.cutoff q95 is set so any values above the 95th percentile will be set to the 95th percentile value,
