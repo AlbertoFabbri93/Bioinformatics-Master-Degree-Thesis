@@ -932,6 +932,30 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
 }
 ```
 
+## Merge all cells together
+
+```{r}
+#| label: merge-all-cells
+
+# Merge the immune and tumor cells into a single Seurat object
+breast_cancer_patients_all_cells <- merge(
+  breast_cancer_patients_immune_cells,
+  breast_cancer_patients_tumor_cells)
+
+# Copy tumor clusters from the tumor cells seurat object
+breast_cancer_patients_all_cells$tumor_cluster <- breast_cancer_patients_tumor_cells[[chosen_tumor_cluster]]
+
+# Merge the insitutype phenotyping with the tumor clusters
+breast_cancer_patients_all_cells@meta.data <- breast_cancer_patients_all_cells@meta.data %>%
+  mutate(cell_cluster = if_else(
+    ist_semisup_clusters_ann != "Tumor",
+    ist_semisup_clusters_ann,
+    paste("Tumor", breast_cancer_patients_all_cells$tumor_cluster, sep = " ")
+))
+
+# Add back the spatial data
+breast_cancer_patients_all_cells@images <- spatial_information
+```
 ## General overview of the data
 
 Create a table with an entry for every FOV in the Seurat object analyzed in this study. The table will contain the patient ID, the serial core, the stamp, and the FOV.
