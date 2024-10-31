@@ -311,7 +311,8 @@ generate_spatial_plots <- function(
     patient_data,
     cluster_var,
     cluster_name = NULL,
-    color_lookup_table = NULL
+    color_lookup_table = NULL,
+    legend_fill = "ident"
 ) {
   
   # If a human friendly name is not given, use the name of the column in the Seurat object
@@ -368,6 +369,9 @@ generate_spatial_plots <- function(
         labs(
           title = paste("Patient", patient_num, "Core", curr_core, ", Stamp", curr_stamp),
           subtitle = cluster_name
+        ) +
+        guides(
+          fill = guide_legend(legend_fill)
         )
       stamp_plot_name <- paste("Patient",  patient_num, cluster_var, "core", curr_core, "stamp", as.character(curr_stamp), sep = "_")
       clustering_plots[[stamp_plot_name]] <- stamp_plot
