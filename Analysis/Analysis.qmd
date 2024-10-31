@@ -62,6 +62,8 @@ library("EBImage")
 library("glmGamPoi")
 # For fast Wilcoxon rank sum test
 library("presto")
+# Combine multidimensional arrays into a single array
+library("abind")
 
 ## PLOTTING
 # Used to annotate images with multiple plots
