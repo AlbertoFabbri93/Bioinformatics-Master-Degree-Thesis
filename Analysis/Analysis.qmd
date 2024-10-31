@@ -956,6 +956,48 @@ breast_cancer_patients_all_cells@meta.data <- breast_cancer_patients_all_cells@m
 # Add back the spatial data
 breast_cancer_patients_all_cells@images <- spatial_information
 ```
+
+## Spatial niches
+
+```{r}
+#| label: spatial-niches
+
+# Build the niche assay
+breast_cancer_patients_all_cells <- BuildNicheAssay(
+  object = breast_cancer_patients_all_cells, 
+  fov = "LU001FFP03",
+  group.by = "cell_cluster",
+  assay = "niche",
+  cluster.name = "niches",
+  # Number of niches to find, default is 4
+  niches.k = 12,
+  # Number of neighbors to consider, default is 20
+  neighbors.k = 50)
+
+# Create the plots with the cell types for every stamp
+cell_types_stamps_plots <- generate_spatial_plots(
+  breast_cancer_patients_all_cells,
+  cluster_var = "cell_cluster",
+  cluster_name = "Cell types with tumor subclusters",
+  legend_fill = "Cell types")
+# Display the plots
+print(cell_types_stamps_plots)
+
+# Create the color palette for the niches
+niches_color_palette <- generate_colors_lookup_table(
+  breast_cancer_patients_all_cells,
+  cluster_column_name = "niches",
+  color_palette = brewer.pal(12, name = "Set3"))
+# Create the plots with the niches for every stamp
+niches_stamps_plots <- generate_spatial_plots(
+  breast_cancer_patients_all_cells,
+  cluster_var = "niches",
+  cluster_name = "Seurat niches",
+  legend_fill = "Niches",
+  color_lookup_table = niches_color_palette)
+# Display the plots
+print(niches_stamps_plots)
+```
 ## General overview of the data
 
 Create a table with an entry for every FOV in the Seurat object analyzed in this study. The table will contain the patient ID, the serial core, the stamp, and the FOV.
