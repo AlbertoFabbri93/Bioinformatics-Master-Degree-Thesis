@@ -986,12 +986,18 @@ breast_cancer_patients_all_cells <- BuildNicheAssay(
   # increasingly far away in the Z-dimension.
   neighbors.k = 50)
 
+# Create the color palette for the niches
+cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
+  breast_cancer_patients_all_cells,
+  cluster_column_name = "cell_cluster",
+  color_palette = unname(polychrome()))
 # Create the plots with the cell types for every stamp
 cell_types_stamps_plots <- generate_spatial_plots(
   breast_cancer_patients_all_cells,
   cluster_var = "cell_cluster",
   cluster_name = "Cell types with tumor subclusters",
-  legend_fill = "Cell types")
+  legend_fill = "Cell types",
+  color_lookup_table = cells_all_phenotypes_color_palette)
 # Display the plots
 print(cell_types_stamps_plots)
 
@@ -1033,13 +1039,15 @@ for (niche in niches) {
   niche_data <- cell_type_counts %>% dplyr::filter(niches == niche)
   
   # Create the bar plot
-  niche_barplot <- ggplot(niche_data, aes(x = cell_cluster, y = percentage)) +
+  niche_barplot <- ggplot(niche_data, aes(x = cell_cluster, y = percentage, fill = cell_cluster)) +
   geom_bar(stat = "identity") +
   labs(title = paste("Niche:", niche),
        x = "Cell Type",
        y = "Percentage (%)") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = cells_all_phenotypes_color_palette) +
+  NoLegend()
 
   # Add the plot to the list
   niches_barplot_list[[niche]] <- niche_barplot
