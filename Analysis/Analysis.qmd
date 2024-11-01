@@ -972,6 +972,14 @@ breast_cancer_patients_all_cells <- BuildNicheAssay(
   # Number of niches to find, default is 4
   niches.k = 12,
   # Number of neighbors to consider, default is 20
+  # Very small neighborhoods produce sparse and noisy data
+  # Very large neighborhoods become inaccurate representations of a cell’s 3D surroundings:
+  # the area of your circular neighborhood increases with the square of the radius,
+  # but the volume of the corresponding (unobserved) 3D tissue 
+  # region increases with the cube of the radius.
+  # This means that the larger the radius, the less of your 3D neighborhood falls in
+  # the narrow tissue slide you’ve assayed, and the more it consists of unseen cells
+  # increasingly far away in the Z-dimension.
   neighbors.k = 50)
 
 # Create the plots with the cell types for every stamp
