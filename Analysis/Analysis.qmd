@@ -76,10 +76,11 @@ library("ggpubr")
 library("ggraph")
 # Used to plot the cluster tree created by running FindClusters at several resolutions
 library("clustree")
-# Nicer color palettes
-library("RColorBrewer")
 # Add more layout options to ggplot
 library("ggforce")
+# Additional color palettes
+library("RColorBrewer")
+library("pals")
 
 ## GENE SET ENRICHMENT ANALYSIS
 # Used to perform gene set enrichment analysis
