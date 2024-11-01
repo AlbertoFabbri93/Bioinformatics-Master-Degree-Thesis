@@ -50,6 +50,8 @@ options(future.seed = TRUE)
 
 # Unpack multiple values without temporary variables
 library("zeallot")
+# Add interpreted string literals
+library("glue")
 # Sane way to declare file paths
 library("here")
 # Machine learning library from NanoString
