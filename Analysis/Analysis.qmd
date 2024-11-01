@@ -1005,6 +1005,44 @@ niches_stamps_plots <- generate_spatial_plots(
   color_lookup_table = niches_color_palette)
 # Display the plots
 print(niches_stamps_plots)
+
+# Count and calculate percentage of cell types per niche
+cell_type_counts <- breast_cancer_patients_all_cells@meta.data %>%
+  group_by(niches, cell_cluster) %>%
+  summarise(count = n()) %>%
+  mutate(percentage = (count / sum(count)) * 100) %>%
+  arrange(.by_group = TRUE)
+# Print the cell type counts and percentages
+print(cell_type_counts)
+
+# Get the list of unique niches
+niches <- unique(metadata$niches)
+# Print the niches
+print(sort(niches))
+# Initialize an empty list to store plots
+niches_barplot_list <- list()
+
+# Loop through each niche and create a bar plot
+for (niche in niches) {
+  
+  # Filter out cells in other niches
+  niche_data <- cell_type_counts %>% dplyr::filter(niches == niche)
+  
+  # Create the bar plot
+  niche_barplot <- ggplot(niche_data, aes(x = cell_cluster, y = percentage)) +
+  geom_bar(stat = "identity") +
+  labs(title = paste("Niche:", niche),
+       x = "Cell Type",
+       y = "Percentage (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  # Add the plot to the list
+  niches_barplot_list[[niche]] <- niche_barplot
+}
+
+# Display all niches bar plots
+print(niches_barplot_list)
 ```
 ## General overview of the data
 
