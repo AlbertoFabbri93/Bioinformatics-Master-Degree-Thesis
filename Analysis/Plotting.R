@@ -331,11 +331,8 @@ generate_spatial_plots <- function(
   # List to be returned with all the plots
   clustering_plots <- list()
   
-  # Read patient number
-  patient_num <- get_patient_num(patient_data)
-  
   # Print some information about the clusters
-  print(paste(cluster_name, "and number of cells in each of them associated with patient", patient_num))
+  print(paste(cluster_name, "and number of cells in each of the cluster"))
   print(table(patient_data[[cluster_var]]))
   
   # Select the cluster as the identity
@@ -353,6 +350,9 @@ generate_spatial_plots <- function(
       
       # Subset data from current core and stamp
       core_stamp_subset <- subset(patient_data, subset = core_serial == curr_core & stamp == curr_stamp)
+      
+      # Read patient number
+      patient_num <- get_patient_num(core_stamp_subset)
       
       # Plot the current core/stamp combination with all the cells in their spatial context and colored by cluster
       stamp_plot <- ImageDimPlot(
