@@ -955,7 +955,7 @@ breast_cancer_patients_all_cells@meta.data <- breast_cancer_patients_all_cells@m
     ist_semisup_clusters_ann,
     paste("Tumor", breast_cancer_patients_all_cells$tumor_cluster, sep = " ")
 ))
-print(glue("Number of cell phenotypes (Insitutype + Tumor clusters: {length(unique(breast_cancer_patients_all_cells@meta.data$cell_cluster))} cells"))
+print(glue("Number of cell phenotypes (Insitutype + Tumor clusters): {length(unique(breast_cancer_patients_all_cells@meta.data$cell_cluster))} cells"))
 
 # Add back the spatial data
 breast_cancer_patients_all_cells@images <- spatial_information
