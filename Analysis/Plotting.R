@@ -331,6 +331,7 @@ generate_spatial_plots <- function(
   # List to be returned with all the plots
   clustering_plots <- list()
   
+  # Read patient number
   patient_num <- get_patient_num(patient_data)
   
   # Print some information about the clusters
