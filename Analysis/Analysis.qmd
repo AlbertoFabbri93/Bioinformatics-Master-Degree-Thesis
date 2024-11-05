@@ -528,6 +528,19 @@ DimPlot(
 
 # Generate summary statistics for the Insitutype clusters
 create_cluster_summary_per_patient(breast_cancer_patients_integrated, ist_cluster_var)
+
+# Violin plot with the expression of panCK, CD45 and CD68 for each Insitutype clusters
+ist_clust_expr <- VlnPlot(
+  breast_cancer_patients_integrated,
+  assay = "integrated",
+  layer = "data",
+  features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
+  pt.size = 0,
+  group.by = "ist_semisup_clusters_ann",
+  combine = FALSE
+) 
+ist_clust_expr <- lapply(ist_clust_expr, function(x) x &NoLegend())
+print(ist_clust_expr)
 ```
 
 ### Split the Seurat object using the Insitutype clusters
