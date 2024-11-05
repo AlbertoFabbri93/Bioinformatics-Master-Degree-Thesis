@@ -390,12 +390,28 @@ breast_cancer_patients_integrated <- RunUMAP(
 #| label: qa-after-integration-plots
 
 # View UMAP with all patients together
-DimPlot(
+UMAP_patients_integrated <- DimPlot(
   breast_cancer_patients_integrated,
   reduction = "integrated_umap",
   group.by = "Patient.ID",
-  cols = patient_colors) + 
-  labs(title = "UMAP with all patients together after per patient normalization")
+  cols = patient_colors,
+) + 
+labs(
+  title = "UMAP after per-patient normalization",
+) +
+# Remove all the axes elements
+theme(
+  axis.title = element_blank(),
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+) +
+guides(
+  color = guide_legend(
+    title = "Patient ID",
+    override.aes = list(size = 4))
+)
+print(UMAP_patients_integrated)
 
 Idents(breast_cancer_patients_integrated) <- "neutral"
 # Check the quantity and the expression level of genes after normalization
