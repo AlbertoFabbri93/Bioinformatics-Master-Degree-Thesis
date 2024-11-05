@@ -606,17 +606,17 @@ print(immune_cells_cluster_statistics)
 # Plot the percentages of the various types of cells (except cancer cells)
 immune_cells_cluster_statistics %>%
   # Plot the data in a grouped barplot
-  ggplot(aes(x = !!sym(ist_cluster_var), y = Percentage, fill = CellTypeGroup)) +
-  geom_bar(stat = "identity") +
+  ggplot(aes(x = !!sym(ist_cluster_var), y = Percentage, fill = Patient.ID)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single", padding = 0), width = .8) +
   facet_grid(~ CellTypeGroup, scales = "free_x", space = "free") +
   theme_minimal() +
-  labs(x = "Cluster", y = "Percentage of Total Cells", 
-       title = "Immune Cells Clusters Distribution",
-       fill = "Cell Group") +
+  labs(x = NULL, 
+       y = "Percentage of Cells", 
+       title = "Immune Cells Types Distribution by Patient",
+       fill = "Patient") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        panel.spacing = unit(1, "lines")) +
-  scale_fill_brewer(palette = "Set2") +
-  guides(fill = "none")
+        panel.spacing = unit(0.8, "lines")) +
+  scale_fill_brewer(palette = "Set2")
 
 # Plot the distribution of immune cell clusters by patient
 immune_cells_cluster_distribution_plot <- immune_cells_cluster_statistics %>%
