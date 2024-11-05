@@ -566,6 +566,17 @@ ist_clust_expr <- VlnPlot(
 ) 
 ist_clust_expr <- lapply(ist_clust_expr, function(x) x &NoLegend())
 print(ist_clust_expr)
+
+# Calculate the mean of CD45, CD68 and PanCK for each Insitutype cluster
+ist_ann_cluster_statistics <- breast_cancer_patients_integrated@meta.data %>%
+  group_by(ist_semisup_clusters_ann) %>%
+  summarise(
+    `Mean PanCK` = mean(Mean.PanCK),
+    `Mean CD45` = mean(Mean.CD45),
+    `Mean CD68` = mean(Mean.CD68),
+    .groups = "drop"
+  )
+print(ist_ann_cluster_statistics)
 ```
 
 ### Split the Seurat object using the Insitutype clusters
