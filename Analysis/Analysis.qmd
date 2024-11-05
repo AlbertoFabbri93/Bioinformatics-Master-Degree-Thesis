@@ -528,7 +528,7 @@ saveRDS(integration_ist_semisup, here(objects_dir, "integration_ist_semisup.rds"
 
 ### Plots
 
-````{r}
+```{r}
 #| label: insitutype-plots
 
 # Define the variable name for the Insitutype column on the metadata
