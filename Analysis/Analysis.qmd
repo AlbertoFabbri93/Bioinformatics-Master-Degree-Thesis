@@ -358,8 +358,10 @@ saveRDS(breast_cancer_patients_integrated, here(objects_dir, "breast_cancer_pati
 
 ### Check the data after integration
 
+#### Reductions
+
 ```{r}
-#| label: qa-after-integration
+#| label: qa-after-integration-reductions
 
 # Set DefaultAssay
 DefaultAssay(breast_cancer_patients_integrated) <- "integrated"
@@ -380,6 +382,13 @@ breast_cancer_patients_integrated <- RunUMAP(
   reduction.key = "IUMAP_",
   reduction.name = "integrated_umap",
   verbose = FALSE)
+```
+
+#### Plots
+
+```{r}
+#| label: qa-after-integration-plots
+
 # View UMAP with all patients together
 DimPlot(
   breast_cancer_patients_integrated,
