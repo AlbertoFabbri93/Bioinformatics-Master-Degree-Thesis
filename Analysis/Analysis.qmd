@@ -656,6 +656,8 @@ print(immune_cells_cluster_distribution_plot)
 
 ## Cancerous cells
 
+### Clustering
+
 ```{r}
 #| label: tumor-cells
 
@@ -721,7 +723,11 @@ breast_cancer_patients_tumor_cells <- RunUMAP(
   reduction.name = "umap_tumor_cells",
   dims = tumor_cells_dims,
   verbose = TRUE)
+```
 
+### Plotting
+
+```{r}
 # View UMAP with tumor cells at different clustering resolutions
 tumor_cells_different_resolutions <- DimPlot(
   breast_cancer_patients_tumor_cells,
@@ -830,7 +836,11 @@ tumor_cells_cluster_distribution_plot <- tumor_cells_cluster_statistics %>%
     color = guide_legend(order = 1),
   )
 print(tumor_cells_cluster_distribution_plot)
+```
 
+### Markers
+
+```{r}
 # Find all markers of the tumor clusters
 # GSEA needs both positive and negative markers
 tumor_markers_data <- FindAllMarkers(
