@@ -827,9 +827,9 @@ tumor_cells_cluster_distribution_plot <- tumor_cells_cluster_statistics %>%
   # Add dots for each patient
   geom_point(aes(color = Patient.ID), size = 3, alpha = 0.7) +
   theme_minimal() +
-  labs(x = "Percentage of Cells", y = "Cluster", 
+  labs(x = "Percentage of Cells", y = "Tumor Cluster", 
        title = "Tumor Cell Clusters Distribution by Patient",
-       color = "Patient ID") +
+       color = "Patient") +
   theme(legend.position = "right") +
   scale_color_brewer(palette = "Set1") +
   guides(
