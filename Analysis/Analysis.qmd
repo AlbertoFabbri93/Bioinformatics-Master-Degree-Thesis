@@ -113,13 +113,9 @@ library("conflicted")
 source_files_dir <- ("Analysis")
 source(here(source_files_dir, "Utils.R"))
 source(here(source_files_dir, "Plotting.R"))
-```
 
-## Declare global variables
 
-```{r}
-#| label: global-variables
-
+## DECLARE GLOBAL VARIABLES
 # Import environment variables as global variables
 objects_dir <- Sys.getenv("OBJECTS_DIR")
 images_dir <- Sys.getenv("IMAGES_DIR")
