@@ -1123,7 +1123,7 @@ for (niche in niches) {
   NoLegend()
 
   # Add the plot to the list
-  niches_barplot_list[[niche]] <- niche_barplot
+  niches_barplot_list[[glue::glue("Niche_{niche}_barplot")]] <- niche_barplot
 }
 
 # Display all niches bar plots
