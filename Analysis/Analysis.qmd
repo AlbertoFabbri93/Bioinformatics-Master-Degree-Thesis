@@ -543,7 +543,7 @@ cancer_clusters <- c("a", "b", "c", "d", "e", "f", "g", "h", "i")
 breast_cancer_patients_integrated$ist_semisup_clusters_ann <- case_match(
   breast_cancer_patients_integrated$ist_semisup_clusters,
   cancer_clusters ~ "Tumor",
-  .default = unname(breast_cancer_patients_integrated$ist_semisup_clusters)
+  .default = base::unname(breast_cancer_patients_integrated$ist_semisup_clusters)
 )
 # Generate the umap with the unannotated clusters
 DimPlot(
