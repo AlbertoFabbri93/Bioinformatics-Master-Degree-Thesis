@@ -890,6 +890,8 @@ print(tumor_cells_cluster_distribution_plot)
 ### Markers
 
 ```{r}
+#| label: tumor-cells-markers
+
 # Find all markers of the tumor clusters
 # GSEA needs both positive and negative markers
 tumor_markers_data <- FindAllMarkers(
@@ -1025,7 +1027,7 @@ breast_cancer_patients_all_cells@images <- spatial_information
 ### Build niches
 
 ```{r}
-#| label: spatial-niches
+#| label: build-spatial-niches
 
 # Build the niche assay
 breast_cancer_patients_all_cells <- BuildNicheAssay(
