@@ -1668,10 +1668,6 @@ print(patient_1_plots)
 rm(this_patient_num)
 ```
 
-::: {.content-hidden}
-#### Save plots
-:::
-
 ```{r}
 #| label: save-plots-patient-1
 #| include: false
@@ -1738,9 +1734,6 @@ patients_rna_data[[2]] <- patient_2_data
 print(patient_2_plots)
 ```
 
-::: {.content-hidden}
-#### Save plots
-:::
 
 ```{r}
 #| label: save-plots-patient-2
@@ -1792,10 +1785,6 @@ patient_3_plots <- c(patient_3_plots, generate_comparison_plots(patient_3_data))
 patients_rna_data[[3]] <- patient_3_data
 print(patient_3_plots)
 ```
-
-::: {.content-hidden}
-#### Save plots
-:::
 
 ```{r}
 #| label: save-plots-patient-3
@@ -1852,10 +1841,6 @@ patients_rna_data[[4]] <- patient_4_data
 print(patient_4_plots)
 ```
 
-::: {.content-hidden}
-#### Save plots
-:::
-
 ```{r}
 #| label: save-plots-patient-4
 #| include: false
@@ -1911,10 +1896,6 @@ patients_rna_data[[5]] <- patient_5_data
 print(patient_5_plots)
 ```
 
-::: {.content-hidden}
-#### Save plots
-:::
-
 ```{r}
 #| label: save-plots-patient-5
 #| include: false
@@ -1963,10 +1944,6 @@ patient_6_plots <- c(patient_6_plots, generate_comparison_plots(patient_6_data))
 patients_rna_data[[6]] <- patient_6_data
 print(patient_6_plots)
 ```
-
-::: {.content-hidden}
-#### Save plots
-:::
 
 ```{r}
 #| label: save-plots-patient-6
