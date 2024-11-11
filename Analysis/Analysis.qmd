@@ -889,6 +889,30 @@ tumor_cells_cluster_distribution_plot <- tumor_cells_cluster_statistics %>%
     color = guide_legend(order = 1),
   )
 print(tumor_cells_cluster_distribution_plot)
+
+# Identify genes in the SCTtumors assay that start with "KRT"
+# These should be the genes that contributes the most to the gene expression
+# measured by the antibody panCK
+krt_genes <- grep("^KRT", rownames(breast_cancer_patients_tumor_cells[["SCTtumors"]]), value = TRUE)
+# Calculate the average expression of the KRT genes for each cell
+krt_avg_expression <- Matrix::colMeans(
+  breast_cancer_patients_tumor_cells[["SCTtumors"]]@data[krt_genes, ])
+# Add the average expression as a new metadata column
+breast_cancer_patients_tumor_cells$KRT_Avg_Expression <- krt_avg_expression
+
+# Visualize the co-expression of the KRT genes and the panCK antibody
+KRT_panCK_coexpression <- (FeaturePlot(
+  breast_cancer_patients_tumor_cells,
+  reduction = "umap_tumor_cells",
+  max.cutoff = "q95",
+  min.cutoff = 0,
+  features = c("Mean.PanCK", "KRT_Avg_Expression"),
+  blend = TRUE
+)  & NoAxes()) + 
+  plot_layout(ncol = 2) +
+  theme(plot.title = element_text(hjust = 0.5))
+KRT_panCK_coexpression[[3]] <- KRT_panCK_coexpression[[3]] + labs(title = "PanCK, KRT genes co-expression")
+print(KRT_panCK_coexpression)
 ```
 
 ### Markers
