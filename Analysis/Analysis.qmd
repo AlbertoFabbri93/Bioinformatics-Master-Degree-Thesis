@@ -1051,6 +1051,8 @@ breast_cancer_patients_all_cells <- BuildNicheAssay(
 ### Spatial plots of clusters
 
 ```{r}
+#| label: spatial-clusters-plots
+
 # Create the color palette for the niches
 cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
   breast_cancer_patients_all_cells,
@@ -1067,9 +1069,18 @@ cell_types_stamps_plots <- generate_spatial_plots(
 print(cell_types_stamps_plots)
 ```
 
+```{r}
+#| eval: false
+
+# Save the plots
+save_plots(cell_types_stamps_plots, here(image_dir, "Integration", "Stamps_with_clusters"))
+```
+
 ### Spatial plots of niches
 
 ```{r}
+#| label: spatial-niches-plots
+
 # Create the color palette for the niches
 niches_color_palette <- generate_colors_lookup_table(
   breast_cancer_patients_all_cells,
@@ -1086,9 +1097,18 @@ niches_stamps_plots <- generate_spatial_plots(
 print(niches_stamps_plots)
 ```
 
+```{r}
+#| eval: false
+
+# Save the plots
+save_plots(niches_stamps_plots, here(image_dir, "Integration", "Stamps_with_niches"))
+```
+
 ### Statistics about niches
 
 ```{r}
+#| label: niches-statistics
+
 # Count and calculate percentage of cell types per niche
 cell_type_counts <- breast_cancer_patients_all_cells@meta.data %>%
   group_by(niches, cell_cluster) %>%
@@ -1128,6 +1148,13 @@ for (niche in niches) {
 
 # Display all niches bar plots
 print(niches_barplot_list)
+```
+
+```{r}
+#| eval: false
+
+# Save the plots
+save_plots(niches_barplot_list, here(image_dir, "Integration", "Niches_barplots"))
 ```
 ## General overview of the data
 
