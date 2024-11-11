@@ -66,6 +66,8 @@ library("glmGamPoi")
 library("presto")
 # Combine multidimensional arrays into a single array
 library("abind")
+# Sparse and dense matrix classes and methods
+library("Matrix")
 
 ## PLOTTING
 # Used to annotate images with multiple plots
