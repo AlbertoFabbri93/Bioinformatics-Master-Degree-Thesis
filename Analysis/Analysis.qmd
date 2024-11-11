@@ -710,7 +710,7 @@ print(immune_cells_cluster_distribution_plot)
 ### Clustering
 
 ```{r}
-#| label: tumor-cells
+#| label: tumor-cells-clustering
 
 # After subsetting a Seurat object it is good to normalize it again
 breast_cancer_patients_tumor_cells <- SCTransform(
@@ -779,6 +779,8 @@ breast_cancer_patients_tumor_cells <- RunUMAP(
 ### Plotting
 
 ```{r}
+#| label: tumor-cells-plotting
+
 # View UMAP with tumor cells at different clustering resolutions
 tumor_cells_different_resolutions <- DimPlot(
   breast_cancer_patients_tumor_cells,
