@@ -1,4 +1,4 @@
 renv.config.pak.enabled = TRUE
 OBJECTS_DIR="Analysis/Objects"
-IMAGE_DIR="Analysis/Images"
-IMAGE_EXT=".png"
+IMAGES_DIR="Analysis/Images"
+IMAGES_EXT=".png"
