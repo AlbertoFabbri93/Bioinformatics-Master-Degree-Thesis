@@ -918,6 +918,33 @@ KRT_panCK_coexpression[[3]] <-
   KRT_panCK_coexpression[[3]] + 
   labs(title = "PanCK & KRT genes", subtitle = "Co-expression")
 print(KRT_panCK_coexpression)
+
+# Violin plot with the expression of panCK, CD45 and CD68 for each Insitutype clusters
+ist_clust_expr <- VlnPlot(
+  breast_cancer_patients_tumor_cells,
+  assay = "SCTtumors",
+  layer = "data",
+  features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
+  pt.size = 0,
+  group.by = chosen_tumor_cluster,
+  combine = FALSE
+) 
+ist_clust_expr <- lapply(
+  ist_clust_expr,
+  function(x) x & NoLegend() & labs(subtitle = "Tumor Clusters"))
+print(ist_clust_expr)
+
+# Calculate the mean of CD45, CD68 and PanCK for each Insitutype cluster
+tumor_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %>%
+  group_by(!!sym(chosen_tumor_cluster)) %>%
+  summarise(
+    `Mean PanCK` = mean(Mean.PanCK),
+    `Mean CD45` = mean(Mean.CD45),
+    `Mean CD68` = mean(Mean.CD68),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(`Mean PanCK`))
+print(tumor_cluster_statistics)
 ```
 
 ### Markers
