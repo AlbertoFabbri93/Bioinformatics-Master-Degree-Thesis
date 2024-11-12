@@ -908,7 +908,15 @@ KRT_panCK_coexpression <- (FeaturePlot(
 )  & NoAxes()) + 
   plot_layout(ncol = 2) +
   theme(plot.title = element_text(hjust = 0.5))
-KRT_panCK_coexpression[[3]] <- KRT_panCK_coexpression[[3]] + labs(title = "PanCK, KRT genes co-expression")
+KRT_panCK_coexpression[[1]] <-
+  KRT_panCK_coexpression[[1]] + 
+  labs(title = "PanCK", subtitle = "Mean expression")
+KRT_panCK_coexpression[[2]] <-
+  KRT_panCK_coexpression[[2]] + 
+  labs(title = "KRT genes", subtitle = "Mean expression")
+KRT_panCK_coexpression[[3]] <-
+  KRT_panCK_coexpression[[3]] + 
+  labs(title = "PanCK & KRT genes", subtitle = "Co-expression")
 print(KRT_panCK_coexpression)
 ```
 
