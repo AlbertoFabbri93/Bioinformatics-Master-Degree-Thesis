@@ -830,7 +830,8 @@ tumor_cells_feature_plot <- (FeaturePlot(
   reduction = "umap_tumor_cells",
   features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
   max.cutoff = "q95",
-  min.cutoff = 0) &
+  min.cutoff = 0,
+  label = TRUE) &
   NoAxes()) +
   plot_annotation(title = "Tumor Cells")
 print(tumor_cells_feature_plot)
