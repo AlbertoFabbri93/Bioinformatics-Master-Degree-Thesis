@@ -272,7 +272,7 @@ vln_plot_raw <- vln_plot_raw + plot_annotation(title = "Before normalization")
 vln_plot_raw
 ```
 
-### Read integrated object from memory
+### Integrated object
 
 ```{r}
 #| label: load-integrated-object
@@ -280,8 +280,6 @@ vln_plot_raw
 # Load integrated object from memory
 breast_cancer_patients_integrated <- readRDS(here(objects_dir, "breast_cancer_patients_integrated.rds"))
 ```
-
-### Create integrated object from scratch
 
 ```{r}
 #| label: create-integrated-object
@@ -494,7 +492,7 @@ FeaturePlot(breast_cancer_patients_integrated,features = c("nFeature_RNA", "nCou
 
 ## Insitutype Clustering
 
-### Read from drive
+### Computation
 
 ```{r}
 #| label: insitutype-read-from-drive
@@ -502,8 +500,6 @@ FeaturePlot(breast_cancer_patients_integrated,features = c("nFeature_RNA", "nCou
 # Read the Insitutype data from the drive
 integration_ist_semisup <- readRDS(here(objects_dir, "integration_ist_semisup.rds"))
 ```
-
-### Calculate
 
 ```{r}
 #| label: insitutype-calculate-clustering
