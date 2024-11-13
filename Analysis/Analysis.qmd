@@ -1115,7 +1115,7 @@ breast_cancer_patients_all_cells <- BuildNicheAssay(
 cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
   breast_cancer_patients_all_cells,
   cluster_column_name = "cell_cluster",
-  color_palette = unname(polychrome()))
+  color_palette = base::unname(polychrome()))
 # Create the plots with the cell types for every stamp
 cell_types_stamps_plots <- generate_spatial_plots(
   breast_cancer_patients_all_cells,
