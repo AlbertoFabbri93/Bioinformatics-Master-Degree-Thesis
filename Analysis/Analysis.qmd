@@ -52,6 +52,20 @@ options(future.globals.maxSize = 6.5 * 2^30)
 # Ensure proper random number seeding globally
 options(future.seed = TRUE)
 
+###### TIDYVERSE ######
+# Data manipulation
+library("dplyr")
+# Create nice plots
+library("ggplot2")
+# Open Excel files
+library("readxl")
+# Open CSV files
+library("readr")
+# Better dataframes
+library("tibble")
+# Pivot tibbles
+library("tidyr")
+
 # Unpack multiple values without temporary variables
 library("zeallot")
 # Add interpreted string literals
@@ -95,20 +109,6 @@ library("clusterProfiler")
 library("org.Hs.eg.db")
 # List all supported types
 keytypes(org.Hs.eg.db)
-
-###### TIDYVERSE ######
-# Data manipulation
-library("dplyr")
-# Create nice plots
-library("ggplot2")
-# Open Excel files
-library("readxl")
-# Open CSV files
-library("readr")
-# Better dataframes
-library("tibble")
-# Pivot tibbles
-library("tidyr")
 
 # Make every conflict trigger an error
 library("conflicted")
