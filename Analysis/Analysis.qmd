@@ -20,6 +20,10 @@ Once `renv` is installed it can be used to install the necessary packages by run
 
 `renv` will then proceed to install all the packages specified in the `renv.lock` file.
 
+**Do not update the version of the packages if not absolutely necessary.**
+
+If some packages have been update, run `renv::snapshot()` to update the `renv.lock` file.
+
 ### Quarto
 
 To run this file it is necessary to have `quarto` installed. `quarto` is a software used to create reproducible documents that embed code. It can be installed by downloading it from the official website:
