@@ -259,13 +259,13 @@ saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_pati
 #| label: remove-spatial-informations
 
 # Create a new Seurat object by copying the original
-breast_cancer_patients_no_rbc_no_spatial <- breast_cancer_patients_filt_cells
+breast_cancer_patients_filt_cells_no_spatial <- breast_cancer_patients_filt_cells
 
 # Save the spatial information to an object
 spatial_information <- breast_cancer_patients_filt_cells@images
 
 # Remove the spatial information from the new Seurat object
-breast_cancer_patients_no_rbc_no_spatial@images <- list()
+breast_cancer_patients_filt_cells_no_spatial@images <- list()
 ```
 
 ## Integrate patients
@@ -276,7 +276,7 @@ breast_cancer_patients_no_rbc_no_spatial@images <- list()
 #| label: qa-before-integration
 
 # Check if there are mitochondrial genes
-mt_gene_count <- sum(grepl("^MT-", rownames(breast_cancer_patients_no_rbc_no_spatial[["RNA"]])))
+mt_gene_count <- sum(grepl("^MT-", rownames(breast_cancer_patients_filt_cells_no_spatial[["RNA"]])))
 if (mt_gene_count > 0) {
   cat("TRUE. Number of mitochondrial genes:", mt_gene_count)
 } else {
@@ -285,7 +285,7 @@ if (mt_gene_count > 0) {
 
 # Check the quantity and the expression level of genes
 vln_plot_raw <- VlnPlot(
-  breast_cancer_patients_no_rbc_no_spatial,
+  breast_cancer_patients_filt_cells_no_spatial,
   assay = "RNA",
   layer = "counts",
   features = c("nFeature_RNA", "nCount_RNA"),
@@ -315,7 +315,7 @@ breast_cancer_patients_integrated <- readRDS(here(objects_dir, "breast_cancer_pa
 #| eval: false
 
 # Split the global Seurat object by patient
-breast_cancer_patients_split <- SplitObject(breast_cancer_patients_no_rbc_no_spatial, split.by = "Patient.ID")
+breast_cancer_patients_split <- SplitObject(breast_cancer_patients_filt_cells_no_spatial, split.by = "Patient.ID")
 # Extract the names from the named list
 bcp_split_project_names <- names(breast_cancer_patients_split)
 # Set the project name for each patient
