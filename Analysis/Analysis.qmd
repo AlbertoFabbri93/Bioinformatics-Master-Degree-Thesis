@@ -420,6 +420,7 @@ breast_cancer_patients_integrated <- RunUMAP(
 after_integration_plots <- list()
 
 # View UMAP with all patients together
+# If the integration has been done properly, the patients' cells should be mixed together
 UMAP_patients_integrated <- DimPlot(
   breast_cancer_patients_integrated,
   reduction = "integrated_umap",
