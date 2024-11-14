@@ -340,6 +340,7 @@ breast_cancer_patients_split <- lapply(breast_cancer_patients_split, function(pa
     return.only.var.genes = FALSE,
     assay = "RNA",
     new.assay.name = "SCT",
+    seed.use = 13,
     verbose = TRUE)
   return(patient_object)
 })
