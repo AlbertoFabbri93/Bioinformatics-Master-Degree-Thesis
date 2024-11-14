@@ -417,6 +417,8 @@ breast_cancer_patients_integrated <- RunUMAP(
 ```{r}
 #| label: qa-after-integration-plots
 
+after_integration_plots <- list()
+
 # View UMAP with all patients together
 UMAP_patients_integrated <- DimPlot(
   breast_cancer_patients_integrated,
@@ -439,11 +441,12 @@ guides(
     title = "Patient ID",
     override.aes = list(size = 4))
 )
-print(UMAP_patients_integrated)
+# Save the plot
+after_integration_plots[["UMAP_patients_integrated"]] <- UMAP_patients_integrated
 
 Idents(breast_cancer_patients_integrated) <- "neutral"
 # Check the quantity and the expression level of genes after normalization
-vln_plot_nrm <- VlnPlot(
+vln_plot_feat_count <- VlnPlot(
   breast_cancer_patients_integrated,
   assay = "integrated",
   layer = "data",
@@ -452,15 +455,15 @@ vln_plot_nrm <- VlnPlot(
   pt.size = 0
 )
 # Customize the titles for each plot
-vln_plot_nrm[[1]] <- vln_plot_nrm[[1]] + labs(subtitle = "Gene count")
-vln_plot_nrm[[2]] <- vln_plot_nrm[[2]] + labs(subtitle = "Total expression level")
+vln_plot_feat_count[[1]] <- vln_plot_feat_count[[1]] + labs(subtitle = "Gene count")
+vln_plot_feat_count[[2]] <- vln_plot_feat_count[[2]] + labs(subtitle = "Total expression level")
 # Add global title
-vln_plot_nrm <- vln_plot_nrm + plot_annotation(title = "After normalization")
-# Display the plot
-vln_plot_nrm
+vln_plot_feat_count <- vln_plot_feat_count + plot_annotation(title = "After normalization")
+# Save the plot
+after_integration_plots[["Violin_plot_features_count_integrated"]] <- vln_plot_feat_count
 
 # Check the quantity and the expression level of genes per patient after normalization
-vln_plot_nrm_patients <- VlnPlot(
+vln_plot_feat_count_patients <- VlnPlot(
   breast_cancer_patients_integrated,
   assay = "integrated",
   layer = "data",
@@ -471,19 +474,24 @@ vln_plot_nrm_patients <- VlnPlot(
   cols = patient_colors
 )
 # Customize the titles for each plot
-vln_plot_nrm_patients[[1]] <- vln_plot_nrm_patients[[1]] + labs(subtitle = "Gene count")
-vln_plot_nrm_patients[[2]] <- vln_plot_nrm_patients[[2]] + labs(subtitle = "Total expression level")
+vln_plot_feat_count_patients[[1]] <- vln_plot_feat_count_patients[[1]] + labs(subtitle = "Gene count")
+vln_plot_feat_count_patients[[2]] <- vln_plot_feat_count_patients[[2]] + labs(subtitle = "Total expression level")
 # Add global title
-vln_plot_nrm_patients <- vln_plot_nrm_patients + plot_annotation(title = "After normalization")
-# Display the plot
-vln_plot_nrm_patients
+vln_plot_feat_count_patients <- vln_plot_feat_count_patients + plot_annotation(title = "After normalization")
+# Save the plot
+after_integration_plots[["Violin_plot_patients_features_count_integrated"]] <- vln_plot_feat_count_patients
 
 # QC the normalization
-FeaturePlot(
+feature_plot_feat_count <- FeaturePlot(
   breast_cancer_patients_integrated,
   features = c("nFeature_RNA", "nCount_RNA"),
   reduction = "integrated_umap",
   combine = TRUE)
+# Save the plot
+after_integration_plots[["Feature_plot_features_count_integrated"]] <- feature_plot_feat_count
+
+# Display the plots
+print(after_integration_plots)
 ```
 
 ## Seurat Clustering
