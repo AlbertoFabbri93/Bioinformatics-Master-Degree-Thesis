@@ -495,42 +495,6 @@ after_integration_plots[["Feature_plot_features_count_integrated"]] <- feature_p
 print(after_integration_plots)
 ```
 
-## Seurat Clustering
-
-```{r}
-#| eval: false
-
-# Generate clusters with different resolutions
-breast_cancer_patients_integrated <- FindNeighbors(breast_cancer_patients_integrated, dims = 1:10)
-res_to_try <- seq(0.1,0.3,by = 0.1)
-# Create custom names based on the actual resolution values
-cluster_name_prefix <- "cluster_integrated_res_"
-cluster_names <- paste0(cluster_name_prefix, res_to_try)
-breast_cancer_patients_integrated <- FindClusters(
-  object = breast_cancer_patients_integrated,
-  resolution = res_to_try,
-  verbose = TRUE,
-  cluster.name = cluster_names)
-# Visualize cluster results
-cluster_plot <- clustree(breast_cancer_patients_integrated, prefix = cluster_name_prefix) + 
-  theme(legend.position = "right") + 
-  guides(colourbar = "none", edge_colour = "none", edge_alpha = "none",
-         size = guide_legend("Number of Cells"),
-         colour = guide_legend("Resolution"))
-plot(cluster_plot)
-# Select the correct resolution
-res.chosen <- 0.2
-clustering.chosen <- paste0(cluster_name_prefix, res.chosen)
-Idents(breast_cancer_patients_integrated) <- clustering.chosen
-# Check the number and names of the clusters
-levels(breast_cancer_patients_integrated)
-# View UMAP with clusters
-DimPlot(breast_cancer_patients_integrated,reduction = "umap", group.by = clustering.chosen)
-# Make QC plots
-FeaturePlot(breast_cancer_patients_integrated,features = c("nFeature_RNA", "nCount_RNA"),
-                          reduction = "umap",combine = FALSE)
-```
-
 ## Insitutype Clustering
 
 ### Computation
