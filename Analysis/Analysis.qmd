@@ -397,7 +397,8 @@ breast_cancer_patients_integrated <- RunPCA(
   assay = "integrated",
   reduction.key = "IPC_",
   reduction.name = "integrated_pca",
-  verbose = TRUE, )
+  seed.use = 42,
+  verbose = TRUE)
 # Generate variance elbow plots
 generate_variance_elbow_plots(breast_cancer_patients_integrated, "integrated_pca", 50)
 # Run UMAP
@@ -407,6 +408,7 @@ breast_cancer_patients_integrated <- RunUMAP(
   dims = 1:22,
   reduction.key = "IUMAP_",
   reduction.name = "integrated_umap",
+  seed.use = 12,
   verbose = FALSE)
 ```
 
