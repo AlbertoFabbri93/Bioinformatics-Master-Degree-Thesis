@@ -136,7 +136,15 @@ patient_colors <- setNames(brewer.pal(7, "Set1"), as.character(1:7))
 The NanoString data is stored in a single assay. The data is divided into three groups: gene expression, negative probes, and system control. The system control and negative probes are not used in the downstream analysis. The gene expression data is moved to a new assay called "RNA". The system control and negative probes are moved to new assays called "SystemControl" and "NegativeProbes", respectively. The metadata is cleaned by removing unnecessary columns and renaming others. The images are copied from the original Seurat object to a new one. The assay name in the images is updated to match the new assay name.
 
 ```{r}
-#| label: move-qc-data
+#| label: load-cleaned-object
+
+# Load cleaned object from memory
+breast_cancer_patients <- readRDS(here(objects_dir, "breast_cancer_patients.rds"))
+```
+
+```{r}
+#| label: create-clenaed-object
+#| eval: false
 
 # Load the Seurat object
 breast_cancer_patients_mixed_features <- readRDS(here(objects_dir, "breast_cancer_patients.rds"))
@@ -213,7 +221,11 @@ tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
   return(seurat_object_cleaned_features)
 }
 
+# Separate the assays in the Seurat object
 breast_cancer_patients <- tidy_seurat_object_assay(breast_cancer_patients_mixed_features, "Nanostring")
+
+# Save the cleaned object
+saveRDS(breast_cancer_patients, here(objects_dir, "breast_cancer_patients.rds"))
 ```
 
 ### Filter out anomalous cells
