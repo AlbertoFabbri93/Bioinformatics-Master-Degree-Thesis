@@ -231,7 +231,15 @@ saveRDS(breast_cancer_patients, here(objects_dir, "breast_cancer_patients.rds"))
 ### Filter out anomalous cells
 
 ```{r}
-#| label: filter-anomalous-cells
+#| label: load-filtered-cells-object
+
+# Load filtered cells object from memory
+breast_cancer_patients_filt_cells <- readRDS(here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
+```
+
+```{r}
+#| label: create-filtered-cells-object
+#| eval: false
 
 # Read csv file with cells to remove from Seurat object
 cells_to_remove <- read_csv(
@@ -239,7 +247,10 @@ cells_to_remove <- read_csv(
   col_types = cols("Cell.ID" = "c"))
 
 # Remove the cells from the Seurat object
-breast_cancer_patients_no_rbc <- subset(breast_cancer_patients, cells = cells_to_remove$Cell.ID)
+breast_cancer_patients_filt_cells <- subset(breast_cancer_patients, cells = cells_to_remove$Cell.ID)
+
+# Save the filtered cells object
+saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
 ```
 
 ### Remove spatial informations
@@ -248,10 +259,10 @@ breast_cancer_patients_no_rbc <- subset(breast_cancer_patients, cells = cells_to
 #| label: remove-spatial-informations
 
 # Create a new Seurat object by copying the original
-breast_cancer_patients_no_rbc_no_spatial <- breast_cancer_patients_no_rbc
+breast_cancer_patients_no_rbc_no_spatial <- breast_cancer_patients_filt_cells
 
 # Save the spatial information to an object
-spatial_information <- breast_cancer_patients_no_rbc@images
+spatial_information <- breast_cancer_patients_filt_cells@images
 
 # Remove the spatial information from the new Seurat object
 breast_cancer_patients_no_rbc_no_spatial@images <- list()
