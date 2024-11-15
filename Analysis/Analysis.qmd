@@ -364,6 +364,8 @@ object_anchors <- FindIntegrationAnchors(
   verbose = TRUE
 )
 # Integrate the data
+# After integration using SCT-normalized counts, the data slot will contain non-centered Pearson residuals and the scale.data slot will contain the centered residuals.
+# Transforming post-integration residuals to corrected counts is not supported/tested/encouraged
 breast_cancer_patients_integrated <- IntegrateData(
   anchorset = object_anchors,
   new.assay.name = "integrated",
