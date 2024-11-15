@@ -970,6 +970,9 @@ print(tumor_cluster_statistics)
 ```{r}
 #| label: tumor-cells-markers
 
+# List with data to save
+tumor_markers_to_print <- list()
+
 # Find all markers of the tumor clusters
 # GSEA needs both positive and negative markers
 tumor_markers_data <- FindAllMarkers(
@@ -984,7 +987,32 @@ most_significant_tumor_markers <- tumor_markers_data %>%
   dplyr::filter(avg_log2FC > 1) %>%
   slice_head(n = 10) %>%
   ungroup()
-print(most_significant_tumor_markers)
+tumor_markers_to_print[["most_significant_tumor_markers"]] <- most_significant_tumor_markers
+
+tumor_clust_diff_expr_genes_heatmap <- DoHeatmap(
+    breast_cancer_patients_tumor_cells,
+    features = most_significant_tumor_markers$gene,
+    assay = "SCTtumors",
+    label = TRUE,
+    size = 2
+    #group.colors = color_lookup_table,
+   ) + theme(
+     axis.text.y = element_text(size = 5),
+   ) + labs(
+     title = paste("Tumor clusters"),
+     subtitle = "Top 10 Differentially Expressed Genes per Cluster"
+   )
+tumor_markers_to_print[["tumor_clust_diff_expr_genes_heatmap"]] <- tumor_clust_diff_expr_genes_heatmap
+
+print(tumor_markers_to_print)
+```
+
+```{r}
+#| label: tumor-markers-save
+#| eval: false
+
+# Save the data
+save_plots(tumor_markers_to_print, here(images_dir, "Tumor markers"))
 ```
 
 ## Gene Set Enrichment Analysis
