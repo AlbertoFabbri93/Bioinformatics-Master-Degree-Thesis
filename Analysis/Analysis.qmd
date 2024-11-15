@@ -795,6 +795,8 @@ breast_cancer_patients_tumor_cells <- RunUMAP(
 ```{r}
 #| label: tumor-cells-plotting
 
+tumor_plots_to_save <- list()
+
 # View UMAP with tumor cells at different clustering resolutions
 tumor_cells_different_resolutions <- DimPlot(
   breast_cancer_patients_tumor_cells,
@@ -809,7 +811,7 @@ tumor_cells_different_resolutions <- DimPlot(
   plot.margin = unit(c(0, 0, 0, 0), "lines"),
   plot.title = element_text(size = 12, face = "bold")
   )
-print(tumor_cells_different_resolutions)
+tumor_plots_to_save[["tumor_cells_different_resolutions"]] <- tumor_cells_different_resolutions
 
 # View UMAP with tumor cells and patient clusters
 tumor_cells_patient_id_plot <- DimPlot(
@@ -819,7 +821,7 @@ tumor_cells_patient_id_plot <- DimPlot(
   group.by = "Patient.ID",
   cols = patient_colors) +
   labs(title = "Patient ID clusters")
-print(tumor_cells_patient_id_plot)
+tumor_plots_to_save[["tumor_cells_patient_id_plot"]] <- tumor_cells_patient_id_plot
 
 # Chosen resolution
 chosen_tumor_cluster_resolution <- 0.2
@@ -837,7 +839,7 @@ tumor_cells_chosen_resolution_plot <- DimPlot(
   labs(title = "Tumor Cell Clusters")
 # Print DimPlots side by side
 tumor_clusters_patient_clusters <- tumor_cells_patient_id_plot + tumor_cells_chosen_resolution_plot
-print(tumor_clusters_patient_clusters)
+tumor_plots_to_save[["tumor_clusters_patient_clusters"]] <- tumor_clusters_patient_clusters
 
 # Generate FeaturePlot of tumor clusters
 # max.cutoff q95 is set so any values above the 95th percentile will be set to the 95th percentile value,
@@ -852,7 +854,7 @@ tumor_cells_feature_plot <- (FeaturePlot(
   label = TRUE) &
   NoAxes()) +
   plot_annotation(title = "Tumor Cells")
-print(tumor_cells_feature_plot)
+tumor_plots_to_save[["tumor_cells_feature_plot"]] <- tumor_cells_feature_plot
 
 # Calculate statistics for the tumor clusters
 tumor_cells_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %>%
@@ -867,17 +869,17 @@ tumor_cells_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %
   mutate(Patient.ID = as.factor(Patient.ID))
 
 # Print tibble with the percentages of cells in each cluster per patient
-tumor_cells_cluster_statistics %>%
+tumor_cells_percent_clust_patient <- tumor_cells_cluster_statistics %>%
   # Specify id_cols so the Count column is dropped
   pivot_wider(names_from = Patient.ID, values_from = Percentage, id_cols = `Tumor cluster`) %>%
   # Round the values to two decimal places
   mutate(across(2:8, round, 2)) %>%
   # Sort according to the Tumor cluster column
-  arrange(`Tumor cluster`) %>%
-  print()
+  arrange(`Tumor cluster`)
+tumor_plots_to_save[["tumor_cells_percent_clust_patient"]] <- tumor_cells_percent_clust_patient
 
 # Print tibble with the count of cells in each cluster per patient
-tumor_cells_cluster_statistics %>%
+tumor_cells_count_clust_patient <- tumor_cells_cluster_statistics %>%
   # Specify id_cols so the Percentage column is dropped
   pivot_wider(names_from = Patient.ID, values_from = Count, id_cols = `Tumor cluster`) %>%
   # Replace NA values with 0 so that the total cells per cluster can be calculated
@@ -885,8 +887,8 @@ tumor_cells_cluster_statistics %>%
   group_by(`Tumor cluster`) %>%
   mutate(`Tot. clust. cells` = sum(across(where(is.numeric)))) %>%
   ungroup() %>%
-  arrange(`Tumor cluster`) %>%
-  print()
+  arrange(`Tumor cluster`)
+tumor_plots_to_save[["tumor_cells_count_clust_patient"]] <- tumor_cells_count_clust_patient
 
 # Plot the distribution of tumor cell clusters by patient
 tumor_cells_cluster_distribution_plot <- tumor_cells_cluster_statistics %>%
@@ -903,7 +905,7 @@ tumor_cells_cluster_distribution_plot <- tumor_cells_cluster_statistics %>%
   guides(
     color = guide_legend(order = 1),
   )
-print(tumor_cells_cluster_distribution_plot)
+tumor_plots_to_save[["tumor_cells_cluster_distribution_plot"]] <- tumor_cells_cluster_distribution_plot
 
 # Identify genes in the SCTtumors assay that start with "KRT"
 # These should be the genes that contributes the most to the gene expression
@@ -935,10 +937,10 @@ KRT_panCK_coexpression[[2]] <-
 KRT_panCK_coexpression[[3]] <-
   KRT_panCK_coexpression[[3]] + 
   labs(title = "PanCK & KRT genes", subtitle = "Co-expression")
-print(KRT_panCK_coexpression)
+tumor_plots_to_save[["KRT_panCK_coexpression"]] <- KRT_panCK_coexpression
 
 # Violin plot with the expression of panCK, CD45 and CD68 for each Insitutype clusters
-ist_clust_expr <- VlnPlot(
+tumor_clust_protein_expr <- VlnPlot(
   breast_cancer_patients_tumor_cells,
   assay = "SCTtumors",
   layer = "data",
@@ -946,11 +948,12 @@ ist_clust_expr <- VlnPlot(
   pt.size = 0,
   group.by = chosen_tumor_cluster,
   combine = FALSE
-) 
-ist_clust_expr <- lapply(
-  ist_clust_expr,
+)
+tumor_clust_protein_expr <- lapply(
+  tumor_clust_protein_expr,
   function(x) x & NoLegend() & labs(subtitle = "Tumor Clusters"))
-print(ist_clust_expr)
+names(tumor_clust_protein_expr) <- c("PanCK", "CD45", "CD68")
+tumor_plots_to_save <- c(tumor_plots_to_save, tumor_clust_protein_expr)
 
 # Calculate the mean of CD45, CD68 and PanCK for each Insitutype cluster
 tumor_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %>%
@@ -962,7 +965,17 @@ tumor_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %>%
     .groups = "drop"
   ) %>%
   arrange(desc(`Mean PanCK`))
-print(tumor_cluster_statistics)
+tumor_plots_to_save[["tumor_cluster_statistics"]] <- tumor_cluster_statistics
+
+print(tumor_plots_to_save)
+```
+
+```{r}
+#| label: tumor-cells-save-plots
+#| eval: false
+
+# Save the tumor cells plots
+save_plots(tumor_plots_to_save, here(images_dir, "Tumor clusters"))
 ```
 
 ### Markers
