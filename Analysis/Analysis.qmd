@@ -1153,7 +1153,7 @@ print(cell_types_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_plots(cell_types_stamps_plots, here(image_dir, "Integration", "Stamps_with_clusters"))
+save_plots(cell_types_stamps_plots, here(images_dir, "Integration", "Stamps_with_clusters"))
 ```
 
 ### Spatial plots of niches
@@ -1181,7 +1181,7 @@ print(niches_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_plots(niches_stamps_plots, here(image_dir, "Integration", "Stamps_with_niches"))
+save_plots(niches_stamps_plots, here(images_dir, "Integration", "Stamps_with_niches"))
 ```
 
 ### Statistics about niches
@@ -1234,7 +1234,7 @@ print(niches_barplot_list)
 #| eval: false
 
 # Save the plots
-save_plots(niches_barplot_list, here(image_dir, "Integration", "Niches_barplots"))
+save_plots(niches_barplot_list, here(images_dir, "Integration", "Niches_barplots"))
 ```
 ## General overview of the data
 
@@ -1724,7 +1724,7 @@ rm(this_patient_num)
 #| echo: false
 #| eval: false
 
-save_plots(patient_1_plots, get_patient_dir_img("1"), image_ext)
+save_plots(patient_1_plots, get_patient_dir_img("1"), images_ext)
 ```
 
 ### Patient 2
@@ -1791,7 +1791,7 @@ print(patient_2_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_2_plots, get_patient_dir_img("2"), image_ext)
+save_plots(patient_2_plots, get_patient_dir_img("2"), images_ext)
 ```
 
 ### Patient 3
@@ -1842,7 +1842,7 @@ print(patient_3_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_3_plots, get_patient_dir_img("3"), image_ext)
+save_plots(patient_3_plots, get_patient_dir_img("3"), images_ext)
 ```
 
 ### Patient 4
@@ -1897,7 +1897,7 @@ print(patient_4_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_4_plots, get_patient_dir_img("4"), image_ext)
+save_plots(patient_4_plots, get_patient_dir_img("4"), images_ext)
 ```
 
 ### Patient 5
@@ -1952,7 +1952,7 @@ print(patient_5_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_5_plots, get_patient_dir_img("5"), image_ext)
+save_plots(patient_5_plots, get_patient_dir_img("5"), images_ext)
 ```
 
 ### Patient 6
@@ -2001,7 +2001,7 @@ print(patient_6_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_6_plots, get_patient_dir_img("6"), image_ext)
+save_plots(patient_6_plots, get_patient_dir_img("6"), images_ext)
 ```
 
 ### Patient 7
@@ -2061,7 +2061,7 @@ print(patient_7_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_7_plots, get_patient_dir_img("7"), image_ext)
+save_plots(patient_7_plots, get_patient_dir_img("7"), images_ext)
 ```
 
 ## Comparing patients
@@ -2367,5 +2367,5 @@ print(compare_patients_to_save)
 #| echo: false
 #| eval: false
 
-save_plots(compare_patients_to_save, compare_patients_subfolder, image_ext)
+save_plots(compare_patients_to_save, compare_patients_subfolder, images_ext)
 ```
