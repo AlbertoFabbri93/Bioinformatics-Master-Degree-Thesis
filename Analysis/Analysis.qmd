@@ -606,6 +606,9 @@ breast_cancer_patients_tumor_cells <- subset(
 ```{r}
 #| label: immune-cells
 
+# Create empty list to store immune cells images
+immune_cells_images <- list()
+
 # Define the groups
 cell_groups <- list(
   "Myeloid" = c("Macrophage", "Mast cell", "Monocyte", "Neutrophil", "Dendritic cell", "Plasmacytoid dendritic cell"),
@@ -651,10 +654,10 @@ immune_cells_cluster_statistics <- breast_cancer_patients_immune_cells@meta.data
     SDPercentage = sd(Percentage)
   ) %>%
   ungroup()
-print(immune_cells_cluster_statistics)
+immune_cells_images[["immune_cells_cluster_statistics"]] <- immune_cells_cluster_statistics
 
 # Plot the percentages of the various types of cells (except cancer cells)
-immune_cells_cluster_statistics %>%
+immune_cells_cluster_distribution_barplot <- immune_cells_cluster_statistics %>%
   # Plot the data in a grouped barplot
   ggplot(aes(x = !!sym(ist_cluster_var), y = Percentage, fill = Patient.ID)) +
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single", padding = 0), width = .8) +
@@ -667,9 +670,10 @@ immune_cells_cluster_statistics %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.spacing = unit(0.8, "lines")) +
   scale_fill_brewer(palette = "Set2")
+immune_cells_images[["immune_cells_cluster_distribution_plot"]] <- immune_cells_cluster_distribution_plot
 
 # Plot the distribution of immune cell clusters by patient
-immune_cells_cluster_distribution_plot <- immune_cells_cluster_statistics %>%
+immune_cells_cluster_distribution_dotplot <- immune_cells_cluster_statistics %>%
   # Plot the data
   ggplot(aes(x = Percentage, y = !!sym(ist_cluster_var))) +
   # Add dots for each patient
@@ -701,8 +705,19 @@ immune_cells_cluster_distribution_plot <- immune_cells_cluster_statistics %>%
     shape = guide_legend(order = 2, title = "Statistics"),
     linetype = guide_legend(order = 3, title = "Statistics")
   )
-print(immune_cells_cluster_distribution_plot)
+immune_cells_images[["immune_cells_cluster_distribution_dotplot"]] <- immune_cells_cluster_distribution_dotplot
+
+print(immune_cells_images)
 ```
+
+```{r}
+#| label: immune-cells-save-plots
+#| eval: false
+
+# Save the immune cells plots
+save_plots(immune_cells_images, here(images_dir, "Immune cells"))
+```
+
 
 ## Cancerous cells
 
