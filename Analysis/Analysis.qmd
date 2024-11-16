@@ -685,7 +685,7 @@ immune_cells_cluster_distribution_barplot <- immune_cells_cluster_statistics %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.spacing = unit(0.8, "lines")) +
   scale_fill_brewer(palette = "Set2")
-immune_cells_images[["immune_cells_cluster_distribution_plot"]] <- immune_cells_cluster_distribution_plot
+immune_cells_images[["immune_cells_cluster_distribution_barplot"]] <- immune_cells_cluster_distribution_barplot
 
 # Plot the distribution of immune cell clusters by patient
 immune_cells_cluster_distribution_dotplot <- immune_cells_cluster_statistics %>%
