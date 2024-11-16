@@ -533,6 +533,9 @@ saveRDS(integration_ist_semisup, here(objects_dir, "integration_ist_semisup.rds"
 ```{r}
 #| label: insitutype-plots
 
+# Save insitutype data
+insitutype_data <- list()
+
 # Define the variable name for the Insitutype column on the metadata
 ist_cluster_var <- "ist_semisup_clusters"
 # Add the Insitutype clusters to the Seurat object metadata
@@ -545,16 +548,17 @@ breast_cancer_patients_integrated$ist_semisup_clusters_ann <- case_match(
   cancer_clusters ~ "Tumor",
   .default = base::unname(breast_cancer_patients_integrated$ist_semisup_clusters)
 )
-# Generate the umap with the unannotated clusters
-DimPlot(
+# Generate the umap with the annotated clusters
+insitutype_clust_v4int <- DimPlot(
   object = breast_cancer_patients_integrated,
   group.by = "ist_semisup_clusters_ann",
   reduction = "integrated_umap",
   cols = known_clusters_colors) +
   labs(title = "UMAP with Insitutype clusters")
+insitutype_data[["insitutype_clust_v4int"]] <- insitutype_clust_v4int
 
 # Generate summary statistics for the Insitutype clusters
-create_cluster_summary_per_patient(breast_cancer_patients_integrated, ist_cluster_var)
+insitutype_data[["insitutype_clust_summary_patients"]] <- create_cluster_summary_per_patient(breast_cancer_patients_integrated, ist_cluster_var)
 
 # Violin plot with the expression of panCK, CD45 and CD68 for each Insitutype clusters
 ist_clust_expr <- VlnPlot(
@@ -567,7 +571,7 @@ ist_clust_expr <- VlnPlot(
   combine = FALSE
 ) 
 ist_clust_expr <- lapply(ist_clust_expr, function(x) x &NoLegend())
-print(ist_clust_expr)
+insitutype_data <- c(insitutype_data, ist_clust_expr)
 
 # Calculate the mean of CD45, CD68 and PanCK for each Insitutype cluster
 ist_ann_cluster_statistics <- breast_cancer_patients_integrated@meta.data %>%
@@ -578,7 +582,17 @@ ist_ann_cluster_statistics <- breast_cancer_patients_integrated@meta.data %>%
     `Mean CD68` = mean(Mean.CD68),
     .groups = "drop"
   )
-print(ist_ann_cluster_statistics)
+insitutype_data[["ist_ann_cluster_statistics"]] <- ist_ann_cluster_statistics
+
+print(insitutype_data)
+```
+
+```{r}
+#| label: insitutype-save-plots
+#| eval: false
+
+# Save the Insitutype plots
+save_plots(insitutype_data, here(images_dir, "Insitutype"))
 ```
 
 ### Split the Seurat object using the Insitutype clusters
