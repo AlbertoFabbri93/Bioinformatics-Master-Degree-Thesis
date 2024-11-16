@@ -1163,8 +1163,8 @@ for (cluster in names(GSEA_results)) {
       GSEAtheme
     
     # Save the plot and tibble
-    GSEA_plots[[cluster]] <- GSEADotPlot
-    GSEA_tibbles[[cluster]] <- as_tibble(gsea_simplified@result)
+    GSEA_plots[[glue("GSEA Tumor cluster {cluster}")]] <- GSEADotPlot
+    GSEA_tibbles[[glue("GSEA Tumor cluster {cluster}")]] <- as_tibble(gsea_simplified@result)
   } else {
     print(paste("No significant pathways found for cluster", cluster))
   }
