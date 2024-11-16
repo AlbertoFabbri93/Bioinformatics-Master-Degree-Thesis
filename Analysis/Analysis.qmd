@@ -146,8 +146,8 @@ breast_cancer_patients <- readRDS(here(objects_dir, "breast_cancer_patients.rds"
 #| label: create-clenaed-object
 #| eval: false
 
-# Load the Seurat object
-breast_cancer_patients_mixed_features <- readRDS(here(objects_dir, "breast_cancer_patients.rds"))
+# Load the original Seurat object
+breast_cancer_patients_mixed_features <- readRDS(here(objects_dir, "breast.cancer.patients.original.rds"))
 
 tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
 
