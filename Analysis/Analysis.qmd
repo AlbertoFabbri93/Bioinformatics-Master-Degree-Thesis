@@ -121,6 +121,7 @@ source(here(source_files_dir, "Plotting.R"))
 
 ## DECLARE GLOBAL VARIABLES
 # Import environment variables as global variables
+# Do not rename these variables as they are declared in Utils.R as well
 objects_dir <- Sys.getenv("OBJECTS_DIR")
 images_dir <- Sys.getenv("IMAGES_DIR")
 images_ext <- Sys.getenv("IMAGES_EXT")

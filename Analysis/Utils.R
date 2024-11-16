@@ -1,7 +1,7 @@
 # Import environment variables as global variables
-rds_dir <- Sys.getenv("RDS_DIR")
-image_dir <- Sys.getenv("IMAGE_DIR")
-image_ext <- Sys.getenv("IMAGE_EXT")
+objects_dir <- Sys.getenv("OBJECTS_DIR")
+images_dir <- Sys.getenv("IMAGES_DIR")
+images_ext <- Sys.getenv("IMAGES_EXT")
 
 ####### SAVE LIST OF ITEMS #######
 
@@ -58,12 +58,12 @@ get_patient_num <- function(patient_data) {
 ####### GET PATIENT DIRECTORIES #######
 
 get_patient_dir_img <- function(patient_num) {
-  patient_dir_img <- here(image_dir, paste0("Patient_", patient_num, "_plots/"))
+  patient_dir_img <- here(images_dir, paste0("Patient_", patient_num, "_plots/"))
   return(patient_dir_img)
 }
 
 get_patient_dir_rds <- function(patient_num) {
-  patient_dir_rds <- here(rds_dir, paste0("Patient_", patient_num, "_data/"))
+  patient_dir_rds <- here(objects_dir, paste0("Patient_", patient_num, "_data/"))
   return(patient_dir_rds)
 }
 
