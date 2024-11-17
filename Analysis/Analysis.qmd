@@ -1254,6 +1254,13 @@ cell_types_stamps_plots <- generate_spatial_plots(
 print(cell_types_stamps_plots)
 ```
 
+```{r}
+#| eval: false
+
+# Save the plots
+save_plots(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
+```
+
 ## Spatial niches
 
 ### Build niches
