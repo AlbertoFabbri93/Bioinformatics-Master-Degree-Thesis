@@ -1311,7 +1311,7 @@ print(niches_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_plots(niches_stamps_plots, here(images_dir, "Stamps_with_{num_niches}_niches"))
+save_plots(niches_stamps_plots, here(images_dir, glue("Stamps_with_{num_niches}_niches")))
 ```
 
 ### Statistics about niches
