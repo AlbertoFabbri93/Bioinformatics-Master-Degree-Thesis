@@ -1323,7 +1323,7 @@ cell_type_counts <- breast_cancer_patients_all_cells@meta.data %>%
 print(cell_type_counts)
 
 # Get the list of unique niches
-niches <- unique(breast_cancer_patients_all_cells$niches)
+niches <- sort(unique(breast_cancer_patients_all_cells$niches))
 # Print the niches
 print(sort(niches))
 # Initialize an empty list to store plots
