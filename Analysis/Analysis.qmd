@@ -1355,11 +1355,52 @@ print(niches_barplot_list)
 ```
 
 ```{r}
+#| label: niches-patients-statistics
+
+# Create list to save data
+niches_patient_data <- list()
+
+# Count and calculate percentage of cell types per niche
+niches_patient_counts <- breast_cancer_patients_all_cells@meta.data %>%
+  mutate(niches = factor(niches, levels = sort(unique(niches))),
+         Patient.ID = factor(Patient.ID)) %>%
+  group_by(Patient.ID, niches) %>%
+  summarise(count = n()) %>%
+  mutate(percentage = (count / sum(count)) * 100) %>%
+  arrange(Patient.ID, .by_group = TRUE)
+# Add to list
+niches_patient_data[["niches_patient_counts"]] <- niches_patient_counts
+
+# Create the bar plot
+niches_patient_dotplot <- ggplot(niches_patient_counts,
+                                 aes(x = Patient.ID, y = percentage, color = niches)) +
+  geom_rect(data = unique(niches_patient_counts["Patient.ID"]),
+            aes(xmin = as.numeric(Patient.ID) - 0.4,
+                xmax = as.numeric(Patient.ID) + 0.4,
+                ymin = -Inf, ymax = Inf),
+            fill = "grey90", alpha = 0.3, inherit.aes = FALSE) +
+  geom_point(size = 2, position = position_dodge(width = 0.4)) +
+  labs(title = paste("Niches distribution across patients"),
+       x = "Patient",
+       y = "Percentage (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(hjust = 1)) +
+  scale_color_manual(values = niches_color_palette)
+# Add to list
+niches_patient_data[["niches_patient_dotplot"]] <- niches_patient_dotplot
+
+# Print the list
+print(niches_patient_data)
+```
+
+```{r}
 #| eval: false
 
 # Save the plots
-save_plots(niches_barplot_list, here(images_dir, "Integration", "Niches_barplots"))
+save_plots(niches_barplot_list, here(images_dir, "Niches_statistics"))
+save_plots(niches_patient_data, here(images_dir, "Niches_statistics"))
 ```
+
 ## General overview of the data
 
 Create a table with an entry for every FOV in the Seurat object analyzed in this study. The table will contain the patient ID, the serial core, the stamp, and the FOV.
