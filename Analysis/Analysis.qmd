@@ -1230,6 +1230,30 @@ print(glue("Number of cell phenotypes (Insitutype + Tumor clusters): {length(uni
 breast_cancer_patients_all_cells@images <- spatial_information
 ```
 
+
+## Spatial plots of clusters
+
+Plot the spatial distribution of the cell types and label them according to the immune/tumor clusters where they belong.
+
+```{r}
+#| label: spatial-clusters-plots
+
+# Create the color palette for the niches
+cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
+  breast_cancer_patients_all_cells,
+  cluster_column_name = "cell_cluster",
+  color_palette = base::unname(polychrome()))
+# Create the plots with the cell types for every stamp
+cell_types_stamps_plots <- generate_spatial_plots(
+  breast_cancer_patients_all_cells,
+  cluster_var = "cell_cluster",
+  cluster_name = "Cell types with tumor subclusters",
+  legend_fill = "Cell types",
+  color_lookup_table = cells_all_phenotypes_color_palette)
+# Display the plots
+print(cell_types_stamps_plots)
+```
+
 ## Spatial niches
 
 ### Build niches
