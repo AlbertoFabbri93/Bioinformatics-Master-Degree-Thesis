@@ -489,6 +489,8 @@ print(after_integration_plots)
 
 ## Insitutype Clustering
 
+The clustering performed by Insitutype  uses the raw counts, therefore it is useless to use the integrated data because Seurat does not provide an adjusted count matrix.
+
 ### Computation
 
 ```{r}
