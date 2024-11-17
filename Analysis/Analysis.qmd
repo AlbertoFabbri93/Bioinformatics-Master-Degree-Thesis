@@ -6,6 +6,10 @@ editor_options:
   chunk_output_type: inline
 ---
 
+# Brain metastaes from primary breast cancer
+
+This study aims to investigate the immune microenvironment of brain metastases from primary breast cancer. The analysis is performed on NanoString data from 7 patients.
+
 ## Set up the environment
 
 ### Packages
@@ -1253,27 +1257,6 @@ breast_cancer_patients_all_cells <- BuildNicheAssay(
   # the narrow tissue slide you’ve assayed, and the more it consists of unseen cells
   # increasingly far away in the Z-dimension.
   neighbors.k = 50)
-```
-
-### Spatial plots of clusters
-
-```{r}
-#| label: spatial-clusters-plots
-
-# Create the color palette for the niches
-cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
-  breast_cancer_patients_all_cells,
-  cluster_column_name = "cell_cluster",
-  color_palette = base::unname(polychrome()))
-# Create the plots with the cell types for every stamp
-cell_types_stamps_plots <- generate_spatial_plots(
-  breast_cancer_patients_all_cells,
-  cluster_var = "cell_cluster",
-  cluster_name = "Cell types with tumor subclusters",
-  legend_fill = "Cell types",
-  color_lookup_table = cells_all_phenotypes_color_palette)
-# Display the plots
-print(cell_types_stamps_plots)
 ```
 
 ```{r}
