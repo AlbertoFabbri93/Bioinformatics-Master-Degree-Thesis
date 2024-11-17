@@ -1232,6 +1232,7 @@ breast_cancer_patients_all_cells@images <- spatial_information
 #| label: build-spatial-niches
 
 # Build the niche assay
+# To build the niche assay, Seurat uses only the spatial images and the cell phenotypes (a column from the metadata)
 breast_cancer_patients_all_cells <- BuildNicheAssay(
   object = breast_cancer_patients_all_cells, 
   fov = "LU001FFP03",
