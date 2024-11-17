@@ -1105,6 +1105,8 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
 saveRDS(GSEA_results, here(objects_dir, "GSEA_results.rds"))
 ```
 
+### GSEA plots
+
 ```{r}
 #| message: false
 #| warning: false
