@@ -1346,6 +1346,7 @@ for (niche in niches) {
     ggplot(aes(x = cell_cluster, y = percentage, fill = cell_cluster)) +
   geom_bar(stat = "identity") +
   labs(title = paste("Niche:", niche),
+       caption = glue("Percentage cutoff value: {cutoff}%"),
        x = "Cell Type",
        y = "Percentage (%)") +
   theme_minimal() +
