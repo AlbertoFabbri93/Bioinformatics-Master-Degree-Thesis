@@ -258,21 +258,6 @@ breast_cancer_patients_filt_cells <- subset(breast_cancer_patients, cells = cell
 saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
 ```
 
-### Remove spatial informations
-
-```{r}
-#| label: remove-spatial-informations
-
-# Create a new Seurat object by copying the original
-breast_cancer_patients_filt_cells_no_spatial <- breast_cancer_patients_filt_cells
-
-# Save the spatial information to an object
-spatial_information <- breast_cancer_patients_filt_cells@images
-
-# Remove the spatial information from the new Seurat object
-breast_cancer_patients_filt_cells_no_spatial@images <- list()
-```
-
 ## Integrate patients
 
 ### Check the data before integration
@@ -281,7 +266,7 @@ breast_cancer_patients_filt_cells_no_spatial@images <- list()
 #| label: qa-before-integration
 
 # Check if there are mitochondrial genes
-mt_gene_count <- sum(grepl("^MT-", rownames(breast_cancer_patients_filt_cells_no_spatial[["RNA"]])))
+mt_gene_count <- sum(grepl("^MT-", rownames(breast_cancer_patients_filt_cells[["RNA"]])))
 if (mt_gene_count > 0) {
   cat("TRUE. Number of mitochondrial genes:", mt_gene_count)
 } else {
@@ -290,7 +275,7 @@ if (mt_gene_count > 0) {
 
 # Check the quantity and the expression level of genes
 vln_plot_raw <- VlnPlot(
-  breast_cancer_patients_filt_cells_no_spatial,
+  breast_cancer_patients_filt_cells,
   assay = "RNA",
   layer = "counts",
   features = c("nFeature_RNA", "nCount_RNA"),
@@ -320,7 +305,7 @@ breast_cancer_patients_integrated <- readRDS(here(objects_dir, "breast_cancer_pa
 #| eval: false
 
 # Split the global Seurat object by patient
-breast_cancer_patients_split <- SplitObject(breast_cancer_patients_filt_cells_no_spatial, split.by = "Patient.ID")
+breast_cancer_patients_split <- SplitObject(breast_cancer_patients_filt_cells, split.by = "Patient.ID")
 # Extract the names from the named list
 bcp_split_project_names <- names(breast_cancer_patients_split)
 # Set the project name for each patient
@@ -1207,29 +1192,29 @@ saveRDS(GSEA_results, here(objects_dir, "GSEA_results.rds"))
 ## Merge all cells together
 
 ```{r}
-#| label: merge-all-cells
+#| label: merge-cells-metadata
 
-# Merge the immune and tumor cells into a single Seurat object
-breast_cancer_patients_all_cells <- merge(
-  breast_cancer_patients_immune_cells,
-  breast_cancer_patients_tumor_cells)
+# Copy the insitutype metadata
+breast_cancer_patients_filt_cells@meta.data["ist_semisup_clusters_ann"] <- 
+  breast_cancer_patients_integrated@meta.data["ist_semisup_clusters_ann"]
 
-# Copy tumor clusters from the tumor cells seurat object
-breast_cancer_patients_all_cells$tumor_cluster <- breast_cancer_patients_tumor_cells[[chosen_tumor_cluster]]
+## Copy tumor clusters
+# Find common cells between tumor and original Seurat objects
+common_tumor_cells <- dplyr::intersect(rownames(breast_cancer_patients_filt_cells@meta.data), 
+                          rownames(breast_cancer_patients_tumor_cells@meta.data))
+# Copy the metadata for the tumor cells
+breast_cancer_patients_filt_cells@meta.data[common_tumor_cells, chosen_tumor_cluster] <- 
+  breast_cancer_patients_tumor_cells@meta.data[common_tumor_cells, chosen_tumor_cluster]
 
 # Merge the insitutype phenotyping with the tumor clusters
-breast_cancer_patients_all_cells@meta.data <- breast_cancer_patients_all_cells@meta.data %>%
+breast_cancer_patients_filt_cells@meta.data <- breast_cancer_patients_filt_cells@meta.data %>%
   mutate(cell_cluster = if_else(
     ist_semisup_clusters_ann != "Tumor",
     ist_semisup_clusters_ann,
-    paste("Tumor", breast_cancer_patients_all_cells$tumor_cluster, sep = " ")
+    glue("Tumor {get(chosen_tumor_cluster)}")
 ))
-print(glue("Number of cell phenotypes (Insitutype + Tumor clusters): {length(unique(breast_cancer_patients_all_cells@meta.data$cell_cluster))} cells"))
-
-# Add back the spatial data
-breast_cancer_patients_all_cells@images <- spatial_information
+print(glue("Number of cell phenotypes (Insitutype + Tumor clusters): {length(unique(breast_cancer_patients_filt_cells@meta.data$cell_cluster))} cells"))
 ```
-
 
 ## Spatial plots of clusters
 
@@ -1240,12 +1225,12 @@ Plot the spatial distribution of the cell types and label them according to the 
 
 # Create the color palette for the niches
 cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
-  breast_cancer_patients_all_cells,
+  breast_cancer_patients_filt_cells,
   cluster_column_name = "cell_cluster",
   color_palette = base::unname(polychrome()))
 # Create the plots with the cell types for every stamp
 cell_types_stamps_plots <- generate_spatial_plots(
-  breast_cancer_patients_all_cells,
+  breast_cancer_patients_filt_cells,
   cluster_var = "cell_cluster",
   cluster_name = "Cell types with tumor subclusters",
   legend_fill = "Cell types",
@@ -1270,8 +1255,8 @@ save_plots(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
 
 # Build the niche assay
 # To build the niche assay, Seurat uses only the spatial images and the cell phenotypes (a column from the metadata)
-breast_cancer_patients_all_cells <- BuildNicheAssay(
-  object = breast_cancer_patients_all_cells, 
+breast_cancer_patients_filt_cells <- BuildNicheAssay(
+  object = breast_cancer_patients_filt_cells,
   fov = "LU001FFP03",
   group.by = "cell_cluster",
   assay = "niche",
@@ -1293,8 +1278,8 @@ breast_cancer_patients_all_cells <- BuildNicheAssay(
 ```{r}
 #| eval: false
 
-# Save the plots
-save_plots(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
+# Save the object
+saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells_10_niches.rds"))
 ```
 
 ### Spatial plots of niches
@@ -1304,12 +1289,12 @@ save_plots(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
 
 # Create the color palette for the niches
 niches_color_palette <- generate_colors_lookup_table(
-  breast_cancer_patients_all_cells,
+  breast_cancer_patients_filt_cells,
   cluster_column_name = "niches",
   color_palette = brewer.pal(12, name = "Set3"))
 # Create the plots with the niches for every stamp
 niches_stamps_plots <- generate_spatial_plots(
-  breast_cancer_patients_all_cells,
+  breast_cancer_patients_filt_cells,
   cluster_var = "niches",
   cluster_name = "Seurat niches",
   legend_fill = "Niches",
@@ -1331,7 +1316,7 @@ save_plots(niches_stamps_plots, here(images_dir, "Stamps_with_niches"))
 #| label: niches-statistics
 
 # Count and calculate percentage of cell types per niche
-cell_type_counts <- breast_cancer_patients_all_cells@meta.data %>%
+cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
   group_by(niches, cell_cluster) %>%
   summarise(count = n()) %>%
   mutate(percentage = (count / sum(count)) * 100) %>%
@@ -1340,7 +1325,7 @@ cell_type_counts <- breast_cancer_patients_all_cells@meta.data %>%
 print(cell_type_counts)
 
 # Get the list of unique niches
-niches <- sort(unique(breast_cancer_patients_all_cells$niches))
+niches <- sort(unique(breast_cancer_patients_filt_cells$niches))
 # Print the niches
 print(sort(niches))
 # Initialize an empty list to store plots
@@ -1383,7 +1368,7 @@ print(niches_barplot_list)
 niches_patient_data <- list()
 
 # Count and calculate percentage of cell types per niche
-niches_patient_counts <- breast_cancer_patients_all_cells@meta.data %>%
+niches_patient_counts <- breast_cancer_patients_filt_cells@meta.data %>%
   mutate(niches = factor(niches, levels = sort(unique(niches))),
          Patient.ID = factor(Patient.ID)) %>%
   group_by(Patient.ID, niches) %>%
