@@ -1336,8 +1336,12 @@ for (niche in niches) {
   # Filter out cells in other niches
   niche_data <- cell_type_counts %>% dplyr::filter(niches == niche)
   
+  # Set the cutoff value for the percentage
+  cutoff <- 2
   # Create the bar plot
-  niche_barplot <- ggplot(niche_data, aes(x = cell_cluster, y = percentage, fill = cell_cluster)) +
+  niche_barplot <- niche_data %>%
+    dplyr::filter(percentage >= cutoff) %>%
+    ggplot(aes(x = cell_cluster, y = percentage, fill = cell_cluster)) +
   geom_bar(stat = "identity") +
   labs(title = paste("Niche:", niche),
        x = "Cell Type",
