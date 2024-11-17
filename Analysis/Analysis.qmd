@@ -1277,7 +1277,7 @@ print(cell_types_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_plots(cell_types_stamps_plots, here(images_dir, "Integration", "Stamps_with_clusters"))
+save_plots(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
 ```
 
 ### Spatial plots of niches
@@ -1305,7 +1305,7 @@ print(niches_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_plots(niches_stamps_plots, here(images_dir, "Integration", "Stamps_with_niches"))
+save_plots(niches_stamps_plots, here(images_dir, "Stamps_with_niches"))
 ```
 
 ### Statistics about niches
