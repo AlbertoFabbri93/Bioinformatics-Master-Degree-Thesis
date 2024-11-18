@@ -746,7 +746,7 @@ breast_cancer_patients_tumor_cells <- RunPCA(
   breast_cancer_patients_tumor_cells,
   reduction.key = "TCPC_",
   reduction.name = "pca_tumor_cells",
-  seed.use = 57,
+  seed.use = 42,
   verbose = TRUE)
 # Generate variance elbow plots
 generate_variance_elbow_plots(breast_cancer_patients_tumor_cells, "pca_tumor_cells", 50)
