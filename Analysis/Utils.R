@@ -47,6 +47,37 @@ save_plots <- function(plots_list, folder_path, image_extension = ".png") {
   }
 }
 
+####### PRINT A NAMED VECTOR COLOR PALETTE #######
+
+print_palette <- function(colors, height = 3, width = 0.5) {
+  # Check if colors is a named vector
+  if (is.null(names(colors))) {
+    stop("Input must be a named vector of colors")
+  }
+  
+  # Get the colors and names
+  color_values <- base::unname(colors)
+  color_names <- names(colors)
+  
+  # Create a blank plot with appropriate dimensions
+  n <- length(colors)
+  plot(0, 0, type = "n", xlim = c(0, width * 2), ylim = c(0, n * height),
+       xlab = "", ylab = "", axes = FALSE)
+  
+  # Plot each color rectangle and its name
+  for (i in 1:n) {
+    y_bottom <- (n - i) * height
+    y_top <- (n - i + 1) * height
+    
+    # Draw the colored rectangle
+    rect(0, y_bottom, width, y_top, col = color_values[i], border = "black")
+    
+    # Add the color name
+    text(width * 1.2, (y_bottom + y_top) / 2, color_names[i], 
+         adj = 0, cex = 1)
+  }
+}
+
 ####### GET PATIENT NUM #######
 
 get_patient_num <- function(patient_data) {
