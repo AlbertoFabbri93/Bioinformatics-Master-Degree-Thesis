@@ -131,7 +131,14 @@ images_dir <- Sys.getenv("IMAGES_DIR")
 images_ext <- Sys.getenv("IMAGES_EXT")
 
 # Create color vector for patients
-patient_colors <- setNames(brewer.pal(7, "Set1"), as.character(1:7))
+patient_colors <- c(
+  "1" <- "#D5809B",
+  "2" <- "#C23621",
+  "3" <- "#5670B5",
+  "4" <- "#53274E",
+  "5" <- "#A5BBD5",
+  "6" <- "#315A2F",
+  "7" <- "#63AC74")
 ```
 
 ## Tidy Seurat object
