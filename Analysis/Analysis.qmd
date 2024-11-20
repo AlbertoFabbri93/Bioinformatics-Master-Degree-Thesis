@@ -515,6 +515,246 @@ integration_ist_semisup <- run_ist_semisup_extract_data(
 saveRDS(integration_ist_semisup, here(objects_dir, "integration_ist_semisup.rds"))
 ```
 
+```{r}
+#| label: insitutype-per-patient
+
+# Create a new Seurat object identical to filt cells
+breast_cancer_patients_analyze <- breast_cancer_patients_filt_cells
+# Arrays to split
+assays_to_split <- c("RNA", "NegativeProbes", "SystemControl")
+# Split the arrays
+for (assay in assays_to_split) {
+  breast_cancer_patients_analyze[[assay]] <- split(
+    breast_cancer_patients_analyze[[assay]],
+    f = breast_cancer_patients_analyze$Patient.ID)
+}
+# Set Patient.ID as the identity
+Idents(breast_cancer_patients_analyze) <- "Patient.ID"
+
+# Create a list to store the results of the insitutype clustering per patient
+patients_ist_semisup <- list()
+# Insitutype clustering - Loop over every patient
+for (patient_id in unique(breast_cancer_patients_analyze$Patient.ID)) {
+
+  # Print the patient ID
+  print(glue("Analysis of patient {patient_id}"))
+  # Compose string of count layer patient
+  count_layer_patient <- paste0("counts.", patient_id)
+  # Extract the count data for the selected patient
+  patient_rna_counts <- LayerData(
+    breast_cancer_patients_analyze,
+    assay = "RNA",
+    layer = count_layer_patient) %>%
+  as.matrix() %>%
+  t()
+  
+  # Extract the negative probes for the selected patient
+  patient_avg_neg_probes <- LayerData(
+    breast_cancer_patients_analyze,
+    assay = "NegativeProbes",
+    layer = count_layer_patient) %>%
+  as.matrix() %>%
+  t() %>%
+  Matrix::rowMeans()
+  
+  # Features to be used for the cohorting
+  features <- c("Mean.PanCK", "Mean.CD45", "Mean.CD68")
+  patient_immunofluorescence <- FetchData(
+  object = breast_cancer_patients_analyze, 
+  vars = features, # Specify which metadata columns to extract
+  cells = WhichCells(breast_cancer_patients_analyze, idents = patient_id)
+  )
+  
+  # Cohort of the patient
+  # fastCohorting is stochastic, so set the seed for reproducibility
+  set.seed(42);
+  # "Gaussian_transform = TRUE" maps variables to gaussians in order to place dramatically different variables on the same scale
+  patient_cohort <- fastCohorting(
+    patient_immunofluorescence,
+    gaussian_transform = TRUE)
+  # check clusters and cohort numbers
+  table(patient_cohort)
+  
+  clusts_search_space = 1:8
+  set.seed(6)
+  clusts_num <- chooseClusterNumber(
+    counts = patient_rna_counts,
+    neg = patient_avg_neg_probes,
+    fixed_profiles = io_profiles,
+    n_clusts = clusts_search_space)
+  
+  # Semi-supervised learning with insitutype and reference profiles
+  # Insitutype needs integers, if given floating point numbers it fails with misleading errors
+  patients_ist_semisup[[patient_id]] <- insitutype(
+    x = patient_rna_counts,
+    neg = patient_avg_neg_probes,
+    cohort = patient_cohort,
+    reference_profiles = io_profiles,
+    
+    # Enter your own per-cell background estimates here if you
+    # have them; otherwise insitutype will use the negprobes to
+    # estimate background for you.
+    bg = NULL,
+    # Group the cells the do not correspond to any type in the reference matrix
+    n_clusts = clusts_num$best_clust_number,
+    # reference_profiles = updatedprofiles$updated_profiles,
+    # Update the reference profile based on the current data
+    update_reference_profiles = FALSE,
+    # choosing inadvisably low numbers to speed the vignette; using the defaults
+    # in recommended.
+    # This is the number of cells used in each phase, because of random sampling
+    n_phase1 = 200,
+    n_phase2 = 500,
+    n_phase3 = 1000,
+    n_starts = 6,
+    max_iters = 12
+  )
+}
+
+# Join Layers
+for (assay in assays_to_split) {
+  breast_cancer_patients_analyze <- JoinLayers(breast_cancer_patients_analyze, assay = assay, layers = "counts")
+}
+# Default assay & layer
+DefaultAssay(breast_cancer_patients_analyze) <- "RNA"
+DefaultLayer(breast_cancer_patients_analyze[["RNA"]]) <- "counts"
+
+# Merge patient insitutype clusters
+merged_ist_results <- c()
+for (i in 1:length(patients_ist_semisup)) {
+  merged_ist_results <- c(merged_ist_results, patients_ist_semisup[[i]]$clust)
+}
+raw_insitutype_col_name <- "patients_ist_semisup_clusters"
+# Add the raw insitutype clusters to the Seurat object
+breast_cancer_patients_analyze <- AddMetaData(
+  object = breast_cancer_patients_analyze,
+  metadata = merged_ist_results,
+  col.name = raw_insitutype_col_name)
+ann_insitutype_col_name <- "patients_ist_semisup_clusters_ann"
+# Rename unknown clusters to tumor
+breast_cancer_patients_analyze@meta.data %<>%
+  mutate(
+    "{ann_insitutype_col_name}" := case_match(
+      .data[[raw_insitutype_col_name]],
+      c("a", "b", "c", "d", "e", "f", "g") ~ "Tumor",
+      "g" ~ "Endothelial",
+      .default = .data[[raw_insitutype_col_name]]
+    )
+  )
+```
+
+### SCTransform
+
+```{r}
+#| label: insitutype-sctransform
+#| eval: false
+
+# List to print and save
+patients_ist_sct <- list()
+
+## SCTransform
+# Normalize and scale
+breast_cancer_patients_analyze <- SCTransform(
+  breast_cancer_patients_analyze,
+  do.correct.umi = TRUE,
+  return.only.var.genes = FALSE,
+  ncells = 6000,
+  assay = "RNA",
+  new.assay.name = "SCT",
+  seed.use = 13,
+  verbose = TRUE)
+# Run PCA
+breast_cancer_patients_analyze <- RunPCA(
+  breast_cancer_patients_analyze,
+  assay = "SCT",
+  reduction.key = "SCTPC_",
+  reduction.name = "sct_pca_patients",
+  seed.use = 42,
+  verbose = TRUE)
+# Elbow plot
+patients_sct_elbow_plot <- generate_variance_elbow_plots(breast_cancer_patients_analyze, "sct_pca_patients", 50)
+patients_ist_sct[["patients_sct_elbow_plot"]] <- patients_sct_elbow_plot
+# Run UMAP
+breast_cancer_patients_analyze <- RunUMAP(
+  breast_cancer_patients_analyze,
+  reduction = "sct_pca_patients",
+  dims = 1:22,
+  reduction.key = "SCTUMAP_",
+  reduction.name = "sct_umap_patients")
+# Plot cells
+patients_ist_sct_plot <- DimPlot(
+  object = breast_cancer_patients_analyze,
+  group.by = "patients_ist_semisup_clusters_ann",
+  reduction = "sct_umap_patients",
+  cols = cell_type_colors)
+patients_ist_sct[["patients_ist_sct_plot"]] <- patients_ist_sct_plot
+# Plot patients
+patients_sct_plot <- DimPlot(
+  object = breast_cancer_patients_analyze,
+  group.by = "Patient.ID",
+  reduction = "sct_umap_patients",
+  cols = patient_colors)
+patients_ist_sct[["patients_sct_plot"]] <- patients_sct_plot
+
+# Print
+print(patients_ist_sct)
+```
+
+### Standard normalization
+
+```{r}
+#| label: insitutype-standard-normalization
+#| eval: false
+
+# List to print and save
+patients_ist_rna <- list()
+
+# Normalize
+breast_cancer_patients_analyze <- NormalizeData(breast_cancer_patients_analyze)
+# Scale
+breast_cancer_patients_analyze <- ScaleData(breast_cancer_patients_analyze)
+# Find variable features
+breast_cancer_patients_analyze <- FindVariableFeatures(
+  breast_cancer_patients_analyze,
+  selection.method = "vst",
+  nfeatures = 1000)
+# RunPCA
+breast_cancer_patients_analyze <- RunPCA(
+  breast_cancer_patients_analyze,
+  assay = "RNA",
+  reduction.key = "RNAPC_",
+  reduction.name = "rna_pca_patients",
+  seed.use = 42,
+  verbose = TRUE)
+# Elbow plot
+patients_rna_elbow_plot <- generate_variance_elbow_plots(breast_cancer_patients_analyze, "rna_pca_patients", 50)
+patients_ist_rna[["patients_rna_elbow_plot"]] <- patients_rna_elbow_plot
+# Run UMAP
+breast_cancer_patients_analyze <- RunUMAP(
+  breast_cancer_patients_analyze,
+  reduction = "rna_pca_patients",
+  dims = 1:22,
+  reduction.key = "RNAUMAP_",
+  reduction.name = "rna_umap_patients")
+# Plot cells
+patients_ist_rna_plot <- DimPlot(
+  object = breast_cancer_patients_analyze,
+  group.by = "patients_ist_semisup_clusters_ann",
+  reduction = "rna_umap_patients",
+  cols = cell_type_colors)
+patients_ist_rna[["patients_ist_rna_plot"]] <- patients_ist_rna_plot
+# Plot patients
+patients_rna_plot <- DimPlot(
+  object = breast_cancer_patients_analyze,
+  group.by = "Patient.ID",
+  reduction = "rna_umap_patients",
+  cols = patient_colors)
+patients_ist_rna[["patients_rna_plot"]] <- patients_rna_plot
+
+# Print
+print(patients_ist_rna)
+```
+
 ### Plots
 
 ```{r}
