@@ -1,27 +1,5 @@
 ###### COLORS ######
 
-# Know clusters that should have consistent colors
-known_clusters_colors <- c(
-  "B cell" = "#5A5156",
-  "Dendritic cell" = "#E4E1E3",
-  "Endothelial" = "#F6222E",
-  "Fibroblast" = "#FE00FA",
-  "Macrophage" = "#16FF32",
-  "Mast cell" = "#3283FE",
-  "Monocyte" = "#FEAF16",
-  "Neutrophil" = "#B00068",
-  "NK cell" = "#1CFFCE",
-  "Plasma" = "#90AD1C",
-  "Plasmablast" = "#2ED9FF",
-  "Plasmacytoid dendritic cell" = "#DEA0FD",
-  "T cell CD4" = "#AA0DFE",
-  "T cell CD8" = "#F8A19F",
-  "T cell regulatory" = "#325A9B",
-  "Tumor" = "#C4451C",
-  "T cell" = "#1C8356",
-  "Unknown" = "#f5ee59"
-)
-
 # Create a vector with a color for every cluster
 # It can be used to create a palette which includes known clusters (e.g. B cell, T cell, etc.) and unknown clusters (e.g. 0, 1, ..., a, b, etc.)
 generate_colors_lookup_table <- function(
