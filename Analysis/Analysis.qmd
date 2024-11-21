@@ -408,30 +408,12 @@ The clustering performed by Insitutype  uses the raw counts, therefore it is use
 #| label: insitutype-read-from-drive
 
 # Read the Insitutype data from the drive
-integration_ist_semisup <- readRDS(here(objects_dir, "integration_ist_semisup.rds"))
-```
-
-```{r}
-#| label: insitutype-calculate-clustering
-#| eval: false
-
-# Execute insitutype clustering
-# The phase and iter parameters have been set to higher values to get a better clustering
-integration_ist_semisup <- run_ist_semisup_extract_data(
-  breast_cancer_patients_integrated,
-  clusts_search_space = 1:12,
-    phase_1_size = 500,
-    phase_2_size = 1000,
-    phase_3_size = 5000,
-    iter_num = 12,
-    max_iter = 25)
-
-# Save the Insitutype clustering results
-saveRDS(integration_ist_semisup, here(objects_dir, "integration_ist_semisup.rds"))
+patients_ist_semisup <- readRDS(here(objects_dir, "patients_ist_semisup.rds"))
 ```
 
 ```{r}
 #| label: insitutype-per-patient
+#| eval: false
 
 # Create a new Seurat object identical to filt cells
 breast_cancer_patients_analyze <- breast_cancer_patients_filt_cells
