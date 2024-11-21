@@ -408,6 +408,7 @@ The clustering performed by Insitutype  uses the raw counts, therefore it is use
 #| label: insitutype-read-from-drive
 
 # Read the Insitutype data from the drive
+breast_cancer_patients_analyze <- readRDS(here(objects_dir, "breast_cancer_patients_analyze.rds"))
 patients_ist_semisup <- readRDS(here(objects_dir, "patients_ist_semisup.rds"))
 ```
 
@@ -717,7 +718,11 @@ print(insitutype_data)
 #| eval: false
 
 # Save the Insitutype plots
+save_data(patients_ist_sct, here(images_dir, "Insitutype"))
+save_data(patients_ist_rna, here(images_dir, "Insitutype"))
 save_data(insitutype_data, here(images_dir, "Insitutype"))
+# Save Seurat object
+saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patients_analyze.rds"))
 ```
 
 ### Split the Seurat object using the Insitutype clusters
