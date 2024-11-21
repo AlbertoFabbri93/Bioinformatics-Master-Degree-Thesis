@@ -733,7 +733,7 @@ print(insitutype_data)
 ```
 
 ```{r}
-#| label: insitutype-save-plots
+#| label: insitutype-save-data
 #| eval: false
 
 # Save the Insitutype plots
