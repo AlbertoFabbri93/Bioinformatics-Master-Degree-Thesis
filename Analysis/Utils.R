@@ -6,7 +6,7 @@ images_ext <- Sys.getenv("IMAGES_EXT")
 ####### SAVE LIST OF ITEMS #######
 
 # This function saves a list of plots and data frames to a specified folder
-save_plots <- function(data_list, folder_path, image_extension = ".png") {
+save_data <- function(data_list, folder_path, image_extension = ".png") {
   # Ensure the folder exists, if not, create it
   if (!dir.exists(folder_path)) {
     dir.create(folder_path, recursive = TRUE)

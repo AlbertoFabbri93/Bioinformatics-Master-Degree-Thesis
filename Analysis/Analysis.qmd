@@ -737,7 +737,7 @@ print(insitutype_data)
 #| eval: false
 
 # Save the Insitutype plots
-save_plots(insitutype_data, here(images_dir, "Insitutype"))
+save_data(insitutype_data, here(images_dir, "Insitutype"))
 ```
 
 ### Split the Seurat object using the Insitutype clusters
@@ -875,7 +875,7 @@ print(immune_cells_images)
 #| eval: false
 
 # Save the immune cells plots
-save_plots(immune_cells_images, here(images_dir, "Immune cells"))
+save_data(immune_cells_images, here(images_dir, "Immune cells"))
 ```
 
 
@@ -1136,7 +1136,7 @@ print(tumor_plots_to_save)
 #| eval: false
 
 # Save the tumor cells plots
-save_plots(tumor_plots_to_save, here(images_dir, "Tumor clusters"))
+save_data(tumor_plots_to_save, here(images_dir, "Tumor clusters"))
 ```
 
 ### Markers
@@ -1186,7 +1186,7 @@ print(tumor_markers_to_print)
 #| eval: false
 
 # Save the data
-save_plots(tumor_markers_to_print, here(images_dir, "Tumor markers"))
+save_data(tumor_markers_to_print, here(images_dir, "Tumor markers"))
 ```
 
 ## Gene Set Enrichment Analysis
@@ -1338,9 +1338,9 @@ print(GSEA_tibbles)
 #| eval: false
 
 # Save the GSEA plots
-save_plots(GSEA_plots, here(images_dir, "GSEA plots"))
+save_data(GSEA_plots, here(images_dir, "GSEA plots"))
 # Save the GSEA tibbles
-save_plots(GSEA_tibbles, here(images_dir, "GSEA tables"))
+save_data(GSEA_tibbles, here(images_dir, "GSEA tables"))
 # Save the GSEA results
 saveRDS(GSEA_results, here(objects_dir, "GSEA_results.rds"))
 ```
@@ -1400,7 +1400,7 @@ print(cell_types_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_plots(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
+save_data(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
 ```
 
 ## Spatial niches
@@ -1466,7 +1466,7 @@ print(niches_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_plots(niches_stamps_plots, here(images_dir, glue("Stamps_with_{num_niches}_niches")))
+save_data(niches_stamps_plots, here(images_dir, glue("Stamps_with_{num_niches}_niches")))
 ```
 
 ### Statistics about niches
@@ -1565,8 +1565,8 @@ print(niches_patient_data)
 # Folder name
 stat_niches_dir <- glue("Statistics_{num_niches}_niches")
 # Save the plots
-save_plots(niches_barplot_list, here(images_dir, stat_niches_dir))
-save_plots(niches_patient_data, here(images_dir, stat_niches_dir))
+save_data(niches_barplot_list, here(images_dir, stat_niches_dir))
+save_data(niches_patient_data, here(images_dir, stat_niches_dir))
 ```
 
 ## General overview of the data
@@ -1752,7 +1752,7 @@ print(c(TMA_info_to_display, TMA_info_to_save))
 #| echo: false
 #| eval: false
 
-save_plots(TMA_info_to_save, here(images_dir), images_ext)
+save_data(TMA_info_to_save, here(images_dir), images_ext)
 ```
 
 ### Read Akoya Data
@@ -2057,7 +2057,7 @@ rm(this_patient_num)
 #| echo: false
 #| eval: false
 
-save_plots(patient_1_plots, get_patient_dir_img("1"), images_ext)
+save_data(patient_1_plots, get_patient_dir_img("1"), images_ext)
 ```
 
 ### Patient 2
@@ -2124,7 +2124,7 @@ print(patient_2_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_2_plots, get_patient_dir_img("2"), images_ext)
+save_data(patient_2_plots, get_patient_dir_img("2"), images_ext)
 ```
 
 ### Patient 3
@@ -2175,7 +2175,7 @@ print(patient_3_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_3_plots, get_patient_dir_img("3"), images_ext)
+save_data(patient_3_plots, get_patient_dir_img("3"), images_ext)
 ```
 
 ### Patient 4
@@ -2230,7 +2230,7 @@ print(patient_4_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_4_plots, get_patient_dir_img("4"), images_ext)
+save_data(patient_4_plots, get_patient_dir_img("4"), images_ext)
 ```
 
 ### Patient 5
@@ -2285,7 +2285,7 @@ print(patient_5_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_5_plots, get_patient_dir_img("5"), images_ext)
+save_data(patient_5_plots, get_patient_dir_img("5"), images_ext)
 ```
 
 ### Patient 6
@@ -2334,7 +2334,7 @@ print(patient_6_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_6_plots, get_patient_dir_img("6"), images_ext)
+save_data(patient_6_plots, get_patient_dir_img("6"), images_ext)
 ```
 
 ### Patient 7
@@ -2394,7 +2394,7 @@ print(patient_7_plots)
 #| echo: false
 #| eval: false
 
-save_plots(patient_7_plots, get_patient_dir_img("7"), images_ext)
+save_data(patient_7_plots, get_patient_dir_img("7"), images_ext)
 ```
 
 ## Comparing patients
@@ -2700,5 +2700,5 @@ print(compare_patients_to_save)
 #| echo: false
 #| eval: false
 
-save_plots(compare_patients_to_save, compare_patients_subfolder, images_ext)
+save_data(compare_patients_to_save, compare_patients_subfolder, images_ext)
 ```
