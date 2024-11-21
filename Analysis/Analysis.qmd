@@ -508,13 +508,13 @@ for (patient_id in unique(breast_cancer_patients_analyze$Patient.ID)) {
   )
 }
 
+# Save insitutype list
+saveRDS(patients_ist_semisup, here(objects_dir, "patients_ist_semisup.rds"))
+
 # Join Layers
 for (assay in assays_to_split) {
   breast_cancer_patients_analyze <- JoinLayers(breast_cancer_patients_analyze, assay = assay, layers = "counts")
 }
-# Default assay & layer
-DefaultAssay(breast_cancer_patients_analyze) <- "RNA"
-DefaultLayer(breast_cancer_patients_analyze[["RNA"]]) <- "counts"
 
 # Merge patient insitutype clusters
 merged_ist_results <- c()
