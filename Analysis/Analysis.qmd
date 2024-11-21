@@ -582,7 +582,8 @@ breast_cancer_patients_analyze <- RunUMAP(
   reduction = "sct_pca_patients",
   dims = 1:22,
   reduction.key = "SCTUMAP_",
-  reduction.name = "sct_umap_patients")
+  reduction.name = "sct_umap_patients",
+  seed.use = 42)
 ```
 
 ```{r}
@@ -651,7 +652,8 @@ breast_cancer_patients_analyze <- RunUMAP(
   reduction = "rna_pca_patients",
   dims = 1:22,
   reduction.key = "RNAUMAP_",
-  reduction.name = "rna_umap_patients")
+  reduction.name = "rna_umap_patients",
+  seed.use = 42)
 ```
 
 ```{r}
