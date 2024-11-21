@@ -527,6 +527,8 @@ breast_cancer_patients_analyze <- AddMetaData(
   object = breast_cancer_patients_analyze,
   metadata = merged_ist_results,
   col.name = raw_insitutype_col_name)
+print(get_cluster_info(breast_cancer_patients_analyze, raw_insitutype_col_name))
+# Name of the metadata column with the annotated insitutype clusters
 ann_insitutype_col_name <- "patients_ist_semisup_clusters_ann"
 # Rename unknown clusters to tumor
 breast_cancer_patients_analyze@meta.data %<>%
