@@ -402,6 +402,13 @@ print(after_integration_plots)
 
 The clustering performed by Insitutype  uses the raw counts, therefore it is useless to use the integrated data because Seurat does not provide an adjusted count matrix.
 
+```{r}
+# Name of the column with the raw insitutype clusters
+raw_insitutype_col_name <- "patients_ist_semisup_clusters"
+# Name of the metadata column with the annotated insitutype clusters
+ann_insitutype_col_name <- "patients_ist_semisup_clusters_ann"
+```
+
 ### Computation
 
 ```{r}
@@ -522,15 +529,13 @@ merged_ist_results <- c()
 for (i in 1:length(patients_ist_semisup)) {
   merged_ist_results <- c(merged_ist_results, patients_ist_semisup[[i]]$clust)
 }
-raw_insitutype_col_name <- "patients_ist_semisup_clusters"
 # Add the raw insitutype clusters to the Seurat object
 breast_cancer_patients_analyze <- AddMetaData(
   object = breast_cancer_patients_analyze,
   metadata = merged_ist_results,
   col.name = raw_insitutype_col_name)
 print(get_cluster_info(breast_cancer_patients_analyze, raw_insitutype_col_name))
-# Name of the metadata column with the annotated insitutype clusters
-ann_insitutype_col_name <- "patients_ist_semisup_clusters_ann"
+
 # Rename unknown clusters to tumor
 breast_cancer_patients_analyze@meta.data %<>%
   mutate(
