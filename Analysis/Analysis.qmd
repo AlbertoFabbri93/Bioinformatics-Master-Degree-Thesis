@@ -681,46 +681,26 @@ print(patients_ist_rna)
 # Save insitutype data
 insitutype_data <- list()
 
-# Define the variable name for the Insitutype column on the metadata
-ist_cluster_var <- "ist_semisup_clusters"
-# Add the Insitutype clusters to the Seurat object metadata
-breast_cancer_patients_integrated[[ist_cluster_var]] <- integration_ist_semisup$clust
-# Specify the clusters with the cancer cells
-cancer_clusters <- c("a", "b", "c", "d", "e", "f", "g", "h", "i")
-# Replace the various cancer clusters with a global cluster called "Tumor"
-breast_cancer_patients_integrated$ist_semisup_clusters_ann <- case_match(
-  breast_cancer_patients_integrated$ist_semisup_clusters,
-  cancer_clusters ~ "Tumor",
-  .default = base::unname(breast_cancer_patients_integrated$ist_semisup_clusters)
-)
-# Generate the umap with the annotated clusters
-insitutype_clust_v4int <- DimPlot(
-  object = breast_cancer_patients_integrated,
-  group.by = "ist_semisup_clusters_ann",
-  reduction = "integrated_umap",
-  cols = known_clusters_colors) +
-  labs(title = "UMAP with Insitutype clusters")
-insitutype_data[["insitutype_clust_v4int"]] <- insitutype_clust_v4int
-
 # Generate summary statistics for the Insitutype clusters
-insitutype_data[["insitutype_clust_summary_patients"]] <- create_cluster_summary_per_patient(breast_cancer_patients_integrated, ist_cluster_var)
+insitutype_data[["insitutype_clust_summary_patients"]] <- create_cluster_summary_per_patient(breast_cancer_patients_analyze, ann_insitutype_col_name)
 
 # Violin plot with the expression of panCK, CD45 and CD68 for each Insitutype clusters
 ist_clust_expr <- VlnPlot(
-  breast_cancer_patients_integrated,
-  assay = "integrated",
+  breast_cancer_patients_analyze,
+  assay = "RNA",
   layer = "data",
   features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
   pt.size = 0,
-  group.by = "ist_semisup_clusters_ann",
-  combine = FALSE
-) 
+  group.by = ann_insitutype_col_name,
+  combine = FALSE,
+  cols = cell_type_colors
+)
 ist_clust_expr <- lapply(ist_clust_expr, function(x) x &NoLegend())
 insitutype_data <- c(insitutype_data, ist_clust_expr)
 
 # Calculate the mean of CD45, CD68 and PanCK for each Insitutype cluster
-ist_ann_cluster_statistics <- breast_cancer_patients_integrated@meta.data %>%
-  group_by(ist_semisup_clusters_ann) %>%
+ist_ann_cluster_statistics <- breast_cancer_patients_analyze@meta.data %>%
+  group_by(!!sym(ann_insitutype_col_name)) %>%
   summarise(
     `Mean PanCK` = mean(Mean.PanCK),
     `Mean CD45` = mean(Mean.CD45),
