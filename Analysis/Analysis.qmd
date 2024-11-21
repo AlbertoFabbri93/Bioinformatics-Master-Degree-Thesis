@@ -736,10 +736,10 @@ ist_ann_column <- FetchData(
   vars = ann_insitutype_col_name)
 # Create Seurat objects with the non-cancerous cells
 breast_cancer_patients_immune_cells <- 
-  breast_cancer_patients_analyze[, which(x = ist_ann_column != "Tumor")]
+  breast_cancer_patients_filt_cells[, which(x = ist_ann_column != "Tumor")]
 # Create Seurat objects with the cancerous cells
 breast_cancer_patients_tumor_cells <-
-  breast_cancer_patients_analyze[, which(x = ist_ann_column == "Tumor")]
+  breast_cancer_patients_filt_cells[, which(x = ist_ann_column == "Tumor")]
 ```
 
 ## Immune cells
