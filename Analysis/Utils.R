@@ -5,7 +5,8 @@ images_ext <- Sys.getenv("IMAGES_EXT")
 
 ####### SAVE LIST OF ITEMS #######
 
-save_plots <- function(plots_list, folder_path, image_extension = ".png") {
+# This function saves a list of plots and data frames to a specified folder
+save_plots <- function(data_list, folder_path, image_extension = ".png") {
   # Ensure the folder exists, if not, create it
   if (!dir.exists(folder_path)) {
     dir.create(folder_path, recursive = TRUE)
@@ -30,7 +31,7 @@ save_plots <- function(plots_list, folder_path, image_extension = ".png") {
   }
   
   # Flatten the plots list
-  flat_items <- flatten_list(plots_list)
+  flat_items <- flatten_list(data_list)
   
   # Iterate over the flattened list of items and save each plot or data frame
   for (item_name in names(flat_items)) {
