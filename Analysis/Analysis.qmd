@@ -254,12 +254,10 @@ breast_cancer_patients_filt_cells <- subset(breast_cancer_patients, cells = cell
 saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
 ```
 
-## Integrate patients
-
-### Check the data before integration
+## Quality assurance
 
 ```{r}
-#| label: qa-before-integration
+#| label: qa
 
 # Check if there are mitochondrial genes
 mt_gene_count <- sum(grepl("^MT-", rownames(breast_cancer_patients_filt_cells[["RNA"]])))
@@ -285,89 +283,6 @@ vln_plot_raw[[2]] <- vln_plot_raw[[2]] + labs(subtitle = "Total expression level
 vln_plot_raw <- vln_plot_raw + plot_annotation(title = "Before normalization")
 # Display the plot
 vln_plot_raw
-```
-
-### Integrated object
-
-```{r}
-#| label: load-integrated-object
-
-# Load integrated object from memory
-breast_cancer_patients_integrated <- readRDS(here(objects_dir, "breast_cancer_patients_integrated.rds"))
-```
-
-```{r}
-#| label: create-integrated-object
-#| eval: false
-
-# Split the global Seurat object by patient
-breast_cancer_patients_split <- SplitObject(breast_cancer_patients_filt_cells, split.by = "Patient.ID")
-# Extract the names from the named list
-bcp_split_project_names <- names(breast_cancer_patients_split)
-# Set the project name for each patient
-breast_cancer_patients_split <- setNames(
-  lapply(bcp_split_project_names, function(seurat_object_name) {
-    # Change the project name of each seurat object in the list
-    breast_cancer_patients_split[[seurat_object_name]]@project.name <- paste0("patient", seurat_object_name)
-    breast_cancer_patients_split[[seurat_object_name]]
-  }),
-  # Preserve the original names
-  bcp_split_project_names
-)
-
-# RUN SCTransform for every patient
-breast_cancer_patients_split <- lapply(breast_cancer_patients_split, function(patient_object) {
-  # Print object name
-  print(patient_object@project.name)
-  # SCTransform
-  patient_object <- SCTransform(
-    patient_object,
-    vars.to.regress = c("nFeature_RNA"),
-    return.only.var.genes = FALSE,
-    assay = "RNA",
-    new.assay.name = "SCT",
-    seed.use = 13,
-    verbose = TRUE)
-  return(patient_object)
-})
-
-# Find integration features
-features <- SelectIntegrationFeatures(
-  object.list = breast_cancer_patients_split,
-  nfeatures = 1000,
-  verbose = TRUE)
-# Prepare for integration
-breast_cancer_patients_split <- PrepSCTIntegration(
-  object.list = breast_cancer_patients_split,
-  anchor.features = features,
-  assay = "SCT",
-  verbose = TRUE)
-# Find integration anchors
-object_anchors <- FindIntegrationAnchors(
-  object.list = breast_cancer_patients_split,
-  normalization.method = "SCT",
-  anchor.features = features,
-  verbose = TRUE
-)
-# Integrate the data
-# After integration using SCT-normalized counts, the data slot will contain non-centered Pearson residuals and the scale.data slot will contain the centered residuals.
-# Transforming post-integration residuals to corrected counts is not supported/tested/encouraged
-breast_cancer_patients_integrated <- IntegrateData(
-  anchorset = object_anchors,
-  new.assay.name = "integrated",
-  normalization.method = "SCT",
-  verbose = TRUE,
-)
-
-# Re-join layers after integration otherwise you have 7 count layers,
-breast_cancer_patients_integrated[["RNA"]] <- JoinLayers(breast_cancer_patients_integrated[["RNA"]])
-# do the same for the SystemControl assay
-breast_cancer_patients_integrated[["SystemControl"]] <- JoinLayers(breast_cancer_patients_integrated[["SystemControl"]])
-# and the negative probes assay
-breast_cancer_patients_integrated[["NegativeProbes"]] <- JoinLayers(breast_cancer_patients_integrated[["NegativeProbes"]])
-
-# Save the integrated object
-saveRDS(breast_cancer_patients_integrated, here(objects_dir, "breast_cancer_patients_integrated.rds"))
 ```
 
 ### Check the data after integration
