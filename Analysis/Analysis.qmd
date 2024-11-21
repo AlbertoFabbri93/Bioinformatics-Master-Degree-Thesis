@@ -608,16 +608,24 @@ print(patients_ist_sct)
 #| label: rna-standard-normalization-calculations
 #| eval: false
 
+# Default assay & layer
+DefaultAssay(breast_cancer_patients_analyze) <- "RNA"
+DefaultLayer(breast_cancer_patients_analyze[["RNA"]]) <- "counts"
 
 # Normalize
-breast_cancer_patients_analyze <- NormalizeData(breast_cancer_patients_analyze)
+breast_cancer_patients_analyze <- NormalizeData(
+  breast_cancer_patients_analyze,
+  assay = "RNA")
 # Scale
-breast_cancer_patients_analyze <- ScaleData(breast_cancer_patients_analyze)
+breast_cancer_patients_analyze <- ScaleData(
+  breast_cancer_patients_analyze,
+  assay = "RNA")
 # Find variable features
 breast_cancer_patients_analyze <- FindVariableFeatures(
   breast_cancer_patients_analyze,
   selection.method = "vst",
-  nfeatures = 1000)
+  nfeatures = 1000,
+  assay = "RNA")
 # RunPCA
 breast_cancer_patients_analyze <- RunPCA(
   breast_cancer_patients_analyze,
