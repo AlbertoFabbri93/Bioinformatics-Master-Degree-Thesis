@@ -789,7 +789,7 @@ immune_cells_cluster_statistics <- breast_cancer_patients_immune_cells@meta.data
   # Ensure Patient.ID is a factor
   mutate(Patient.ID = as.factor(Patient.ID)) %>%
   # Calculate mean and sd for each cluster
-  group_by(!!sym(ist_cluster_var)) %>%
+  group_by(!!sym(ann_insitutype_col_name)) %>%
   mutate(
     MeanPercentage = mean(Percentage),
     SDPercentage = sd(Percentage)
@@ -800,9 +800,9 @@ immune_cells_images[["immune_cells_cluster_statistics"]] <- immune_cells_cluster
 # Plot the percentages of the various types of cells (except cancer cells)
 immune_cells_cluster_distribution_barplot <- immune_cells_cluster_statistics %>%
   # Plot the data in a grouped barplot
-  ggplot(aes(x = !!sym(ist_cluster_var), y = Percentage, fill = Patient.ID)) +
+  ggplot(aes(x = !!sym(ann_insitutype_col_name), y = Percentage, fill = Patient.ID)) +
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single", padding = 0), width = .8) +
-  facet_grid(~ CellTypeGroup, scales = "free_x", space = "free") +
+  facet_grid(cols = ggplot2::vars(!!sym(cell_type_col)), scales = "free_x", space = "free") +
   theme_minimal() +
   labs(x = NULL, 
        y = "Percentage of Cells", 
@@ -824,7 +824,7 @@ immune_cells_cluster_distribution_dotplot <- immune_cells_cluster_statistics %>%
   # Add standard deviation error bars
   geom_errorbarh(aes(xmin = MeanPercentage - SDPercentage, 
                      xmax = MeanPercentage + SDPercentage, 
-                     y = !!sym(ist_cluster_var),
+                     y = !!sym(ann_insitutype_col_name),
                      linetype = "Standard Deviation"), 
                  color = "black", alpha = 0.7, height = 0.5, size = 0.2) +
   theme_minimal() +
