@@ -605,11 +605,9 @@ print(patients_ist_sct)
 ### Standard normalization
 
 ```{r}
-#| label: insitutype-standard-normalization
+#| label: rna-standard-normalization-calculations
 #| eval: false
 
-# List to print and save
-patients_ist_rna <- list()
 
 # Normalize
 breast_cancer_patients_analyze <- NormalizeData(breast_cancer_patients_analyze)
@@ -630,7 +628,7 @@ breast_cancer_patients_analyze <- RunPCA(
   verbose = TRUE)
 # Elbow plot
 patients_rna_elbow_plot <- generate_variance_elbow_plots(breast_cancer_patients_analyze, "rna_pca_patients", 50)
-patients_ist_rna[["patients_rna_elbow_plot"]] <- patients_rna_elbow_plot
+print(patients_rna_elbow_plot)
 # Run UMAP
 breast_cancer_patients_analyze <- RunUMAP(
   breast_cancer_patients_analyze,
@@ -638,6 +636,14 @@ breast_cancer_patients_analyze <- RunUMAP(
   dims = 1:22,
   reduction.key = "RNAUMAP_",
   reduction.name = "rna_umap_patients")
+```
+
+```{r}
+#| label: rna-standard-normalization-calculations
+
+# List to print and save
+patients_ist_rna <- list()
+
 # Plot cells
 patients_ist_rna_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
