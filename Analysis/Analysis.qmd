@@ -543,11 +543,8 @@ breast_cancer_patients_analyze@meta.data %<>%
 ### SCTransform
 
 ```{r}
-#| label: insitutype-sctransform
+#| label: rna-sctransform-calculations
 #| eval: false
-
-# List to print and save
-patients_ist_sct <- list()
 
 ## SCTransform
 # Normalize and scale
@@ -570,7 +567,7 @@ breast_cancer_patients_analyze <- RunPCA(
   verbose = TRUE)
 # Elbow plot
 patients_sct_elbow_plot <- generate_variance_elbow_plots(breast_cancer_patients_analyze, "sct_pca_patients", 50)
-patients_ist_sct[["patients_sct_elbow_plot"]] <- patients_sct_elbow_plot
+print(patients_sct_elbow_plot)
 # Run UMAP
 breast_cancer_patients_analyze <- RunUMAP(
   breast_cancer_patients_analyze,
@@ -578,6 +575,14 @@ breast_cancer_patients_analyze <- RunUMAP(
   dims = 1:22,
   reduction.key = "SCTUMAP_",
   reduction.name = "sct_umap_patients")
+```
+
+```{r}
+#| label: rna-sctransform-plots
+
+# List to print and save
+patients_ist_sct <- list()
+
 # Plot cells
 patients_ist_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
