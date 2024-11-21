@@ -725,20 +725,16 @@ save_data(insitutype_data, here(images_dir, "Insitutype"))
 ```{r}
 #| label: insitutype-split
 
-# Specify the identity column
-Idents(breast_cancer_patients_integrated) <- ist_cluster_var
-
+# Extract the Insitutype clusters metadata column
+ist_ann_column <- FetchData(
+  object = breast_cancer_patients_analyze,
+  vars = ann_insitutype_col_name)
 # Create Seurat objects with the non-cancerous cells
-breast_cancer_patients_immune_cells <- subset(
-  breast_cancer_patients_integrated,
-  idents = dplyr::setdiff(unique(Idents(breast_cancer_patients_integrated)), cancer_clusters)
-)
-
+breast_cancer_patients_immune_cells <- 
+  breast_cancer_patients_analyze[, which(x = ist_ann_column != "Tumor")]
 # Create Seurat objects with the cancerous cells
-breast_cancer_patients_tumor_cells <- subset(
-  breast_cancer_patients_integrated,
-  idents = cancer_clusters
-)
+breast_cancer_patients_tumor_cells <-
+  breast_cancer_patients_analyze[, which(x = ist_ann_column == "Tumor")]
 ```
 
 ## Immune cells
