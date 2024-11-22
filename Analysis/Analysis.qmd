@@ -268,23 +268,6 @@ if (mt_gene_count > 0) {
 } else {
   cat("FALSE. No mitochondrial genes found.")
 }
-
-# Check the quantity and the expression level of genes
-vln_plot_raw <- VlnPlot(
-  breast_cancer_patients_filt_cells,
-  assay = "RNA",
-  layer = "counts",
-  features = c("nFeature_RNA", "nCount_RNA"),
-  ncol = 2,
-  pt.size = 0
-)
-# Customize the titles for each plot
-vln_plot_raw[[1]] <- vln_plot_raw[[1]] + labs(subtitle = "Gene count")
-vln_plot_raw[[2]] <- vln_plot_raw[[2]] + labs(subtitle = "Total expression level")
-# Add global title
-vln_plot_raw <- vln_plot_raw + plot_annotation(title = "Before normalization")
-# Display the plot
-vln_plot_raw
 ```
 
 ## Insitutype Clustering
