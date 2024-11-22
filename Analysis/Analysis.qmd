@@ -275,6 +275,8 @@ if (mt_gene_count > 0) {
 The clustering performed by Insitutype  uses the raw counts, therefore it is useless to use the integrated data because Seurat does not provide an adjusted count matrix.
 
 ```{r}
+#| label: ins-metadata-columns
+
 # Name of the column with the raw insitutype clusters
 raw_insitutype_col_name <- "patients_ist_semisup_clusters"
 # Name of the metadata column with the annotated insitutype clusters
