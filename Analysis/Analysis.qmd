@@ -1460,15 +1460,20 @@ Plot the spatial distribution of the cell types and label them according to the 
 ```{r}
 #| label: spatial-clusters-plots
 
+# Count the number of tumor clusters
+num_tumor_clusters <- length(levels(breast_cancer_patients_tumor_cells@meta.data[[chosen_tumor_cluster]]))
+# Create a gray scale for the tumor clusters
+tumor_clusters_colors <- gray.colors(12, start = 0.2, end = 0.9)
 # Create the color palette for the niches
 cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
   breast_cancer_patients_filt_cells,
-  cluster_column_name = "cell_cluster",
-  color_palette = base::unname(polychrome()))
+  cluster_column_name = cell_subcluster_col,
+  known_clusters_colors = cell_type_colors,
+  color_palette = tumor_clusters_colors)
 # Create the plots with the cell types for every stamp
 cell_types_stamps_plots <- generate_spatial_plots(
   breast_cancer_patients_filt_cells,
-  cluster_var = "cell_cluster",
+  cluster_var = cell_subcluster_col,
   cluster_name = "Cell types with tumor subclusters",
   legend_fill = "Cell types",
   color_lookup_table = cells_all_phenotypes_color_palette)
