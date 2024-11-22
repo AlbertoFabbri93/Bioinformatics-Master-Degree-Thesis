@@ -1441,7 +1441,7 @@ num_niches <- 10
 breast_cancer_patients_filt_cells <- BuildNicheAssay(
   object = breast_cancer_patients_filt_cells,
   fov = "LU001FFP03",
-  group.by = "cell_cluster",
+  group.by = ann_insitutype_col_name,
   assay = "niche",
   cluster.name = "niches",
   # Number of niches to find, default is 4
