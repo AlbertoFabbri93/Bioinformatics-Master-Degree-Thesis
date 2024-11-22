@@ -907,7 +907,15 @@ save_data(immune_cells_images, here(images_dir, "Immune cells"))
 ### Clustering
 
 ```{r}
-#| label: tumor-cells-clustering
+#| label: tumor-cells-read-from-drive
+
+# Load tumor cells object from memory
+breast_cancer_patients_tumor_cells <- readRDS(here(objects_dir, "breast_cancer_patients_tumor_cells.rds"))
+```
+
+```{r}
+#| label: tumor-cells-computation
+#| eval: false
 
 # After subsetting a Seurat object it is good to normalize it again
 breast_cancer_patients_tumor_cells <- SCTransform(
@@ -973,6 +981,9 @@ breast_cancer_patients_tumor_cells <- RunUMAP(
   dims = tumor_cells_dims,
   verbose = TRUE,
   seed.use = 42)
+
+# Save the Seurat object
+saveRDS(breast_cancer_patients_tumor_cells, here(objects_dir, "breast_cancer_patients_tumor_cells.rds"))
 ```
 
 ### Plotting
