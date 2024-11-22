@@ -1425,7 +1425,9 @@ saveRDS(GSEA_results, here(objects_dir, "GSEA_results.rds"))
 ```
 
 
-## Merge all cells together
+## Merge
+
+Merge immune and tumor subclusters
 
 ```{r}
 #| label: merge-cells-metadata
