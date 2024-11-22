@@ -1561,7 +1561,7 @@ save_data(niches_stamps_plots, here(images_dir, glue("Stamps_with_{num_niches}_n
 
 # Count and calculate percentage of cell types per niche
 cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
-  group_by(niches, cell_cluster) %>%
+  group_by(niches, !!sym(cell_subcluster_col)) %>%
   summarise(count = n()) %>%
   mutate(percentage = (count / sum(count)) * 100) %>%
   arrange(.by_group = TRUE)
@@ -1586,7 +1586,7 @@ for (niche in niches) {
   # Create the bar plot
   niche_barplot <- niche_data %>%
     dplyr::filter(percentage >= cutoff) %>%
-    ggplot(aes(x = cell_cluster, y = percentage, fill = cell_cluster)) +
+    ggplot(aes(x = !!sym(cell_subcluster_col), y = percentage, fill = !!sym(cell_subcluster_col))) +
   geom_bar(stat = "identity") +
   labs(title = paste("Niche:", niche),
        caption = glue("Percentage cutoff value: {cutoff}%"),
