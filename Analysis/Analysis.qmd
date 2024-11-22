@@ -698,14 +698,25 @@ save_data(insitutype_data, here(images_dir, "Insitutype"))
 saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patients_analyze.rds"))
 ```
 
-### Split the Seurat object using the Insitutype clusters
+## Split
+
+Create two separate Seurat objects for tumor and immune cells using the Insitutype clusters
 
 ```{r}
 #| label: insitutype-split
+#| eval: false
 
+# Add insitutype annotated clusters to filt cells object
+breast_cancer_patients_filt_cells <- AddMetaData(
+  object = breast_cancer_patients_filt_cells,
+  metadata = FetchData(
+    object = breast_cancer_patients_analyze,
+    vars = ann_insitutype_col_name),
+  col.name = ann_insitutype_col_name
+)
 # Extract the Insitutype clusters metadata column
 ist_ann_column <- FetchData(
-  object = breast_cancer_patients_analyze,
+  object = breast_cancer_patients_filt_cells,
   vars = ann_insitutype_col_name)
 # Create Seurat objects with the non-cancerous cells
 breast_cancer_patients_immune_cells <- 
