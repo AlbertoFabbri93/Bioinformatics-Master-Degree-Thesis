@@ -763,7 +763,8 @@ breast_cancer_patients_immune_cells <- RunUMAP(
   reduction = "sct_pca_immune_cells",
   dims = 1:30,
   reduction.key = "SCTUMAP_",
-  reduction.name = "sct_umap_immune_cells")
+  reduction.name = "sct_umap_immune_cells",
+  seed.use = 42)
 
 # Define the groups
 cell_groups <- c(
@@ -970,7 +971,8 @@ breast_cancer_patients_tumor_cells <- RunUMAP(
   reduction.key = "TCUMAP_",
   reduction.name = "umap_tumor_cells",
   dims = tumor_cells_dims,
-  verbose = TRUE)
+  verbose = TRUE,
+  seed.use = 42)
 ```
 
 ### Plotting
