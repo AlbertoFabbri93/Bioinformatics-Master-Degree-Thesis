@@ -1305,10 +1305,8 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
                     pvalueCutoff = 0.05,
                     verbose      = TRUE,
                     pAdjustMethod = "fdr")
-  # Simplify GSEA results by grouping together or eliminating terms that are very similar or redundant
-  gsea_simplified <- simplify(gsea, cutoff = 0.7)
   # Save the GSEA results
-  GSEA_results[[tumor_cluster_number]] <- gsea_simplified
+  GSEA_results[[tumor_cluster_number]] <- gsea
 }
 
 # Save the GSEA results
@@ -1346,40 +1344,57 @@ for (cluster in levels(breast_cancer_patients_tumor_cells)) {
 GSEA_plots <- list()
 GSEA_tibbles <- list()
 
+GSEA_to_plot <- list()
+# GSEA plots with results
+for (cluster in names(GSEA_results)) {
+  gsea <- GSEA_results[[cluster]]
+  # If there are results
+  if (nrow(gsea@result) > 0) {
+    GSEA_to_plot[[cluster]] <- GSEA_results[[cluster]]
+  }
+}
+# Print the names of the clusters with GSEA results
+print(names(GSEA_to_plot))
 
+# Simplify values for the GSEA plots
+GSEA_plot_simply_cutoff <- c(
+  "0" = 1,
+  "2" = 0.4,
+  "3" = 1,
+  "4" = 0.5,
+  "6" = 0.5,
+  "7" = 1)
 # Create plots and tibbles
 # Do not plot if no pathways have been found
-for (cluster in names(GSEA_results)) {
-  gsea_simplified <- GSEA_results[[cluster]]
+for (cluster in names(GSEA_to_plot)) {
+  gsea <- GSEA_to_plot[[cluster]]
+  # Simplify GSEA results by grouping together or eliminating terms that are very similar or redundant
+  gsea_simplified <- clusterProfiler::simplify(gsea, cutoff = GSEA_plot_simply_cutoff[[cluster]])
   gene_stats <- cluster_gene_stats[[cluster]]
   num_upreg_genes <- gene_stats$num_upreg_genes
   num_downreg_genes <- gene_stats$num_downreg_genes
   
-  if (nrow(gsea_simplified@result) > 0) {
-    # Prepare plot labels
-    GSEAlabels <- labs(
-      title = paste("Significant Pathways in Tumor Cluster", cluster), 
-      subtitle = "by Gene Set Enrichment Analysis",
-      caption = paste0("Based on ", num_upreg_genes, " up-regulated genes and ", num_downreg_genes, " down-regulated genes.")
-    )
-    # Prepare plot aesthetics
-    GSEAtheme <- theme(
-      plot.title = element_text(hjust = 0.5, size = 20),
-      plot.subtitle = element_text(hjust = 0.5, size = 15),
-      axis.text.x = element_text(angle = 0, size = 10),
-      axis.text.y = element_text(angle = 0, size = 6)
-    ) 
-    # Make the GSEA plot
-    GSEADotPlot <- dotplot(gsea_simplified, showCategory = 25) +
-      GSEAlabels + labs(x = "Gene Ratio", y = "Biological Pathway") +
-      GSEAtheme
-    
-    # Save the plot and tibble
-    GSEA_plots[[glue("GSEA Tumor cluster {cluster}")]] <- GSEADotPlot
-    GSEA_tibbles[[glue("GSEA Tumor cluster {cluster}")]] <- as_tibble(gsea_simplified@result)
-  } else {
-    print(paste("No significant pathways found for cluster", cluster))
-  }
+  # Prepare plot labels
+  GSEAlabels <- labs(
+    title = paste("Significant Pathways in Tumor Cluster", cluster), 
+    subtitle = "by Gene Set Enrichment Analysis",
+    caption = paste0("Based on ", num_upreg_genes, " up-regulated genes and ", num_downreg_genes, " down-regulated genes.")
+  )
+  # Prepare plot aesthetics
+  GSEAtheme <- theme(
+    plot.title = element_text(hjust = 0.5, size = 20),
+    plot.subtitle = element_text(hjust = 0.5, size = 15),
+    axis.text.x = element_text(angle = 0, size = 10),
+    axis.text.y = element_text(angle = 0, size = 6)
+  ) 
+  # Make the GSEA plot
+  GSEADotPlot <- dotplot(gsea_simplified, showCategory = 25) +
+    GSEAlabels + labs(x = "Gene Ratio", y = "Biological Pathway") +
+    GSEAtheme
+  
+  # Save the plot and tibble
+  GSEA_plots[[glue("GSEA Tumor cluster {cluster}")]] <- GSEADotPlot
+  GSEA_tibbles[[glue("GSEA Tumor cluster {cluster}")]] <- as_tibble(gsea_simplified@result)
 }
 ```
 
