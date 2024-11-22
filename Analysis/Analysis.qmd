@@ -1187,10 +1187,17 @@ save_data(tumor_plots_to_save, here(images_dir, "Tumor clusters"))
 ### Markers
 
 ```{r}
-#| label: tumor-cells-markers
+#| label: tumor-cells-markers-read-from-drive
 
-# List with data to save
-tumor_markers_to_print <- list()
+# Load tumor cells object from memory
+tumor_markers_data <- readRDS(here(objects_dir, "tumor_markers_data.rds"))
+
+```
+
+
+```{r}
+#| label: tumor-cells-markers-computation
+#| eval: false
 
 # Find all markers of the tumor clusters
 # GSEA needs both positive and negative markers
@@ -1200,6 +1207,18 @@ tumor_markers_data <- FindAllMarkers(
   assay = "SCTtumors",
   only.pos = FALSE,
   random.seed = 5)
+
+# Save the data
+saveRDS(tumor_markers_data, here(objects_dir, "tumor_markers_data.rds"))
+```
+
+
+```{r}
+#| label: tumor-cells-markers-plots
+
+# List with data to save
+tumor_markers_to_print <- list()
+
 # Filter markers to get the most significant up-regulated ones per cluster
 most_significant_tumor_markers <- tumor_markers_data %>%
   group_by(cluster) %>%
