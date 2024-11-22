@@ -1432,10 +1432,6 @@ Merge immune and tumor subclusters
 ```{r}
 #| label: merge-cells-metadata
 
-# Copy the insitutype metadata
-breast_cancer_patients_filt_cells@meta.data["ist_semisup_clusters_ann"] <- 
-  breast_cancer_patients_integrated@meta.data["ist_semisup_clusters_ann"]
-
 ## Copy tumor clusters
 # Find common cells between tumor and original Seurat objects
 common_tumor_cells <- dplyr::intersect(rownames(breast_cancer_patients_filt_cells@meta.data), 
@@ -1444,14 +1440,17 @@ common_tumor_cells <- dplyr::intersect(rownames(breast_cancer_patients_filt_cell
 breast_cancer_patients_filt_cells@meta.data[common_tumor_cells, chosen_tumor_cluster] <- 
   breast_cancer_patients_tumor_cells@meta.data[common_tumor_cells, chosen_tumor_cluster]
 
+# Name of metadata column with tumor subclusters
+cell_subcluster_col <- "cell_subcluster"
 # Merge the insitutype phenotyping with the tumor clusters
-breast_cancer_patients_filt_cells@meta.data <- breast_cancer_patients_filt_cells@meta.data %>%
-  mutate(cell_cluster = if_else(
-    ist_semisup_clusters_ann != "Tumor",
-    ist_semisup_clusters_ann,
+breast_cancer_patients_filt_cells@meta.data %<>%
+  mutate("{cell_subcluster_col}" := if_else(
+    get(ann_insitutype_col_name) != "Tumor",
+    get(ann_insitutype_col_name),
     glue("Tumor {get(chosen_tumor_cluster)}")
 ))
-print(glue("Number of cell phenotypes (Insitutype + Tumor clusters): {length(unique(breast_cancer_patients_filt_cells@meta.data$cell_cluster))} cells"))
+print(glue("Number of cell phenotypes (Insitutype + Tumor clusters):
+           {length(unique(breast_cancer_patients_filt_cells@meta.data[[cell_subcluster_col]]))}"))
 ```
 
 ## Spatial plots of clusters
