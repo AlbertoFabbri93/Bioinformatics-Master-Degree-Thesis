@@ -289,34 +289,6 @@ vln_plot_raw
 
 ### Check the data after integration
 
-#### Reductions
-
-```{r}
-#| label: qa-after-integration-reductions
-
-# Set DefaultAssay
-DefaultAssay(breast_cancer_patients_integrated) <- "integrated"
-# Run PCA
-breast_cancer_patients_integrated <- RunPCA(
-  breast_cancer_patients_integrated,
-  assay = "integrated",
-  reduction.key = "IPC_",
-  reduction.name = "integrated_pca",
-  seed.use = 42,
-  verbose = TRUE)
-# Generate variance elbow plots
-generate_variance_elbow_plots(breast_cancer_patients_integrated, "integrated_pca", 50)
-# Run UMAP
-breast_cancer_patients_integrated <- RunUMAP(
-  breast_cancer_patients_integrated,
-  reduction = "integrated_pca",
-  dims = 1:22,
-  reduction.key = "IUMAP_",
-  reduction.name = "integrated_umap",
-  seed.use = 12,
-  verbose = FALSE)
-```
-
 #### Plots
 
 ```{r}
