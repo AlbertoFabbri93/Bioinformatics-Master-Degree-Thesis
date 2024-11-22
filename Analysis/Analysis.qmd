@@ -1006,9 +1006,12 @@ tumor_cells_patient_id_plot <- DimPlot(
   breast_cancer_patients_tumor_cells,
   reduction = "umap_tumor_cells",
   label = TRUE,
+  label.box=TRUE,
   group.by = "Patient.ID",
   cols = patient_colors) +
-  labs(title = "Patient ID clusters")
+  labs(title = "Patient ID clusters") &
+  NoLegend() &
+  NoAxes()
 tumor_plots_to_save[["tumor_cells_patient_id_plot"]] <- tumor_cells_patient_id_plot
 
 # Chosen resolution
@@ -1024,7 +1027,9 @@ tumor_cells_chosen_resolution_plot <- DimPlot(
   reduction = "umap_tumor_cells",
   group.by = chosen_tumor_cluster,
   label = TRUE) +
-  labs(title = "Tumor Cell Clusters")
+  labs(title = "Tumor Cell Clusters") &
+  NoLegend() &
+  NoAxes()
 # Print DimPlots side by side
 tumor_clusters_patient_clusters <- tumor_cells_patient_id_plot + tumor_cells_chosen_resolution_plot
 tumor_plots_to_save[["tumor_clusters_patient_clusters"]] <- tumor_clusters_patient_clusters
