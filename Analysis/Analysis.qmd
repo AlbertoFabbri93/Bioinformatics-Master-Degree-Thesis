@@ -1176,12 +1176,62 @@ tumor_plots_to_save[["tumor_cluster_statistics"]] <- tumor_cluster_statistics
 print(tumor_plots_to_save)
 ```
 
+### Heterogeneous clusters
+
+```{r}
+#| label: tumor-cells-heterogeneous-clusters
+
+# Create a list to store the plots
+heterogeneous_clusters_plots <- list()
+
+# Set identity
+Idents(breast_cancer_patients_tumor_cells) <- chosen_tumor_cluster
+# Vector of heterogeneous clusters
+heterogeneous_clusters <- c("2", "4")
+# Create a list with a vector of the cells in each cluster
+heterogeneous_clusters_cells <- lapply(heterogeneous_clusters, function(cluster) {
+  breast_cancer_patients_tumor_cells %>%
+    WhichCells(., ident = cluster)
+})
+# Set identity
+Idents(breast_cancer_patients_immune_cells) <- ann_insitutype_col_name
+# Vector of immune cells clusters to highlight
+immune_clusters_show <- c("Macrophage", "Monocyte")
+# Create a list with a vector of the cells in each immune cluster
+immune_clusters_show_cells <- lapply(immune_clusters_show, function(cluster) {
+  breast_cancer_patients_immune_cells %>%
+    WhichCells(., ident = cluster)
+})
+
+# For every heterogeneous cluster, create a DimPlot with the cells from that cluster and the cells in the immune clusters
+heterogeneous_clusters_umaps <- lapply(heterogeneous_clusters_cells, function(cluster_cells) {
+  # Merge cells from the tumor and immune cells into a vector
+  all_cells <- c(cluster_cells, unlist(immune_clusters_show_cells))
+  DimPlot(
+    object = breast_cancer_patients_analyze,
+    cells = all_cells,
+    reduction = "sct_umap_patients",
+    group.by = ann_insitutype_col_name,
+    cols = cell_type_colors,
+    label = FALSE
+  )
+})
+# Save to list, call them heterogeneous_clusters_umaps + the cluster name
+heterogeneous_clusters_umaps <- setNames(heterogeneous_clusters_umaps, paste0("het_clusters_umap_tum_clust_", heterogeneous_clusters))
+heterogeneous_clusters_plots[["heterogeneous_clusters_umaps"]] <- heterogeneous_clusters_umaps
+
+# Print list
+print(heterogeneous_clusters_plots)
+```
+
+
 ```{r}
 #| label: tumor-cells-save-plots
 #| eval: false
 
 # Save the tumor cells plots
 save_data(tumor_plots_to_save, here(images_dir, "Tumor clusters"))
+save_data(heterogeneous_clusters_plots, here(images_dir, "Tumor clusters"))
 ```
 
 ### Markers
