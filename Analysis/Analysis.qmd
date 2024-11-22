@@ -88,6 +88,8 @@ library("presto")
 library("abind")
 # Sparse and dense matrix classes and methods
 library("Matrix")
+# Analysis of cell-cell communication
+library("CellChat")
 
 ## PLOTTING
 # Used to annotate images with multiple plots
@@ -1616,6 +1618,39 @@ stat_niches_dir <- glue("Statistics_{num_niches}_niches")
 save_data(niches_barplot_list, here(images_dir, stat_niches_dir))
 save_data(niches_patient_data, here(images_dir, stat_niches_dir))
 ```
+
+## CellChat
+
+```{r}
+#| label: cellchat
+
+data.input = Seurat::GetAssayData(breast_cancer_patients_analyze, layer = "data", assay = "SCT")
+spatial.locs = Seurat::GetTissueCoordinates(
+  object = breast_cancer_patients_analyze,
+  image = "LU001FFP03",
+) %>%
+# Set the rownames equal to the cell names and remove the cell column
+  tibble::column_to_rownames(var = "cell")
+
+# For CosMx data, the spatial coordinates are in pixels and the conversion factor of converting spatial coordinates from Pixels to Micrometers is 0.18. Because CosMx does not include the uniform cell size like 10X Visium and Slide-seq, users can compute the minimum cell centroid-to-centroid distance via computeCellDistance and use its half value as the tolerance factor. Of note, CellChat does not need an accurate tolerance factor, which is used for determining whether considering the cell-pair as spatially proximal if their distance is greater than interaction.range but smaller than “interaction.range + tol”.
+
+conversion.factor = 0.18
+d = computeCellDistance(spatial.locs)
+spot.size = min(d)*conversion.factor # converting the distance in Pixels to Micrometers
+spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
+
+cellchat <- createCellChat(
+  object = data.input,
+  meta = breast_cancer_patients_filt_cells@meta.data,
+  group.by = ann_insitutype_col_name,
+  datatype = "spatial",
+  coordinates = spatial.locs,
+  spatial.factors = spatial.factors)
+
+CellChatDB <- CellChatDB.human
+showDatabaseCategory(CellChatDB)
+```
+
 
 ## General overview of the data
 
