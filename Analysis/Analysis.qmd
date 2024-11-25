@@ -705,8 +705,7 @@ saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patient
 Create two separate Seurat objects for tumor and immune cells using the Insitutype clusters
 
 ```{r}
-#| label: insitutype-split
-#| eval: false
+#| label: insitutype-add-metadata
 
 # Add insitutype annotated clusters to filt cells object
 breast_cancer_patients_filt_cells <- AddMetaData(
@@ -716,6 +715,11 @@ breast_cancer_patients_filt_cells <- AddMetaData(
     vars = ann_insitutype_col_name),
   col.name = ann_insitutype_col_name
 )
+```
+
+```{r}
+#| label: insitutype-split
+#| eval: false
 # Extract the Insitutype clusters metadata column
 ist_ann_column <- FetchData(
   object = breast_cancer_patients_filt_cells,
@@ -771,6 +775,13 @@ breast_cancer_patients_immune_cells <- RunUMAP(
   reduction.name = "sct_umap_immune_cells",
   seed.use = 42)
 
+# Save the Seurat object
+saveRDS(breast_cancer_patients_immune_cells, here(objects_dir, "breast_cancer_patients_immune_cells.rds"))
+```
+
+```{r}
+#| label: immune-cells-groups
+
 # Define the groups
 cell_groups <- c(
   "Macrophage" = "Myeloid",
@@ -795,9 +806,6 @@ cell_type_col <- "cell_type"
 # Create the cell type group metadata column
 breast_cancer_patients_immune_cells@meta.data %<>%
    mutate("{cell_type_col}" := cell_groups[.data[[ann_insitutype_col_name]]])
-
-# Save the Seurat object
-saveRDS(breast_cancer_patients_immune_cells, here(objects_dir, "breast_cancer_patients_immune_cells.rds"))
 ```
 
 ### Plotting
@@ -919,6 +927,20 @@ breast_cancer_patients_tumor_cells <- readRDS(here(objects_dir, "breast_cancer_p
 ```
 
 ```{r}
+#| label: tumor-cells-metadata-columns
+
+# Name of the metadata column with the tumor clusters
+tumor_cluster_name <- "louvain_tumor_cells_clusters"
+# Find clusters of tumor cells
+# The default resolution is 1, increase it to get more clusters or decrease it to get fewer clusters
+# Try a range of resolutions
+seq_res <- seq(0.1, 0.4, by = 0.1)
+# Create custom cluster names based on the actual resolution values
+tumor_cluster_seq_res <- glue::glue("{tumor_cluster_name}.{seq_res}")
+```
+
+
+```{r}
 #| label: tumor-cells-computation
 #| eval: false
 
@@ -961,14 +983,7 @@ breast_cancer_patients_tumor_cells <- FindNeighbors(
   reduction = "pca_tumor_cells",
   dims = tumor_cells_dims,
   verbose = TRUE)
-# Name of the metadata column with the tumor clusters
-tumor_cluster_name <- "louvain_tumor_cells_clusters"
-# Find clusters of tumor cells
-# The default resolution is 1, increase it to get more clusters or decrease it to get fewer clusters
-# Try a range of resolutions
-seq_res <- seq(0.1, 0.4, by = 0.1)
-# Create custom cluster names based on the actual resolution values
-tumor_cluster_seq_res <- glue::glue("{tumor_cluster_name}.{seq_res}")
+
 # Find clusters at different resolutions
 breast_cancer_patients_tumor_cells <- FindClusters(
   breast_cancer_patients_tumor_cells,
