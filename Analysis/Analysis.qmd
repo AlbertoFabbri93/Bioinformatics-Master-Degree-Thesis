@@ -1208,6 +1208,8 @@ heterogeneous_clusters_cells <- lapply(heterogeneous_clusters, function(cluster)
   breast_cancer_patients_tumor_cells %>%
     WhichCells(., ident = cluster)
 })
+# Give the heterogeneous clusters cells the name of the cluster
+names(heterogeneous_clusters_cells) <- heterogeneous_clusters
 # Set identity
 Idents(breast_cancer_patients_immune_cells) <- ann_insitutype_col_name
 # Vector of immune cells clusters to highlight
@@ -1219,9 +1221,13 @@ immune_clusters_show_cells <- lapply(immune_clusters_show, function(cluster) {
 })
 
 # For every heterogeneous cluster, create a DimPlot with the cells from that cluster and the cells in the immune clusters
-heterogeneous_clusters_umaps <- lapply(heterogeneous_clusters_cells, function(cluster_cells) {
+heterogeneous_clusters_umaps <- lapply(seq_along(heterogeneous_clusters_cells), function(i) {
+  # Retrieve the cluster name using the index
+  cluster_name <- names(heterogeneous_clusters_cells)[i]
+  
   # Merge cells from the tumor and immune cells into a vector
-  all_cells <- c(cluster_cells, unlist(immune_clusters_show_cells))
+  all_cells <- c(heterogeneous_clusters_cells[[i]], unlist(immune_clusters_show_cells))
+  
   DimPlot(
     object = breast_cancer_patients_analyze,
     cells = all_cells,
@@ -1229,7 +1235,7 @@ heterogeneous_clusters_umaps <- lapply(heterogeneous_clusters_cells, function(cl
     group.by = ann_insitutype_col_name,
     cols = cell_type_colors,
     label = FALSE
-  )
+  ) + labs(title = paste("Tumor cluster", cluster_name))
 })
 # Save to list, call them heterogeneous_clusters_umaps + the cluster name
 heterogeneous_clusters_umaps <- setNames(heterogeneous_clusters_umaps, paste0("het_clusters_umap_tum_clust_", heterogeneous_clusters))
