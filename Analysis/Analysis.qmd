@@ -1630,6 +1630,9 @@ save_data(niches_stamps_plots, here(images_dir, glue("Stamps_with_{num_niches}_n
 ```{r}
 #| label: niches-statistics
 
+# Create list to save data
+niches_statistics <- list()
+
 # Count and calculate percentage of cell types per niche
 cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
   group_by(niches, !!sym(cell_subcluster_col)) %>%
@@ -1637,7 +1640,7 @@ cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
   mutate(percentage = (count / sum(count)) * 100) %>%
   arrange(.by_group = TRUE)
 # Print the cell type counts and percentages
-print(cell_type_counts)
+niches_statistics[["cell_type_counts"]] <- cell_type_counts
 
 # Get the list of unique niches
 niches <- sort(unique(breast_cancer_patients_filt_cells$niches))
@@ -1671,9 +1674,11 @@ for (niche in niches) {
   # Add the plot to the list
   niches_barplot_list[[glue::glue("Niche_{niche}_barplot")]] <- niche_barplot
 }
+# Save niches plots to list
+niches_statistics <- c(niches_statistics, niches_barplot_list)
 
 # Display all niches bar plots
-print(niches_barplot_list)
+print(niches_statistics)
 ```
 
 ```{r}
@@ -1721,7 +1726,7 @@ print(niches_patient_data)
 # Folder name
 stat_niches_dir <- glue("Statistics_{num_niches}_niches")
 # Save the plots
-save_data(niches_barplot_list, here(images_dir, stat_niches_dir))
+save_data(niches_statistics, here(images_dir, stat_niches_dir))
 save_data(niches_patient_data, here(images_dir, stat_niches_dir))
 ```
 
