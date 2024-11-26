@@ -471,7 +471,7 @@ patients_ist_sct <- list()
 # Plot cells
 patients_ist_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
-  group.by = "patients_ist_semisup_clusters_ann",
+  group.by = ann_insitutype_col_name,
   reduction = "sct_umap_patients",
   cols = cell_type_colors)
 patients_ist_sct[["patients_ist_sct_plot"]] <- patients_ist_sct_plot
