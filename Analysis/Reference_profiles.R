@@ -1,8 +1,20 @@
 ## REFERENCE PROFILES
 # Get cell reference profile data from NanoString
-# Use this reference profile as it is the only one available from CosMx data, originally from:
+# Use these reference profiles as they have been created from a CosMx dataset
+# I have added the name "Gene" to the first column of these reference profiles
+
+# CURRENT DATASET ---------------------------------------------------------
+# Get the list of genes from the current dataset
+seurat_obj <- breast_cancer_patients_filt_cells
+# Extract the count assay data
+counts.mat <- GetAssayData(seurat_obj, assay = "RNA", layer = "counts")
+# Extract the list of genes
+current_dataset_genes <- rownames(counts.mat)
+# Length of the list of genes
+current_dataset_genes_length <- length(breast_cancer_patients_genes)
+
+# IO PROFILE ------------------------------------------------------
 # https://raw.githubusercontent.com/Nanostring-Biostats/CosMx-Cell-Profiles/main/Human/IO/IO.profiles.csv
-# I have added a name to the first column
 io_profiles <- read_csv(
   file = here("Analysis", "metadata", "NanoString.CosMx.Human.IO.profiles.csv"),
   col_types = cols(
@@ -24,6 +36,51 @@ io_profiles <- read_csv(
     `T cell regulatory` = col_double()
   )
 )
-row_name = io_profiles$Gene
-io_profiles %<>% dplyr::select(-Gene) %>% as.matrix
-rownames(io_profiles) = row_name
+# Extract the list of genes
+io_genes_list = io_profiles$Gene
+# Length of the list of genes
+io_genes_list_length = length(io_genes_list)
+# Convert the profiles to a matrix with named rows
+io_profiles_matrix <- io_profiles %>% dplyr::select(-Gene) %>% as.matrix
+rownames(io_profiles_matrix) = io_genes_list
+
+# List of genes that are in the current dataset but not in the IO profiles
+missing_io <- dplyr::setdiff(current_dataset_genes, io_genes_list)
+# Length of the list of genes that are in the current dataset but not in the IO profiles
+missing_io_length <- length(missing_io)
+
+
+# BRAIN PROFILE -----------------------------------------------------------
+# https://raw.githubusercontent.com/Nanostring-Biostats/CosMx-Cell-Profiles/refs/heads/main/Human/Brain/Brain.profiles.csv
+brain_profiles <- read_csv(
+  file = here("Analysis", "metadata", "NanoString.CosMx.Human.Brain.profiles.csv"),
+  col_types = cols(
+    `Gene` = col_character(),
+    `Astrocyte A` = col_double(),
+    `Astrocyte B` = col_double(),
+    Endothelial = col_double(),
+    `Inhibitory neuron A` = col_double(),
+    `Inhibitory neuron B` = col_double(),
+    `Inhibitory neuron C` = col_double(),
+    `L2/3 neuron` = col_double(),
+    `L4 neuron` = col_double(),
+    `L6 neuron` = col_double(),
+    `Microglia A` = col_double(),
+    `Microglia B` = col_double(),
+    `Oligodendrocyte` = col_double(),
+    `Oligodendrocyte precursor cell` = col_double(),
+  )
+)
+# Extract the list of genes
+brain_genes_list = brain_profiles$Gene
+# Length of the list of genes
+brain_genes_list_length = length(brain_genes_list)
+# Convert the profiles to a matrix with named rows
+brain_profiles_matrix <- brain_profiles %>% dplyr::select(-Gene) %>% as.matrix
+rownames(brain_profiles_matrix) = brain_genes_list
+
+# List of genes that are in the current dataset but not in the Brain profiles
+missing_brain <- dplyr::setdiff(current_dataset_genes, brain_genes_list)
+# Length of the list of genes that are in the current dataset but not in the Brain profiles
+missing_brain_length <- length(missing_brain)
+
