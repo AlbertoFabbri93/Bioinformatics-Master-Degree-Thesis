@@ -1670,7 +1670,7 @@ for (niche in niches) {
     geom_bar(stat = "identity") +
     geom_text(
       aes(label = count),
-      vjust = -0.5,
+      vjust = -0.3,
       color = "black",
       size = 3.5
     ) +
@@ -1680,6 +1680,8 @@ for (niche in niches) {
       x = "Cell Type",
       y = "Percentage (%)"
     ) +
+    # Make space for the count number above the bars
+    expand_limits(y = max(niche_data$percentage) * 1.04) +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     scale_fill_manual(values = cells_all_phenotypes_color_palette) +
