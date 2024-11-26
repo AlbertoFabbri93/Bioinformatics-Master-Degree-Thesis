@@ -1662,16 +1662,28 @@ for (niche in niches) {
   # Create the bar plot
   niche_barplot <- niche_data %>%
     dplyr::filter(percentage >= cutoff) %>%
-    ggplot(aes(x = !!sym(cell_subcluster_col), y = percentage, fill = !!sym(cell_subcluster_col))) +
-  geom_bar(stat = "identity") +
-  labs(title = paste("Niche:", niche),
-       caption = glue("Percentage cutoff value: {cutoff}%"),
-       x = "Cell Type",
-       y = "Percentage (%)") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_manual(values = cells_all_phenotypes_color_palette) +
-  NoLegend()
+    ggplot(aes(
+      x = !!sym(cell_subcluster_col),
+      y = percentage,
+      fill = !!sym(cell_subcluster_col)
+    )) +
+    geom_bar(stat = "identity") +
+    geom_text(
+      aes(label = count),
+      vjust = -0.5,
+      color = "black",
+      size = 3.5
+    ) +
+    labs(
+      title = paste("Niche:", niche),
+      caption = glue("Percentage cutoff value: {cutoff}%"),
+      x = "Cell Type",
+      y = "Percentage (%)"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_manual(values = cells_all_phenotypes_color_palette) +
+    NoLegend()
 
   # Add the plot to the list
   niches_barplot_list[[glue::glue("Niche_{niche}_barplot")]] <- niche_barplot
