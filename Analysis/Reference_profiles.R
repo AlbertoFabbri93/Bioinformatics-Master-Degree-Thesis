@@ -49,7 +49,6 @@ missing_io <- dplyr::setdiff(current_dataset_genes, io_genes_list)
 # Length of the list of genes that are in the current dataset but not in the IO profiles
 missing_io_length <- length(missing_io)
 
-
 # BRAIN PROFILE -----------------------------------------------------------
 # https://raw.githubusercontent.com/Nanostring-Biostats/CosMx-Cell-Profiles/refs/heads/main/Human/Brain/Brain.profiles.csv
 brain_profiles <- read_csv(
@@ -84,3 +83,23 @@ missing_brain <- dplyr::setdiff(current_dataset_genes, brain_genes_list)
 # Length of the list of genes that are in the current dataset but not in the Brain profiles
 missing_brain_length <- length(missing_brain)
 
+# MERGED IO & BRAIN PROFILES ----------------------------------------------
+# Find the common genes between the two reference profiles
+io_brain_common_genes_list = dplyr::intersect(io_genes_list, brain_genes_list)
+# Length of the list of common genes
+io_brain_common_genes_list_length = length(io_brain_common_genes_list)
+
+# Find shared cell types
+shared_cell_types <- dplyr::intersect(colnames(io_profiles_matrix), colnames(brain_profiles_matrix))
+# Remove shared cell types from the brain profiles
+brain_profiles_matrix_trimmed <- brain_profiles_matrix[,!colnames(brain_profiles_matrix) %in% shared_cell_types]
+
+# Merge the IO and Brain profiles using the common genes
+io_brain_profiles_matrix <- cbind(io_profiles_matrix[io_brain_common_genes_list,], brain_profiles_matrix_trimmed[io_brain_common_genes_list,])
+# Sort columns alphabetically
+io_brain_profiles_matrix <- io_brain_profiles_matrix[,order(colnames(io_brain_profiles_matrix))]
+
+# List of genes that are in the current dataset but not in the IO and Brain profiles
+missing_io_brain <- dplyr::setdiff(current_dataset_genes, io_brain_common_genes_list)
+# Length of the list of genes that are in the current dataset but not in the IO and Brain profiles
+missing_io_brain_length <- length(missing_io_brain)
