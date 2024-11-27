@@ -1683,7 +1683,9 @@ for (niche in niches) {
     # Make space for the count number above the bars
     expand_limits(y = max(niche_data$percentage) * 1.04) +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          # Move caption to the left
+          plot.caption = element_text(hjust = 0)) +
     scale_fill_manual(values = cells_all_phenotypes_color_palette) +
     NoLegend()
 
