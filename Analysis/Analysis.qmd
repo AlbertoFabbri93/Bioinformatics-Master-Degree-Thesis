@@ -1635,7 +1635,8 @@ save_data(niches_stamps_plots, here(images_dir, glue("Stamps_with_{num_niches}_n
 # Create list to save data
 niches_statistics <- list()
 
-# Count and calculate percentage of cell types per niche
+# Count and calculate percentages of cell types inside every niche
+# The percentages of the various cells types in a niches adds up to 100%
 cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
   group_by(niches, !!sym(cell_subcluster_col)) %>%
   summarise(count = n()) %>%
