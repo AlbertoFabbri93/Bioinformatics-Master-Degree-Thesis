@@ -1655,14 +1655,26 @@ niches_barplot_list <- list()
 # Loop through each niche and create a bar plot
 for (niche in niches) {
   
-  # Filter out cells in other niches
-  niche_data <- cell_type_counts %>% dplyr::filter(niches == niche)
-  
   # Set the cutoff value for the percentage
-  cutoff <- 2
+  niche_cell_type_cutoff <- 2
+  # Filter out cells in other niches and group the cells types below the cutoff together
+  niche_data <- cell_type_counts %>%
+    dplyr::filter(niches == niche) %>%
+    dplyr::mutate(
+      !!sym(cell_subcluster_col) := ifelse(
+        percentage >= niche_cell_type_cutoff,
+        !!sym(cell_subcluster_col),
+        "Others")
+    ) %>%
+    dplyr::group_by(!!sym(cell_subcluster_col)) %>%
+    dplyr::summarize(
+      percentage = sum(percentage, na.rm = TRUE),
+      count = sum(count, na.rm = TRUE),
+      .groups = "drop"
+    )
+  
   # Create the bar plot
   niche_barplot <- niche_data %>%
-    dplyr::filter(percentage >= cutoff) %>%
     ggplot(aes(
       x = !!sym(cell_subcluster_col),
       y = percentage,
@@ -1677,7 +1689,12 @@ for (niche in niches) {
     ) +
     labs(
       title = paste("Niche:", niche),
-      caption = glue("Percentage cutoff value: {cutoff}%"),
+      subtitle = "Cell Type Distribution",
+      caption = glue(
+        "Cutoff value: {niche_cell_type_cutoff}%, the cells types with a percentage below the cutoff are grouped together as 'Others'.
+        The percentage of each cell type represents its proportion within the niche, with all percentages summing to 100%.
+        The count number above the bars represents the number of cells of each type."
+      ),
       x = "Cell Type",
       y = "Percentage (%)"
     ) +
