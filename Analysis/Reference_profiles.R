@@ -4,14 +4,14 @@
 # I have added the name "Gene" to the first column of these reference profiles
 
 # CURRENT DATASET ---------------------------------------------------------
-# Get the list of genes from the current dataset
-seurat_obj <- breast_cancer_patients_filt_cells
-# Extract the count assay data
-counts.mat <- GetAssayData(seurat_obj, assay = "RNA", layer = "counts")
-# Extract the list of genes
-current_dataset_genes <- rownames(counts.mat)
-# Length of the list of genes
-current_dataset_genes_length <- length(breast_cancer_patients_genes)
+# # Get the list of genes from the current dataset
+# seurat_obj <- breast_cancer_patients_filt_cells
+# # Extract the count assay data
+# counts.mat <- GetAssayData(seurat_obj, assay = "RNA", layer = "counts")
+# # Extract the list of genes
+# current_dataset_genes <- rownames(counts.mat)
+# # Length of the list of genes
+# current_dataset_genes_length <- length(breast_cancer_patients_genes)
 
 # IO PROFILE ------------------------------------------------------
 # https://raw.githubusercontent.com/Nanostring-Biostats/CosMx-Cell-Profiles/main/Human/IO/IO.profiles.csv
@@ -44,10 +44,10 @@ io_genes_list_length = length(io_genes_list)
 io_profiles_matrix <- io_profiles %>% dplyr::select(-Gene) %>% as.matrix
 rownames(io_profiles_matrix) = io_genes_list
 
-# List of genes that are in the current dataset but not in the IO profiles
-missing_io <- dplyr::setdiff(current_dataset_genes, io_genes_list)
-# Length of the list of genes that are in the current dataset but not in the IO profiles
-missing_io_length <- length(missing_io)
+# # List of genes that are in the current dataset but not in the IO profiles
+# missing_io <- dplyr::setdiff(current_dataset_genes, io_genes_list)
+# # Length of the list of genes that are in the current dataset but not in the IO profiles
+# missing_io_length <- length(missing_io)
 
 # BRAIN PROFILE -----------------------------------------------------------
 # https://raw.githubusercontent.com/Nanostring-Biostats/CosMx-Cell-Profiles/refs/heads/main/Human/Brain/Brain.profiles.csv
@@ -78,10 +78,10 @@ brain_genes_list_length = length(brain_genes_list)
 brain_profiles_matrix <- brain_profiles %>% dplyr::select(-Gene) %>% as.matrix
 rownames(brain_profiles_matrix) = brain_genes_list
 
-# List of genes that are in the current dataset but not in the Brain profiles
-missing_brain <- dplyr::setdiff(current_dataset_genes, brain_genes_list)
-# Length of the list of genes that are in the current dataset but not in the Brain profiles
-missing_brain_length <- length(missing_brain)
+# # List of genes that are in the current dataset but not in the Brain profiles
+# missing_brain <- dplyr::setdiff(current_dataset_genes, brain_genes_list)
+# # Length of the list of genes that are in the current dataset but not in the Brain profiles
+# missing_brain_length <- length(missing_brain)
 
 # MERGED IO & BRAIN PROFILES ----------------------------------------------
 # Find the common genes between the two reference profiles
@@ -99,7 +99,7 @@ io_brain_profiles_matrix <- cbind(io_profiles_matrix[io_brain_common_genes_list,
 # Sort columns alphabetically
 io_brain_profiles_matrix <- io_brain_profiles_matrix[,order(colnames(io_brain_profiles_matrix))]
 
-# List of genes that are in the current dataset but not in the IO and Brain profiles
-missing_io_brain <- dplyr::setdiff(current_dataset_genes, io_brain_common_genes_list)
-# Length of the list of genes that are in the current dataset but not in the IO and Brain profiles
-missing_io_brain_length <- length(missing_io_brain)
+# # List of genes that are in the current dataset but not in the IO and Brain profiles
+# missing_io_brain <- dplyr::setdiff(current_dataset_genes, io_brain_common_genes_list)
+# # Length of the list of genes that are in the current dataset but not in the IO and Brain profiles
+# missing_io_brain_length <- length(missing_io_brain)
