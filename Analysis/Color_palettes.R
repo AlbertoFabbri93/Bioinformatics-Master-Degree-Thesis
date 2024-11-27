@@ -54,5 +54,5 @@ cell_type_colors <- c(
   "Astrocyte B" = "#F9E0D9",
   # Others
   "Unknown" = "#f5ee59",
-  "Others" = "#6969B3"
+  "Other" = "#B0B0B0"
 )
