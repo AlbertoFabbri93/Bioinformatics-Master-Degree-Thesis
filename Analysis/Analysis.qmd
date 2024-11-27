@@ -275,12 +275,12 @@ if (mt_gene_count > 0) {
 The clustering performed by Insitutype  uses the raw counts, therefore it is useless to use the integrated data because Seurat does not provide an adjusted count matrix.
 
 ```{r}
-#| label: ins-metadata-columns
+#| label: ins-io-metadata-columns
 
 # Name of the column with the raw insitutype clusters
-raw_insitutype_col_name <- "patients_ist_semisup_clusters"
+raw_insitutype_col_name <- "patients_ist_io_semisup_clusters"
 # Name of the metadata column with the annotated insitutype clusters
-ann_insitutype_col_name <- "patients_ist_semisup_clusters_ann"
+ann_insitutype_io_col_name <- "patients_ist_io_semisup_clusters_ann"
 ```
 
 ### Computation
@@ -412,7 +412,7 @@ print(get_cluster_info(breast_cancer_patients_analyze, raw_insitutype_col_name))
 # Rename unknown clusters to tumor
 breast_cancer_patients_analyze@meta.data %<>%
   mutate(
-    "{ann_insitutype_col_name}" := case_match(
+    "{ann_insitutype_io_col_name}" := case_match(
       .data[[raw_insitutype_col_name]],
       c("a", "b", "c", "d", "e", "f", "g") ~ "Tumor",
       "g" ~ "Endothelial",
@@ -468,7 +468,7 @@ patients_ist_sct <- list()
 # Plot cells
 patients_ist_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
-  group.by = ann_insitutype_col_name,
+  group.by = ann_insitutype_io_col_name,
   reduction = "sct_umap_patients",
   cols = cell_type_colors)
 patients_ist_sct[["patients_ist_sct_plot"]] <- patients_ist_sct_plot
@@ -657,7 +657,7 @@ print(patients_ist_rna)
 insitutype_data <- list()
 
 # Generate summary statistics for the Insitutype clusters
-insitutype_data[["insitutype_clust_summary_patients"]] <- create_cluster_summary_per_patient(breast_cancer_patients_analyze, ann_insitutype_col_name)
+insitutype_data[["insitutype_clust_summary_patients"]] <- create_cluster_summary_per_patient(breast_cancer_patients_analyze, ann_insitutype_io_col_name)
 
 # Violin plot with the expression of panCK, CD45 and CD68 for each Insitutype clusters
 ist_clust_expr <- VlnPlot(
@@ -666,7 +666,7 @@ ist_clust_expr <- VlnPlot(
   layer = "data",
   features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
   pt.size = 0,
-  group.by = ann_insitutype_col_name,
+  group.by = ann_insitutype_io_col_name,
   combine = FALSE,
   cols = cell_type_colors
 )
@@ -675,7 +675,7 @@ insitutype_data <- c(insitutype_data, ist_clust_expr)
 
 # Calculate the mean of CD45, CD68 and PanCK for each Insitutype cluster
 ist_ann_cluster_statistics <- breast_cancer_patients_analyze@meta.data %>%
-  group_by(!!sym(ann_insitutype_col_name)) %>%
+  group_by(!!sym(ann_insitutype_io_col_name)) %>%
   summarise(
     `Mean PanCK` = mean(Mean.PanCK),
     `Mean CD45` = mean(Mean.CD45),
@@ -713,8 +713,8 @@ breast_cancer_patients_filt_cells <- AddMetaData(
   object = breast_cancer_patients_filt_cells,
   metadata = FetchData(
     object = breast_cancer_patients_analyze,
-    vars = ann_insitutype_col_name),
-  col.name = ann_insitutype_col_name
+    vars = ann_insitutype_io_col_name),
+  col.name = ann_insitutype_io_col_name
 )
 ```
 
@@ -722,15 +722,15 @@ breast_cancer_patients_filt_cells <- AddMetaData(
 #| label: insitutype-split
 #| eval: false
 # Extract the Insitutype clusters metadata column
-ist_ann_column <- FetchData(
+ist_io_ann_column <- FetchData(
   object = breast_cancer_patients_filt_cells,
-  vars = ann_insitutype_col_name)
+  vars = ann_insitutype_io_col_name)
 # Create Seurat objects with the non-cancerous cells
 breast_cancer_patients_immune_cells <- 
-  breast_cancer_patients_filt_cells[, which(x = ist_ann_column != "Tumor")]
+  breast_cancer_patients_filt_cells[, which(x = ist_io_ann_column != "Tumor")]
 # Create Seurat objects with the cancerous cells
 breast_cancer_patients_tumor_cells <-
-  breast_cancer_patients_filt_cells[, which(x = ist_ann_column == "Tumor")]
+  breast_cancer_patients_filt_cells[, which(x = ist_io_ann_column == "Other")]
 ```
 
 ## Immune cells
@@ -806,7 +806,7 @@ cell_groups <- c(
 cell_type_col <- "cell_type"
 # Create the cell type group metadata column
 breast_cancer_patients_immune_cells@meta.data %<>%
-   mutate("{cell_type_col}" := cell_groups[.data[[ann_insitutype_col_name]]])
+   mutate("{cell_type_col}" := cell_groups[.data[[ann_insitutype_io_col_name]]])
 ```
 
 ### Plotting
@@ -820,7 +820,7 @@ immune_cells_images <- list()
 # Calculate the statistics for the immune cells
 immune_cells_cluster_statistics <- breast_cancer_patients_immune_cells@meta.data %>%
   # Group by patient and cluster, then calculate percentage
-  group_by(Patient.ID, !!sym(ann_insitutype_col_name), !!sym(cell_type_col)) %>%
+  group_by(Patient.ID, !!sym(ann_insitutype_io_col_name), !!sym(cell_type_col)) %>%
   summarise(count = n(), .groups = "drop") %>%
   group_by(Patient.ID) %>%
   mutate(Percentage = count / sum(count) * 100) %>%
@@ -828,7 +828,7 @@ immune_cells_cluster_statistics <- breast_cancer_patients_immune_cells@meta.data
   # Ensure Patient.ID is a factor
   mutate(Patient.ID = as.factor(Patient.ID)) %>%
   # Calculate mean and sd for each cluster
-  group_by(!!sym(ann_insitutype_col_name)) %>%
+  group_by(!!sym(ann_insitutype_io_col_name)) %>%
   mutate(
     MeanPercentage = mean(Percentage),
     SDPercentage = sd(Percentage)
@@ -839,7 +839,7 @@ immune_cells_images[["immune_cells_cluster_statistics"]] <- immune_cells_cluster
 # Plot the percentages of the various types of cells (except cancer cells)
 immune_cells_cluster_distribution_barplot <- immune_cells_cluster_statistics %>%
   # Plot the data in a grouped barplot
-  ggplot(aes(x = !!sym(ann_insitutype_col_name), y = Percentage, fill = Patient.ID)) +
+  ggplot(aes(x = !!sym(ann_insitutype_io_col_name), y = Percentage, fill = Patient.ID)) +
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single", padding = 0), width = .8) +
   facet_grid(cols = ggplot2::vars(!!sym(cell_type_col)), scales = "free_x", space = "free") +
   theme_minimal() +
@@ -855,7 +855,7 @@ immune_cells_images[["immune_cells_cluster_distribution_barplot"]] <- immune_cel
 # Plot the distribution of immune cell clusters by patient
 immune_cells_cluster_distribution_dotplot <- immune_cells_cluster_statistics %>%
   # Plot the data
-  ggplot(aes(x = Percentage, y = !!sym(ann_insitutype_col_name))) +
+  ggplot(aes(x = Percentage, y = !!sym(ann_insitutype_io_col_name))) +
   # Add dots for each patient
   geom_point(aes(color = Patient.ID), size = 3, alpha = 0.7) +
   # Add mean percentage point
@@ -863,7 +863,7 @@ immune_cells_cluster_distribution_dotplot <- immune_cells_cluster_statistics %>%
   # Add standard deviation error bars
   geom_errorbarh(aes(xmin = MeanPercentage - SDPercentage, 
                      xmax = MeanPercentage + SDPercentage, 
-                     y = !!sym(ann_insitutype_col_name),
+                     y = !!sym(ann_insitutype_io_col_name),
                      linetype = "Standard Deviation"), 
                  color = "black", alpha = 0.7, height = 0.5, size = 0.2) +
   theme_minimal() +
@@ -890,7 +890,7 @@ immune_cells_images[["immune_cells_cluster_distribution_dotplot"]] <- immune_cel
 # Umap immune cells types
 immune_cells_type_umap_plot <- DimPlot(
   object = breast_cancer_patients_immune_cells,
-  group.by = ann_insitutype_col_name,
+  group.by = ann_insitutype_io_col_name,
   reduction = "sct_umap_immune_cells",
   cols = cell_type_colors
 )
@@ -1212,7 +1212,7 @@ heterogeneous_clusters_cells <- lapply(heterogeneous_clusters, function(cluster)
 # Give the heterogeneous clusters cells the name of the cluster
 names(heterogeneous_clusters_cells) <- heterogeneous_clusters
 # Set identity
-Idents(breast_cancer_patients_immune_cells) <- ann_insitutype_col_name
+Idents(breast_cancer_patients_immune_cells) <- ann_insitutype_io_col_name
 # Vector of immune cells clusters to highlight
 immune_clusters_show <- c("Macrophage", "Monocyte")
 # Create a list with a vector of the cells in each immune cluster
@@ -1233,7 +1233,7 @@ heterogeneous_clusters_umaps <- lapply(seq_along(heterogeneous_clusters_cells), 
     object = breast_cancer_patients_analyze,
     cells = all_cells,
     reduction = "sct_umap_patients",
-    group.by = ann_insitutype_col_name,
+    group.by = ann_insitutype_io_col_name,
     cols = cell_type_colors,
     label = FALSE
   ) + labs(title = paste("Tumor cluster", cluster_name))
@@ -1517,8 +1517,8 @@ cell_subcluster_col <- "cell_subcluster"
 # Merge the insitutype phenotyping with the tumor clusters
 breast_cancer_patients_filt_cells@meta.data %<>%
   mutate("{cell_subcluster_col}" := if_else(
-    get(ann_insitutype_col_name) != "Tumor",
-    get(ann_insitutype_col_name),
+    get(ann_insitutype_io_col_name) != "Tumor",
+    get(ann_insitutype_io_col_name),
     glue("Tumor {get(chosen_tumor_cluster)}")
 ))
 print(glue("Number of cell phenotypes (Insitutype + Tumor clusters):
@@ -1574,7 +1574,7 @@ num_niches <- 10
 breast_cancer_patients_filt_cells <- BuildNicheAssay(
   object = breast_cancer_patients_filt_cells,
   fov = "LU001FFP03",
-  group.by = ann_insitutype_col_name,
+  group.by = ann_insitutype_io_col_name,
   assay = "niche",
   cluster.name = "niches",
   # Number of niches to find, default is 4
@@ -1788,7 +1788,7 @@ spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
 cellchat <- createCellChat(
   object = data.input,
   meta = breast_cancer_patients_filt_cells@meta.data,
-  group.by = ann_insitutype_col_name,
+  group.by = ann_insitutype_io_col_name,
   datatype = "spatial",
   coordinates = spatial.locs,
   spatial.factors = spatial.factors)
