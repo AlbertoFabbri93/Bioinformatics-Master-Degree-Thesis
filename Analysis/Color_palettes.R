@@ -34,5 +34,25 @@ cell_type_colors <- c(
   # A type of cell that makes up certain types of connective tissue (supporting tissue that surrounds other tissues and organs)
   "Endothelial" = "#EDBD39",
   "Fibroblast" = "#C43522",
+  # Inhibitory neurons
+  "Inhibitory neuron A" = "#E3D26F",
+  "Inhibitory neuron B" = "#E3D26F",
+  "Inhibitory neuron C" = "#E3D26F",
+  # Excitatory neurons
+  "L2/3 neuron" = "#89808C",
+  "L4 neuron" = "#89808C",
+  "L6 neuron" = "#89808C",
+  # Glial cells
+  "Oligodendrocyte-like" = "#CEBACF",
+  "Oligodendrocyte precursor cell" = "#CEBACF",
+  "Oligodendrocyte" = "#CEBACF",
+  # Microglia cells
+  "Microglia A" = "#C08552",
+  "Microglia B" = "#C08552",
+  # Astrocyte cells
+  "Astrocyte A" = "#F9E0D9",
+  "Astrocyte B" = "#F9E0D9",
   # Others
-  "Unknown" = "#f5ee59")
+  "Unknown" = "#f5ee59",
+  "Others" = "#6969B3"
+)
