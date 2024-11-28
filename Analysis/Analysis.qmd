@@ -312,6 +312,8 @@ Idents(breast_cancer_patients_analyze) <- "Patient.ID"
 
 # Create a list to store the results of the insitutype clustering per patient
 patients_ist_semisup <- list()
+# Create a list to store the results of the cluster num search function
+patients_clusters_num_search_info <- list()
 # Set the reference profile
 reference_profile <- io_profiles_matrix
 # Insitutype clustering - Loop over every patient
@@ -356,13 +358,22 @@ for (patient_id in unique(breast_cancer_patients_analyze$Patient.ID)) {
   # check clusters and cohort numbers
   table(patient_cohort)
   
+  # Set the range to search for the optimal number of extra clusters
   clusts_search_space = 1:8
   set.seed(6)
-  clusts_num <- chooseClusterNumber(
+  # Search the optimal numer of extra clusters
+  clusters_num_search_info <- chooseClusterNumber(
     counts = patient_rna_counts,
     neg = patient_avg_neg_probes,
     fixed_profiles = reference_profile,
     n_clusts = clusts_search_space)
+  # Save the result to a list
+  patients_clusters_num_search_info[[patient_id]] <- clusters_num_search_info
+  
+  # Get the best number of clusters
+  clusts_num <- clusters_num_search_info$best_clust_number
+  # Print the best number of clusters
+  print(glue("Best number of clusters: {clusts_num}"))
   
   # Semi-supervised learning with insitutype and reference profiles
   # Insitutype needs integers, if given floating point numbers it fails with misleading errors
@@ -377,7 +388,7 @@ for (patient_id in unique(breast_cancer_patients_analyze$Patient.ID)) {
     # estimate background for you.
     bg = NULL,
     # Group the cells the do not correspond to any type in the reference matrix
-    n_clusts = clusts_num$best_clust_number,
+    n_clusts = clusts_num,
     # reference_profiles = updatedprofiles$updated_profiles,
     # Update the reference profile based on the current data
     update_reference_profiles = FALSE,
