@@ -1640,10 +1640,10 @@ save_data(niches_stamps_plots, here(images_dir, glue("Stamps_with_{num_niches}_n
 ### Statistics about niches
 
 ```{r}
-#| label: niches-statistics
+#| label: niches-statistics-calc
 
 # Create list to save data
-niches_statistics <- list()
+niches_statistics_calc <- list()
 
 # Count and calculate percentages of cell types inside every niche
 # The percentages of the various cells types in a niches adds up to 100%
@@ -1653,22 +1653,23 @@ cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
   mutate(percentage = (count / sum(count)) * 100) %>%
   arrange(.by_group = TRUE)
 # Print the cell type counts and percentages
-niches_statistics[["cell_type_counts"]] <- cell_type_counts
+niches_statistics_calc[["cell_type_counts"]] <- cell_type_counts
 
 # Get the list of unique niches
 niches <- sort(unique(breast_cancer_patients_filt_cells$niches))
 # Print the niches
 print(sort(niches))
-# Initialize an empty list to store plots
-niches_barplot_list <- list()
 
-# Loop through each niche and create a bar plot
+# Create list to save niches data
+niches_data <- list()
+
+# Loop through each niche and calculate the data for the plot
 for (niche in niches) {
   
   # Set the cutoff value for the percentage
   niche_cell_type_cutoff <- 2
   # Filter out cells in other niches and group the cells types below the cutoff together
-  niche_data <- cell_type_counts %>%
+  niche_stat <- cell_type_counts %>%
     dplyr::filter(niches == niche) %>%
     dplyr::mutate(
       !!sym(cell_subcluster_col) := ifelse(
@@ -1676,15 +1677,31 @@ for (niche in niches) {
         !!sym(cell_subcluster_col),
         "Others")
     ) %>%
-    dplyr::group_by(!!sym(cell_subcluster_col)) %>%
+    dplyr::group_by(!!sym(cell_subcluster_col), niches) %>%
     dplyr::summarize(
       percentage = sum(percentage, na.rm = TRUE),
       count = sum(count, na.rm = TRUE),
       .groups = "drop"
     )
-  
+  niches_data[[glue("Niche_{niche}_statistics")]] <- niche_stat
+}
+# Add niches data to print list
+niches_statistics_calc <- c(niches_statistics_calc, niches_data)
+
+print(niches_statistics_calc)
+```
+
+```{r}
+#| label: niches-statistics-plots
+
+# Create list to save data
+niches_statistics_plots <- list()
+
+# Loop through each niche and create a bar plot
+for (niche in niches) {
+
   # Create the bar plot
-  niche_barplot <- niche_data %>%
+  niche_barplot <- niches_data[[niche]] %>%
     ggplot(aes(
       x = !!sym(cell_subcluster_col),
       y = percentage,
@@ -1718,13 +1735,11 @@ for (niche in niches) {
     NoLegend()
 
   # Add the plot to the list
-  niches_barplot_list[[glue::glue("Niche_{niche}_barplot")]] <- niche_barplot
+  niches_statistics_plots[[glue::glue("Niche_{niche}_barplot")]] <- niche_barplot
 }
-# Save niches plots to list
-niches_statistics <- c(niches_statistics, niches_barplot_list)
 
 # Display all niches bar plots
-print(niches_statistics)
+print(niches_statistics_plots)
 ```
 
 ```{r}
