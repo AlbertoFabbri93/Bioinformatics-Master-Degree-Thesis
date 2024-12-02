@@ -1695,9 +1695,12 @@ niches_statistics_plots <- list()
 
 # Loop through each niche and create a bar plot
 for (niche in niches) {
+  
+  # Extract niche data
+  niche_data <- niches_data[[niche]]
 
   # Create the bar plot
-  niche_barplot <- niches_data[[niche]] %>%
+  niche_barplot <- niche_data %>%
     ggplot(aes(
       x = !!sym(cell_subcluster_col),
       y = percentage,
