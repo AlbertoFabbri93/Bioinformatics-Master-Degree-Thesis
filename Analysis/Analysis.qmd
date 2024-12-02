@@ -1786,7 +1786,8 @@ print(niches_patient_data)
 # Folder name
 stat_niches_dir <- glue("Statistics_{num_niches}_niches")
 # Save the plots
-save_data(niches_statistics, here(images_dir, stat_niches_dir))
+save_data(niches_statistics_calc, here(images_dir, stat_niches_dir))
+save_data(niches_statistics_plots, here(images_dir, stat_niches_dir))
 save_data(niches_patient_data, here(images_dir, stat_niches_dir))
 ```
 
