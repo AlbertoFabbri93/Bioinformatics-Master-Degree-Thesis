@@ -1440,12 +1440,9 @@ print(names(GSEA_to_plot))
 
 # Simplify values for the GSEA plots
 GSEA_plot_simply_cutoff <- c(
-  "0" = 1,
-  "2" = 0.4,
-  "3" = 1,
   "4" = 0.5,
-  "6" = 0.5,
-  "7" = 1)
+  "5" = 0.5,
+  "8" = 1)
 # Create plots and tibbles
 # Do not plot if no pathways have been found
 for (cluster in names(GSEA_to_plot)) {
