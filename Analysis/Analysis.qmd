@@ -587,7 +587,7 @@ breast_cancer_patients_analyze <- RunUMAP(
 ```
 
 ```{r}
-#| label: rna-standard-normalization-calculations
+#| label: rna-standard-normalization-plots
 
 # List to print and save
 patients_ist_rna <- list()
