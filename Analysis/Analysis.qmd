@@ -252,6 +252,11 @@ cells_to_remove <- read_csv(
 # Remove the cells from the Seurat object
 breast_cancer_patients_filt_cells <- subset(breast_cancer_patients, cells = cells_to_remove$Cell.ID)
 
+# Find cells with extremely low or high number of Features and Counts
+cells_to_remove <- WhichCells(breast_cancer_patients_filt_cells, expression = nFeature_RNA < 10 | nCount_RNA > 2500)
+# Remove the cells from the Seurat object
+breast_cancer_patients_filt_cells <- subset(breast_cancer_patients_filt_cells, cells = cells_to_remove, invert = TRUE)
+
 # Save the filtered cells object
 saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
 ```
