@@ -425,7 +425,7 @@ breast_cancer_patients_analyze@meta.data %<>%
   mutate(
     "{ann_insitutype_col_name}" := case_match(
       .data[[raw_insitutype_col_name]],
-      c("a") ~ "Other",
+      c("a") ~ "Tumor",
       .default = .data[[raw_insitutype_col_name]]
     )
   )
