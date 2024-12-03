@@ -973,11 +973,10 @@ tumor_cluster_seq_res <- glue::glue("{tumor_cluster_name}.{seq_res}")
 # After subsetting a Seurat object it is good to normalize it again
 breast_cancer_patients_tumor_cells <- SCTransform(
   breast_cancer_patients_tumor_cells,
-  vars.to.regress = c("nFeature_RNA", "nCount_RNA"),
   return.only.var.genes = FALSE,
   assay = "RNA",
   new.assay.name = "SCTtumors",
-  verbose = FALSE)
+  verbose = TRUE)
 
 # Run PCA
 breast_cancer_patients_tumor_cells <- RunPCA(
