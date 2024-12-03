@@ -2,12 +2,12 @@
 # Color vector for patients
 patient_colors <- c(
   "1" = "#D5809B",
-  "2" = "#C23621",
+  "2" = "#63AC74",
   "3" = "#5670B5",
-  "4" = "#53274E",
+  "4" = "#9ACD32",
   "5" = "#A5BBD5",
   "6" = "#315A2F",
-  "7" = "#63AC74")
+  "7" = "#C23621")
 
 # Color vector for cell types, similar cell types have similar colors
 cell_type_colors <- c(
