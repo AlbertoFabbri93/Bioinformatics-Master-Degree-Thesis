@@ -484,7 +484,18 @@ patients_ist_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
   group.by = ann_insitutype_col_name,
   reduction = "sct_umap_patients",
-  cols = cell_type_colors)
+  cols = cell_type_colors) +
+  labs(title = "Insitutype clusters") +
+  guides(
+    color = guide_legend(
+      override.aes = list(size=2),
+      ncol=1,
+      keywidth = unit(0.5, "lines"),
+      keyheight = unit(0.8, "lines"),
+      spacing = unit(0.2, "lines"))
+  ) +
+  theme_classic(base_size = 9) &
+  NoAxes()
 patients_ist_sct[["patients_ist_sct_plot"]] <- patients_ist_sct_plot
 # Plot patients
 patients_sct_plot <- DimPlot(
