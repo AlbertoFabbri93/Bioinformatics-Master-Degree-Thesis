@@ -502,7 +502,8 @@ patients_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
   group.by = "Patient.ID",
   reduction = "sct_umap_patients",
-  cols = patient_colors)
+  cols = patient_colors)  &
+  NoAxes()
 patients_ist_sct[["patients_sct_plot"]] <- patients_sct_plot
 
 Idents(breast_cancer_patients_analyze) <- "neutral"
