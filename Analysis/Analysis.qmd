@@ -810,29 +810,56 @@ saveRDS(breast_cancer_patients_immune_cells, here(objects_dir, "breast_cancer_pa
 #| label: immune-cells-groups
 
 # Define the groups
-cell_groups <- c(
-  "Macrophage" = "Myeloid",
-  "Mast cell" = "Myeloid", 
-  "Monocyte" = "Myeloid",
-  "Neutrophil" = "Myeloid", 
-  "Dendritic cell" = "Myeloid", 
-  "Plasmacytoid dendritic cell" = "Myeloid",
-  "Endothelial" = "Stromal cells", 
-  "Fibroblast" = "Stromal cells",
-  "B cell" = "Lymphocites", 
-  "T cell CD4" = "Lymphocites", 
-  "T cell CD8" = "Lymphocites", 
-  "T cell regulatory" = "Lymphocites", 
-  "NK cell" = "Lymphocites", 
-  "Plasma" = "Lymphocites", 
-  "Plasmablast" = "Lymphocites"
+cell_groups <- list(
+  "Myeloids" = c(
+    "Macrophage",
+    "Mast cell",
+    "Monocyte",
+    "Neutrophil",
+    "Dendritic cell",
+    "Plasmacytoid dendritic cell"
+  ),
+  "Stromal cells" = c(
+    "Endothelial",
+    "Fibroblast"
+  ),
+  "Lymphocites" = c(
+    "B cell",
+    "T cell CD4",
+    "T cell CD8",
+    "T cell regulatory",
+    "NK cell",
+    "Plasma",
+    "Plasmablast"
+  ),
+  "Brain cells" = c(
+    "Inhibitory neuron A",
+    "Inhibitory neuron B",
+    "Inhibitory neuron C",
+    # Excitatory neurons
+    "L2/3 neuron",
+    "L4 neuron",
+    "L6 neuron",
+    # Glial cells
+    "Oligodendrocyte-like",
+    "Oligodendrocyte precursor cell",
+    "Oligodendrocyte",
+    # Microglia cells
+    "Microglia A",
+    "Microglia B",
+    # Astrocyte cells
+    "Astrocyte A",
+    "Astrocyte B"
+  )
 )
+
+cell_groups_vector <- setNames(rep(names(cell_groups), sapply(cell_groups, length)), unlist(cell_groups))
 
 # Name of the cell type metadata column
 cell_type_col <- "cell_type"
 # Create the cell type group metadata column
 breast_cancer_patients_immune_cells@meta.data %<>%
-   mutate("{cell_type_col}" := cell_groups[.data[[ann_insitutype_col_name]]])
+   mutate("{cell_type_col}" := cell_groups_vector[.data[[ann_insitutype_col_name]]])
 ```
 
 ### Plotting
