@@ -800,8 +800,6 @@ print(insitutype_data)
 #| label: insitutype-save-data
 #| eval: false
 
-# Save insitutype list
-saveRDS(patients_ist_semisup, here(objects_dir, "patients_ist_semisup.rds"))
 # Save the Insitutype plots
 save_data(patients_ist_sct, here(images_dir, "Insitutype"))
 save_data(patients_ist_rna, here(images_dir, "Insitutype"))
@@ -812,6 +810,8 @@ save_data(insitutype_data, here(images_dir, "Insitutype"))
 #| label: insitutype-save-rds
 #| eval: false
 
+# Save insitutype list
+saveRDS(patients_ist_semisup, here(objects_dir, "patients_ist_semisup.rds"))
 # Save Seurat object
 saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patients_analyze.rds"))
 ```
