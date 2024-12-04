@@ -1445,6 +1445,65 @@ print(tumor_clust_diff_expr_genes_heatmap)
 ```
 
 ```{r}
+#| label: annotate-other-cells
+
+# Name of the other cell annotated column
+col_other_cells_ann <- "other_clusters_ann"
+col_tumor_cells_ann <- "tumor_clusters_ann"
+col_ist_merge <- "cell_final_type"
+
+# Create metadata column distinguishing between tumor and other cells
+breast_cancer_patients_tumor_cells@meta.data %<>%
+  mutate("{col_other_cells_ann}" := case_match(
+  breast_cancer_patients_tumor_cells$seurat_clusters,
+  "7" ~ "Unknown",
+  .default = "Tumor",
+))
+
+# Create a metadata column with all the tumor subclusters
+breast_cancer_patients_tumor_cells@meta.data %<>%
+  mutate("{col_tumor_cells_ann}" := case_match(
+  breast_cancer_patients_tumor_cells$seurat_clusters,
+  "7" ~ "Unknown",
+  .default = glue("Tumor {get(chosen_tumor_cluster)}"),
+))
+
+# Add other cells clusters to analyze object
+breast_cancer_patients_analyze <- AddMetaData(
+  object = breast_cancer_patients_analyze,
+  metadata = FetchData(
+    object = breast_cancer_patients_tumor_cells,
+    vars = col_other_cells_ann),
+  col.name = col_other_cells_ann
+)
+
+# Merge the other cells clusters with the insitutype clusters
+breast_cancer_patients_analyze@meta.data %<>%
+mutate("{col_ist_merge}" := if_else(
+    get(col_ist_ann) != "Other",
+    get(col_ist_ann),
+    get(col_other_cells_ann)
+))
+
+DimPlot(
+  object = breast_cancer_patients_analyze,
+  group.by = col_ist_merge,
+  reduction = "sct_umap_patients",
+  cols = cell_type_colors) +
+  labs(title = "Insitutype clusters") +
+  guides(
+    color = guide_legend(
+      override.aes = list(size=2),
+      ncol=1,
+      keywidth = unit(0.5, "lines"),
+      keyheight = unit(0.8, "lines"),
+      spacing = unit(0.2, "lines"))
+  ) +
+  theme_classic(base_size = 9) &
+  NoAxes()
+```
+
+```{r}
 #| label: tumor-markers-save
 #| eval: false
 
