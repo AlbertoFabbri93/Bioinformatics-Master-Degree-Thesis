@@ -487,12 +487,12 @@ cell_groups <- list(
 cell_groups_vector <- setNames(rep(names(cell_groups), sapply(cell_groups, length)), unlist(cell_groups))
 
 # Name of the cell type metadata column
-cell_type_col <- "cell_type"
+col_cell_group <- "cell_type"
 # Create the cell type group metadata column
 # If a cell type does not belong to any cell group, copy over the cell type
 breast_cancer_patients_analyze@meta.data %<>%
   mutate(
-    "{cell_type_col}" := ifelse(
+    "{col_cell_group}" := ifelse(
       is.na(cell_groups_vector[.data[[col_ist_ann]]]),
       .data[[col_ist_ann]],
       cell_groups_vector[.data[[col_ist_ann]]]
@@ -566,7 +566,7 @@ patients_ist_sct[["patients_ist_type_sct_plot"]] <- patients_ist_type_sct_plot
 # Plot cells by group
 patients_ist_group_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
-  group.by = cell_type_col,
+  group.by = col_cell_group,
   reduction = "sct_umap_patients",
   cols = cell_type_colors) +
   labs(title = "Insitutype cell groups") &
@@ -836,8 +836,8 @@ breast_cancer_patients_filt_cells <- AddMetaData(
   object = breast_cancer_patients_filt_cells,
   metadata = FetchData(
     object = breast_cancer_patients_analyze,
-    vars = cell_type_col),
-  col.name = cell_type_col
+    vars = col_cell_group),
+  col.name = col_cell_group
 )
 ```
 
@@ -911,7 +911,7 @@ normal_cells_images <- list()
 # Calculate the statistics for the normal cells
 normal_cells_cluster_statistics <- breast_cancer_patients_normal_cells@meta.data %>%
   # Group by patient and cluster, then calculate percentage
-  group_by(Patient.ID, !!sym(col_ist_ann), !!sym(cell_type_col)) %>%
+  group_by(Patient.ID, !!sym(col_ist_ann), !!sym(col_cell_group)) %>%
   summarise(count = n(), .groups = "drop") %>%
   group_by(Patient.ID) %>%
   mutate(Percentage = count / sum(count) * 100) %>%
@@ -932,7 +932,7 @@ normal_cells_cluster_distribution_barplot <- normal_cells_cluster_statistics %>%
   # Plot the data in a grouped barplot
   ggplot(aes(x = !!sym(col_ist_ann), y = Percentage, fill = Patient.ID)) +
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single", padding = 0), width = .8) +
-  facet_grid(cols = ggplot2::vars(!!sym(cell_type_col)), scales = "free_x", space = "free") +
+  facet_grid(cols = ggplot2::vars(!!sym(col_cell_group)), scales = "free_x", space = "free") +
   theme_minimal() +
   labs(x = NULL, 
        y = "Percentage of Cells", 
@@ -959,7 +959,7 @@ normal_cells_cluster_distribution_dotplot <- normal_cells_cluster_statistics %>%
                  color = "black", alpha = 0.7, height = 0.5, size = 0.2) +
   theme_minimal() +
   ggforce::facet_col(
-    facets = cell_type_col,
+    facets = col_cell_group,
     scales = "free_y",
     space = "free",
     drop = TRUE,
@@ -1017,7 +1017,7 @@ normal_cells_images[["normal_cells_type_umap_plot"]] <- normal_cells_type_umap_p
 # Umap normal cells groups
 normal_cells_group_umap_plot <- DimPlot(
   object = breast_cancer_patients_normal_cells,
-  group.by = cell_type_col,
+  group.by = col_cell_group,
   reduction = "sct_umap_normal_cells"
   )  +
   labs(title = "Normal cells groups") &
