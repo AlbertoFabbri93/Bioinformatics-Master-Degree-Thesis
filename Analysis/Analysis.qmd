@@ -540,8 +540,8 @@ breast_cancer_patients_analyze <- RunUMAP(
 # List to print and save
 patients_ist_sct <- list()
 
-# Plot cells
-patients_ist_sct_plot <- DimPlot(
+# Plot cells by type
+patients_ist_type_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
   group.by = ann_insitutype_col_name,
   reduction = "sct_umap_patients",
@@ -557,7 +557,18 @@ patients_ist_sct_plot <- DimPlot(
   ) +
   theme_classic(base_size = 9) &
   NoAxes()
-patients_ist_sct[["patients_ist_sct_plot"]] <- patients_ist_sct_plot
+patients_ist_sct[["patients_ist_type_sct_plot"]] <- patients_ist_type_sct_plot
+
+# Plot cells by group
+patients_ist_group_sct_plot <- DimPlot(
+  object = breast_cancer_patients_analyze,
+  group.by = cell_type_col,
+  reduction = "sct_umap_patients",
+  cols = cell_type_colors) +
+  labs(title = "Insitutype cell groups") &
+  NoAxes()
+patients_ist_sct[["patients_ist_group_sct_plot"]] <- patients_ist_group_sct_plot
+
 # Plot patients
 patients_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
@@ -670,12 +681,12 @@ breast_cancer_patients_analyze <- RunUMAP(
 patients_ist_rna <- list()
 
 # Plot cells
-patients_ist_rna_plot <- DimPlot(
+patients_ist_type_rna_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
   group.by = "patients_ist_semisup_clusters_ann",
   reduction = "rna_umap_patients",
   cols = cell_type_colors)
-patients_ist_rna[["patients_ist_rna_plot"]] <- patients_ist_rna_plot
+patients_ist_rna[["patients_ist_type_rna_plot"]] <- patients_ist_type_rna_plot
 # Plot patients
 patients_rna_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
