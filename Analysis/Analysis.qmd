@@ -288,7 +288,7 @@ raw_insitutype_col_name <- "patients_ist_semisup_clusters"
 ann_insitutype_col_name <- "patients_ist_semisup_clusters_ann"
 ```
 
-### Computation
+### Compute
 
 ```{r}
 #| label: insitutype-read-from-drive
@@ -753,7 +753,7 @@ patients_ist_rna[["Feature_plot_features_count_rna"]] <- feature_plot_feat_count
 print(patients_ist_rna)
 ```
 
-### Plots
+### Plot
 
 ```{r}
 #| label: insitutype-plots
@@ -854,7 +854,7 @@ breast_cancer_patients_tumor_cells <-
 
 ## Normal cells
 
-### Computation
+### Compute
 
 ```{r}
 #| label: normal-cells-read-from-drive
@@ -896,7 +896,7 @@ breast_cancer_patients_normal_cells <- RunUMAP(
   seed.use = 42)
 ```
 
-### Plotting
+### Plot
 
 ```{r}
 #| label: normal-cells-plotting
@@ -1039,10 +1039,9 @@ save_data(normal_cells_images, here(images_dir, "Normal cells"))
 saveRDS(breast_cancer_patients_normal_cells, here(objects_dir, "breast_cancer_patients_normal_cells.rds"))
 ```
 
-
 ## Cancerous cells
 
-### Clustering
+### Cluster
 
 ```{r}
 #| label: tumor-cells-read-from-drive
@@ -1130,7 +1129,7 @@ breast_cancer_patients_tumor_cells <- RunUMAP(
 saveRDS(breast_cancer_patients_tumor_cells, here(objects_dir, "breast_cancer_patients_tumor_cells.rds"))
 ```
 
-### Plotting
+### Plot
 
 ```{r}
 #| label: tumor-cells-plotting
