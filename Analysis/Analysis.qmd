@@ -814,7 +814,7 @@ saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patient
 
 ## Split
 
-Create two separate Seurat objects for tumor and immune cells using the Insitutype clusters
+Create two separate Seurat objects for tumor and normal cells using the Insitutype clusters
 
 ```{r}
 #| label: insitutype-add-metadata
@@ -845,31 +845,31 @@ ist_ann_column <- FetchData(
   object = breast_cancer_patients_filt_cells,
   vars = ann_insitutype_col_name)
 # Create Seurat objects with the non-cancerous cells
-breast_cancer_patients_immune_cells <- 
+breast_cancer_patients_normal_cells <- 
   breast_cancer_patients_filt_cells[, which(x = ist_ann_column != "Tumor")]
 # Create Seurat objects with the cancerous cells
 breast_cancer_patients_tumor_cells <-
   breast_cancer_patients_filt_cells[, which(x = ist_ann_column == "Tumor")]
 ```
 
-## Immune cells
+## Normal cells
 
 ### Computation
 
 ```{r}
-#| label: immune-cells-read-from-drive
+#| label: normal-cells-read-from-drive
 
-# Load immune cells object from memory
-breast_cancer_patients_immune_cells <- readRDS(here(objects_dir, "breast_cancer_patients_immune_cells.rds"))
+# Load normal cells object from memory
+breast_cancer_patients_normal_cells <- readRDS(here(objects_dir, "breast_cancer_patients_normal_cells.rds"))
 ```
 
 ```{r}
-#| label: immune-cells-computation
+#| label: normal-cells-computation
 #| eval: false
 
 # Run SCTransform
-breast_cancer_patients_immune_cells <- SCTransform(
-  breast_cancer_patients_immune_cells,
+breast_cancer_patients_normal_cells <- SCTransform(
+  breast_cancer_patients_normal_cells,
   do.correct.umi = TRUE,
   return.only.var.genes = FALSE,
   assay = "RNA",
@@ -877,22 +877,22 @@ breast_cancer_patients_immune_cells <- SCTransform(
   seed.use = 13,
   verbose = TRUE)
 # Run PCA
-breast_cancer_patients_immune_cells <- RunPCA(
-  breast_cancer_patients_immune_cells,
+breast_cancer_patients_normal_cells <- RunPCA(
+  breast_cancer_patients_normal_cells,
   assay = "SCT",
   reduction.key = "SCTPC_",
-  reduction.name = "sct_pca_immune_cells",
+  reduction.name = "sct_pca_normal_cells",
   seed.use = 42,
   verbose = TRUE)
 # Generate variance elbow plots
-generate_variance_elbow_plots(breast_cancer_patients_immune_cells, "sct_pca_immune_cells", 50)
+generate_variance_elbow_plots(breast_cancer_patients_normal_cells, "sct_pca_normal_cells", 50)
 # Run UMAP
-breast_cancer_patients_immune_cells <- RunUMAP(
-  breast_cancer_patients_immune_cells,
-  reduction = "sct_pca_immune_cells",
+breast_cancer_patients_normal_cells <- RunUMAP(
+  breast_cancer_patients_normal_cells,
+  reduction = "sct_pca_normal_cells",
   dims = 1:30,
   reduction.key = "SCTUMAP_",
-  reduction.name = "sct_umap_immune_cells",
+  reduction.name = "sct_umap_normal_cells",
   seed.use = 42)
 
 # Save the Seurat object
@@ -902,13 +902,13 @@ saveRDS(breast_cancer_patients_immune_cells, here(objects_dir, "breast_cancer_pa
 ### Plotting
 
 ```{r}
-#| label: immune-cells-plotting
+#| label: normal-cells-plotting
 
-# Create empty list to store immune cells images
-immune_cells_images <- list()
+# Create empty list to store normal cells images
+normal_cells_images <- list()
 
-# Calculate the statistics for the immune cells
-immune_cells_cluster_statistics <- breast_cancer_patients_immune_cells@meta.data %>%
+# Calculate the statistics for the normal cells
+normal_cells_cluster_statistics <- breast_cancer_patients_normal_cells@meta.data %>%
   # Group by patient and cluster, then calculate percentage
   group_by(Patient.ID, !!sym(ann_insitutype_col_name), !!sym(cell_type_col)) %>%
   summarise(count = n(), .groups = "drop") %>%
@@ -924,10 +924,10 @@ immune_cells_cluster_statistics <- breast_cancer_patients_immune_cells@meta.data
     SDPercentage = sd(Percentage)
   ) %>%
   ungroup()
-immune_cells_images[["immune_cells_cluster_statistics"]] <- immune_cells_cluster_statistics
+normal_cells_images[["normal_cells_cluster_statistics"]] <- normal_cells_cluster_statistics
 
 # Plot the percentages of the various types of cells (except cancer cells)
-immune_cells_cluster_distribution_barplot <- immune_cells_cluster_statistics %>%
+normal_cells_cluster_distribution_barplot <- normal_cells_cluster_statistics %>%
   # Plot the data in a grouped barplot
   ggplot(aes(x = !!sym(ann_insitutype_col_name), y = Percentage, fill = Patient.ID)) +
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single", padding = 0), width = .8) +
@@ -935,15 +935,15 @@ immune_cells_cluster_distribution_barplot <- immune_cells_cluster_statistics %>%
   theme_minimal() +
   labs(x = NULL, 
        y = "Percentage of Cells", 
-       title = "Immune Cells Types Distribution by Patient",
+       title = "Normal Cells Types Distribution by Patient",
        fill = "Patient") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.spacing = unit(0.8, "lines")) +
   scale_fill_manual(values = patient_colors)
-immune_cells_images[["immune_cells_cluster_distribution_barplot"]] <- immune_cells_cluster_distribution_barplot
+normal_cells_images[["normal_cells_cluster_distribution_barplot"]] <- normal_cells_cluster_distribution_barplot
 
-# Plot the distribution of immune cell clusters by patient
-immune_cells_cluster_distribution_dotplot <- immune_cells_cluster_statistics %>%
+# Plot the distribution of normal cell clusters by patient
+normal_cells_cluster_distribution_dotplot <- normal_cells_cluster_statistics %>%
   # Plot the data
   ggplot(aes(x = Percentage, y = !!sym(ann_insitutype_col_name))) +
   # Add dots for each patient
@@ -965,7 +965,7 @@ immune_cells_cluster_distribution_dotplot <- immune_cells_cluster_statistics %>%
     strip.position = "top"
   ) +
   labs(x = "Percentage of Cells", y = NULL,
-       title = "Immune Cells Types Distribution by Patient",
+       title = "Normal Cells Types Distribution by Patient",
        color = "Patient") +
   scale_color_manual(values = patient_colors) +
   scale_shape_manual(values = c("Mean" = 18), labels = c("Mean")) +
@@ -975,34 +975,63 @@ immune_cells_cluster_distribution_dotplot <- immune_cells_cluster_statistics %>%
     shape = guide_legend(order = 2, title = "Statistics"),
     linetype = guide_legend(order = 3, title = "Statistics")
   )
-immune_cells_images[["immune_cells_cluster_distribution_dotplot"]] <- immune_cells_cluster_distribution_dotplot
+normal_cells_images[["normal_cells_cluster_distribution_dotplot"]] <- normal_cells_cluster_distribution_dotplot
 
-# Umap immune cells types
-immune_cells_type_umap_plot <- DimPlot(
-  object = breast_cancer_patients_immune_cells,
+# Umap normal cells groups
+normal_cells_patients_umap_plot <- DimPlot(
+  object = breast_cancer_patients_normal_cells,
+  group.by = "Patient.ID",
+  reduction = "sct_umap_normal_cells"
+  )  +
+  labs(title = "Normal cells") +
+  guides(
+    color = guide_legend(
+      title = "Patient",
+      override.aes = list(size=2)
+    )
+  ) &
+  NoAxes()
+normal_cells_images[["normal_cells_patients_umap_plot"]] <- normal_cells_patients_umap_plot
+
+# Umap normal cells types
+normal_cells_type_umap_plot <- DimPlot(
+  object = breast_cancer_patients_normal_cells,
   group.by = ann_insitutype_col_name,
-  reduction = "sct_umap_immune_cells",
+  reduction = "sct_umap_normal_cells",
   cols = cell_type_colors
-)
-immune_cells_images[["immune_cells_type_umap_plot"]] <- immune_cells_type_umap_plot
+  )  +
+  labs(title = "Normal cells clusters") +
+  guides(
+    color = guide_legend(
+      override.aes = list(size=2),
+      ncol=1,
+      keywidth = unit(0.5, "lines"),
+      keyheight = unit(0.8, "lines"),
+      spacing = unit(0.2, "lines"))
+  ) +
+  theme_classic(base_size = 9) &
+  NoAxes()
+normal_cells_images[["normal_cells_type_umap_plot"]] <- normal_cells_type_umap_plot
 
-# Umap immune cells groups
-immune_cells_group_umap_plot <- DimPlot(
-  object = breast_cancer_patients_immune_cells,
+# Umap normal cells groups
+normal_cells_group_umap_plot <- DimPlot(
+  object = breast_cancer_patients_normal_cells,
   group.by = cell_type_col,
-  reduction = "sct_umap_immune_cells"
-)
-immune_cells_images[["immune_cells_group_umap_plot"]] <- immune_cells_group_umap_plot
+  reduction = "sct_umap_normal_cells"
+  )  +
+  labs(title = "Normal cells groups") &
+  NoAxes()
+normal_cells_images[["normal_cells_group_umap_plot"]] <- normal_cells_group_umap_plot
 
-print(immune_cells_images)
+print(normal_cells_images)
 ```
 
 ```{r}
-#| label: immune-cells-save-plots
+#| label: normal-cells-save-plots
 #| eval: false
 
-# Save the immune cells plots
-save_data(immune_cells_images, here(images_dir, "Immune cells"))
+# Save the normal cells plots
+save_data(normal_cells_images, here(images_dir, "Normal cells"))
 ```
 
 
@@ -1301,22 +1330,22 @@ heterogeneous_clusters_cells <- lapply(heterogeneous_clusters, function(cluster)
 # Give the heterogeneous clusters cells the name of the cluster
 names(heterogeneous_clusters_cells) <- heterogeneous_clusters
 # Set identity
-Idents(breast_cancer_patients_immune_cells) <- ann_insitutype_col_name
-# Vector of immune cells clusters to highlight
-immune_clusters_show <- c("Macrophage", "Monocyte")
-# Create a list with a vector of the cells in each immune cluster
-immune_clusters_show_cells <- lapply(immune_clusters_show, function(cluster) {
-  breast_cancer_patients_immune_cells %>%
+Idents(breast_cancer_patients_normal_cells) <- ann_insitutype_col_name
+# Vector of normal cells clusters to highlight
+normal_clusters_show <- c("Astrocyte A", "Astrocyte B")
+# Create a list with a vector of the cells in each normal cluster
+normal_clusters_show_cells <- lapply(normal_clusters_show, function(cluster) {
+  breast_cancer_patients_normal_cells %>%
     WhichCells(., ident = cluster)
 })
 
-# For every heterogeneous cluster, create a DimPlot with the cells from that cluster and the cells in the immune clusters
+# For every heterogeneous cluster, create a DimPlot with the cells from that cluster and the cells in the normal clusters
 heterogeneous_clusters_umaps <- lapply(seq_along(heterogeneous_clusters_cells), function(i) {
   # Retrieve the cluster name using the index
   cluster_name <- names(heterogeneous_clusters_cells)[i]
   
-  # Merge cells from the tumor and immune cells into a vector
-  all_cells <- c(heterogeneous_clusters_cells[[i]], unlist(immune_clusters_show_cells))
+  # Merge cells from the tumor and normal cells into a vector
+  all_cells <- c(heterogeneous_clusters_cells[[i]], unlist(normal_clusters_show_cells))
   
   DimPlot(
     object = breast_cancer_patients_analyze,
@@ -1585,7 +1614,7 @@ saveRDS(GSEA_results, here(objects_dir, "GSEA_results.rds"))
 
 ## Merge
 
-Merge immune and tumor subclusters
+Merge normal and tumor subclusters
 
 ```{r}
 #| label: merge-cells-metadata
@@ -1613,7 +1642,7 @@ print(glue("Number of cell phenotypes (Insitutype + Tumor clusters):
 
 ## Spatial plots of clusters
 
-Plot the spatial distribution of the cell types and label them according to the immune/tumor clusters where they belong.
+Plot the spatial distribution of the cell types and label them according to the normal/tumor clusters where they belong.
 
 ```{r}
 #| label: spatial-clusters-plots
