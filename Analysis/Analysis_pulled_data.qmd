@@ -1751,34 +1751,40 @@ save_data(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
 #| label: build-spatial-niches
 
 # To build the niche assay, Seurat uses only the spatial images and the cell phenotypes (a column from the metadata)
-# Number of niches
-num_niches <- 10
-# Build the niche assay
-breast_cancer_patients_filt_cells <- BuildNicheAssay(
-  object = breast_cancer_patients_filt_cells,
-  fov = "LU001FFP03",
-  group.by = col_ist_ann,
-  assay = "niche",
-  cluster.name = "niches",
-  # Number of niches to find, default is 4
-  niches.k = num_niches,
-  # Number of neighbors to consider, default is 20
-  # Very small neighborhoods produce sparse and noisy data
-  # Very large neighborhoods become inaccurate representations of a cell’s 3D surroundings:
-  # the area of your circular neighborhood increases with the square of the radius,
-  # but the volume of the corresponding (unobserved) 3D tissue 
-  # region increases with the cube of the radius.
-  # This means that the larger the radius, the less of your 3D neighborhood falls in
-  # the narrow tissue slide you’ve assayed, and the more it consists of unseen cells
-  # increasingly far away in the Z-dimension.
-  neighbors.k = 30)
+# Number of niche to calculate
+niches_nums <- c(6, 9)
+# Build the niche assays
+for (num in niches_nums) {
+  # Print the current number of niches being calculated
+  print(glue("Calculating {num} niches"))
+  # Build the niche assay
+  breast_cancer_patients_filt_cells <- BuildNicheAssay(
+    object = breast_cancer_patients_filt_cells,
+    fov = "LU001FFP03",
+    group.by = col_ist_ann,
+    assay = glue("niches{num}"),
+    cluster.name = glue("niches_{num}"),
+    # Number of niches to find, default is 4
+    niches.k = num,
+    # Number of neighbors to consider, default is 20
+    # Very small neighborhoods produce sparse and noisy data
+    # Very large neighborhoods become inaccurate representations of a cell’s 3D surroundings:
+    # the area of your circular neighborhood increases with the square of the radius,
+    # but the volume of the corresponding (unobserved) 3D tissue 
+    # region increases with the cube of the radius.
+    # This means that the larger the radius, the less of your 3D neighborhood falls in
+    # the narrow tissue slide you’ve assayed, and the more it consists of unseen cells
+    # increasingly far away in the Z-dimension.
+    neighbors.k = 30
+  )
+}
 ```
 
 ```{r}
 #| eval: false
 
 # Save the object
-saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, glue("breast_cancer_patients_filt_cells_{num_niches}_niches.rds")))
+saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, glue("breast_cancer_patients_filt_cells_niches.rds")))
 ```
 
 ### Spatial plots of niches
@@ -1786,15 +1792,22 @@ saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, glue("breast_cancer
 ```{r}
 #| label: spatial-niches-plots
 
+# Metadata column with the highest number of niches
+col_highest_niches_num <- glue("niches_{niches_nums[length(niches_nums)]}")
+# Number of niches to plot
+niches_plot <- niches_nums[1]
+# Metadata column with the niches to plot
+col_niches_plot <- glue("niches_{niches_plot}")
+
 # Create the color palette for the niches
 niches_color_palette <- generate_colors_lookup_table(
   breast_cancer_patients_filt_cells,
-  cluster_column_name = "niches",
+  cluster_column_name = col_highest_niches_num,
   color_palette = brewer.pal(12, name = "Set3"))
 # Create the plots with the niches for every stamp
 niches_stamps_plots <- generate_spatial_plots(
   breast_cancer_patients_filt_cells,
-  cluster_var = "niches",
+  cluster_var = col_niches_plot,
   cluster_name = "Seurat niches",
   legend_fill = "Niches",
   color_lookup_table = niches_color_palette)
@@ -1806,7 +1819,7 @@ print(niches_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_data(niches_stamps_plots, here(images_dir, glue("Stamps_with_{num_niches}_niches")))
+save_data(niches_stamps_plots, here(images_dir, glue("Stamps_with_{niches_plot}_niches")))
 ```
 
 ### Statistics about niches
@@ -1820,7 +1833,7 @@ niches_statistics_calc <- list()
 # Count and calculate percentages of cell types inside every niche
 # The percentages of the various cells types in a niches adds up to 100%
 cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
-  group_by(niches, !!sym(cell_subcluster_col)) %>%
+  group_by(!!sym(col_niches_plot), !!sym(cell_subcluster_col)) %>%
   summarise(count = n()) %>%
   mutate(percentage = (count / sum(count)) * 100) %>%
   arrange(.by_group = TRUE)
@@ -1828,7 +1841,7 @@ cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
 niches_statistics_calc[["cell_type_counts"]] <- cell_type_counts
 
 # Get the list of unique niches
-niches <- sort(unique(breast_cancer_patients_filt_cells$niches))
+niches <- sort(unique(breast_cancer_patients_filt_cells@meta.data[[col_niches_plot]]))
 # Print the niches
 print(sort(niches))
 
@@ -1842,14 +1855,14 @@ for (niche in niches) {
   niche_cell_type_cutoff <- 2
   # Filter out cells in other niches and group the cells types below the cutoff together
   niche_stat <- cell_type_counts %>%
-    dplyr::filter(niches == niche) %>%
+    dplyr::filter(!!sym(col_niches_plot) == niche) %>%
     dplyr::mutate(
       !!sym(cell_subcluster_col) := ifelse(
         percentage >= niche_cell_type_cutoff,
         !!sym(cell_subcluster_col),
         "Others")
     ) %>%
-    dplyr::group_by(!!sym(cell_subcluster_col), niches) %>%
+    dplyr::group_by(!!sym(cell_subcluster_col), !!sym(col_niches_plot)) %>%
     dplyr::summarize(
       percentage = sum(percentage, na.rm = TRUE),
       count = sum(count, na.rm = TRUE),
@@ -1925,9 +1938,9 @@ niches_patient_data <- list()
 
 # Count and calculate percentage of cell types per niche
 niches_patient_counts <- breast_cancer_patients_filt_cells@meta.data %>%
-  mutate(niches = factor(niches, levels = sort(unique(niches))),
+  mutate("{col_niches_plot}" := factor(!!sym(col_niches_plot), levels = sort(unique(!!sym(col_niches_plot)))),
          Patient.ID = factor(Patient.ID)) %>%
-  group_by(Patient.ID, niches) %>%
+  group_by(Patient.ID, !!sym(col_niches_plot)) %>%
   summarise(count = n()) %>%
   mutate(percentage = (count / sum(count)) * 100) %>%
   arrange(Patient.ID, .by_group = TRUE)
@@ -1936,7 +1949,7 @@ niches_patient_data[["niches_patient_counts"]] <- niches_patient_counts
 
 # Create the bar plot
 niches_patient_dotplot <- ggplot(niches_patient_counts,
-                                 aes(x = Patient.ID, y = percentage, color = niches)) +
+                                 aes(x = Patient.ID, y = percentage, color = !!sym(col_niches_plot))) +
   geom_rect(data = unique(niches_patient_counts["Patient.ID"]),
             aes(xmin = as.numeric(Patient.ID) - 0.4,
                 xmax = as.numeric(Patient.ID) + 0.4,
@@ -1946,6 +1959,7 @@ niches_patient_dotplot <- ggplot(niches_patient_counts,
   labs(title = paste("Niches distribution across patients"),
        x = "Patient",
        y = "Percentage (%)") +
+  guides(color = guide_legend(title = "Niche")) +
   theme_minimal() +
   theme(axis.text.x = element_text(hjust = 1)) +
   scale_color_manual(values = niches_color_palette)
@@ -1960,7 +1974,7 @@ print(niches_patient_data)
 #| eval: false
 
 # Folder name
-stat_niches_dir <- glue("Statistics_{num_niches}_niches")
+stat_niches_dir <- glue("Statistics_{niches_plot}_niches")
 # Save the plots
 save_data(niches_statistics_calc, here(images_dir, stat_niches_dir))
 save_data(niches_statistics_plots, here(images_dir, stat_niches_dir))
