@@ -574,7 +574,14 @@ patients_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
   group.by = "Patient.ID",
   reduction = "sct_umap_patients",
-  cols = patient_colors)  &
+  cols = patient_colors) +
+  labs(title = "All cells") +
+  guides(
+    color = guide_legend(
+      override.aes = list(size=2),
+      title = "Patient"
+    )
+  ) &
   NoAxes()
 patients_ist_sct[["patients_sct_plot"]] <- patients_sct_plot
 
