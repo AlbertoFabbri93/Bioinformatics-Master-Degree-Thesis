@@ -802,6 +802,12 @@ saveRDS(patients_ist_semisup, here(objects_dir, "patients_ist_semisup.rds"))
 save_data(patients_ist_sct, here(images_dir, "Insitutype"))
 save_data(patients_ist_rna, here(images_dir, "Insitutype"))
 save_data(insitutype_data, here(images_dir, "Insitutype"))
+```
+
+```{r}
+#| label: insitutype-save-rds
+#| eval: false
+
 # Save Seurat object
 saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patients_analyze.rds"))
 ```
