@@ -827,6 +827,14 @@ breast_cancer_patients_filt_cells <- AddMetaData(
     vars = ann_insitutype_col_name),
   col.name = ann_insitutype_col_name
 )
+# Add insitutype group clusters to filt cells object
+breast_cancer_patients_filt_cells <- AddMetaData(
+  object = breast_cancer_patients_filt_cells,
+  metadata = FetchData(
+    object = breast_cancer_patients_analyze,
+    vars = cell_type_col),
+  col.name = cell_type_col
+)
 ```
 
 ```{r}
