@@ -1129,14 +1129,6 @@ breast_cancer_patients_tumor_cells <- RunUMAP(
   seed.use = 42)
 ```
 
-```{r}
-#| label: tumor-cells-save-rds
-#| eval: false
-
-# Save the Seurat object
-saveRDS(breast_cancer_patients_tumor_cells, here(objects_dir, "breast_cancer_patients_tumor_cells.rds"))
-```
-
 ### Plot
 
 ```{r}
@@ -1328,7 +1320,14 @@ print(tumor_plots_to_save)
 
 # Save the tumor cells plots
 save_data(tumor_plots_to_save, here(images_dir, "Tumor clusters"))
-save_data(heterogeneous_clusters_plots, here(images_dir, "Tumor clusters"))
+```
+
+```{r}
+#| label: tumor-cells-save-rds
+#| eval: false
+
+# Save the Seurat object
+saveRDS(breast_cancer_patients_tumor_cells, here(objects_dir, "breast_cancer_patients_tumor_cells.rds"))
 ```
 
 ### Markers
