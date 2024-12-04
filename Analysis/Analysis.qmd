@@ -438,7 +438,7 @@ breast_cancer_patients_analyze@meta.data %<>%
 ### Cell groups
 
 ```{r}
-#| label: immune-cells-groups
+#| label: cells-groups
 
 # Define the groups
 cell_groups <- list(
