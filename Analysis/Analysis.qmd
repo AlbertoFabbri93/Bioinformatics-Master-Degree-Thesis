@@ -1063,9 +1063,8 @@ seq_res <- seq(0.1, 0.4, by = 0.1)
 tumor_cluster_seq_res <- glue::glue("{tumor_cluster_name}.{seq_res}")
 ```
 
-
 ```{r}
-#| label: tumor-cells-computation
+#| label: tumor-cells-compute
 #| eval: false
 
 # After subsetting a Seurat object it is good to normalize it again
@@ -1124,6 +1123,11 @@ breast_cancer_patients_tumor_cells <- RunUMAP(
   dims = tumor_cells_dims,
   verbose = TRUE,
   seed.use = 42)
+```
+
+```{r}
+#| label: tumor-cells-save-rds
+#| eval: false
 
 # Save the Seurat object
 saveRDS(breast_cancer_patients_tumor_cells, here(objects_dir, "breast_cancer_patients_tumor_cells.rds"))
