@@ -1329,7 +1329,7 @@ heterogeneous_clusters_plots <- list()
 # Set identity
 Idents(breast_cancer_patients_tumor_cells) <- chosen_tumor_cluster
 # Vector of heterogeneous clusters
-heterogeneous_clusters <- c("2", "4")
+heterogeneous_clusters <- c("7")
 # Create a list with a vector of the cells in each cluster
 heterogeneous_clusters_cells <- lapply(heterogeneous_clusters, function(cluster) {
   breast_cancer_patients_tumor_cells %>%
