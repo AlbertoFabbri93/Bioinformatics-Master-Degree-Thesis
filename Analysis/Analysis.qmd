@@ -894,9 +894,6 @@ breast_cancer_patients_normal_cells <- RunUMAP(
   reduction.key = "SCTUMAP_",
   reduction.name = "sct_umap_normal_cells",
   seed.use = 42)
-
-# Save the Seurat object
-saveRDS(breast_cancer_patients_immune_cells, here(objects_dir, "breast_cancer_patients_immune_cells.rds"))
 ```
 
 ### Plotting
@@ -1032,6 +1029,14 @@ print(normal_cells_images)
 
 # Save the normal cells plots
 save_data(normal_cells_images, here(images_dir, "Normal cells"))
+```
+
+```{r}
+#| label: normal-cells-save-rds
+#| eval: false
+
+# Save the Seurat object
+saveRDS(breast_cancer_patients_normal_cells, here(objects_dir, "breast_cancer_patients_normal_cells.rds"))
 ```
 
 
