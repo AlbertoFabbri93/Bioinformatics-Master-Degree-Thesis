@@ -539,7 +539,7 @@ breast_cancer_patients_analyze <- RunUMAP(
 ```
 
 ```{r}
-#| label: rna-sctransform-plots
+#| label: rna-sctransform-plot
 
 # List to print and save
 patients_ist_sct <- list()
@@ -643,7 +643,7 @@ print(patients_ist_sct)
 ### Standard normalization
 
 ```{r}
-#| label: rna-standard-normalization-calculations
+#| label: rna-standard-normalization-calculate
 #| eval: false
 
 # Default assay & layer
@@ -686,7 +686,7 @@ breast_cancer_patients_analyze <- RunUMAP(
 ```
 
 ```{r}
-#| label: rna-standard-normalization-plots
+#| label: rna-standard-normalization-plot
 
 # List to print and save
 patients_ist_rna <- list()
