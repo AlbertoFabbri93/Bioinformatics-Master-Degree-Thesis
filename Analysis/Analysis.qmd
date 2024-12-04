@@ -1318,61 +1318,6 @@ tumor_plots_to_save[["tumor_cluster_statistics"]] <- tumor_cluster_statistics
 print(tumor_plots_to_save)
 ```
 
-### Heterogeneous clusters
-
-```{r}
-#| label: tumor-cells-heterogeneous-clusters
-
-# Create a list to store the plots
-heterogeneous_clusters_plots <- list()
-
-# Set identity
-Idents(breast_cancer_patients_tumor_cells) <- chosen_tumor_cluster
-# Vector of heterogeneous clusters
-heterogeneous_clusters <- c("7")
-# Create a list with a vector of the cells in each cluster
-heterogeneous_clusters_cells <- lapply(heterogeneous_clusters, function(cluster) {
-  breast_cancer_patients_tumor_cells %>%
-    WhichCells(., ident = cluster)
-})
-# Give the heterogeneous clusters cells the name of the cluster
-names(heterogeneous_clusters_cells) <- heterogeneous_clusters
-# Set identity
-Idents(breast_cancer_patients_normal_cells) <- ann_insitutype_col_name
-# Vector of normal cells clusters to highlight
-normal_clusters_show <- c("Astrocyte A", "Astrocyte B")
-# Create a list with a vector of the cells in each normal cluster
-normal_clusters_show_cells <- lapply(normal_clusters_show, function(cluster) {
-  breast_cancer_patients_normal_cells %>%
-    WhichCells(., ident = cluster)
-})
-
-# For every heterogeneous cluster, create a DimPlot with the cells from that cluster and the cells in the normal clusters
-heterogeneous_clusters_umaps <- lapply(seq_along(heterogeneous_clusters_cells), function(i) {
-  # Retrieve the cluster name using the index
-  cluster_name <- names(heterogeneous_clusters_cells)[i]
-  
-  # Merge cells from the tumor and normal cells into a vector
-  all_cells <- c(heterogeneous_clusters_cells[[i]], unlist(normal_clusters_show_cells))
-  
-  DimPlot(
-    object = breast_cancer_patients_analyze,
-    cells = all_cells,
-    reduction = "sct_umap_patients",
-    group.by = ann_insitutype_col_name,
-    cols = cell_type_colors,
-    label = FALSE
-  ) + labs(title = paste("Tumor cluster", cluster_name))
-})
-# Save to list, call them heterogeneous_clusters_umaps + the cluster name
-heterogeneous_clusters_umaps <- setNames(heterogeneous_clusters_umaps, paste0("het_clusters_umap_tum_clust_", heterogeneous_clusters))
-heterogeneous_clusters_plots[["heterogeneous_clusters_umaps"]] <- heterogeneous_clusters_umaps
-
-# Print list
-print(heterogeneous_clusters_plots)
-```
-
-
 ```{r}
 #| label: tumor-cells-save-plots
 #| eval: false
