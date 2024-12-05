@@ -1935,7 +1935,7 @@ for (niche in niches) {
       size = 3.5
     ) +
     labs(
-      title = paste("Niche:", niche),
+      title = glue("Niche: {niche} of {niches_plot}"),
       subtitle = "Cell Type Distribution",
       caption = glue(
         "Cutoff value: {niche_cell_type_cutoff}%, the cells types with a percentage below the cutoff are grouped together as 'Others'.
