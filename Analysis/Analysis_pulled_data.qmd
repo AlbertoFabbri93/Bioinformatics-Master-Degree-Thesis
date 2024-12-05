@@ -1793,7 +1793,7 @@ for (num in niches_nums) {
   breast_cancer_patients_filt_cells <- BuildNicheAssay(
     object = breast_cancer_patients_filt_cells,
     fov = "LU001FFP03",
-    group.by = col_ist_ann,
+    group.by = cell_subcluster_col,
     assay = glue("niches{num}"),
     cluster.name = glue("niches_{num}"),
     # Number of niches to find, default is 4
