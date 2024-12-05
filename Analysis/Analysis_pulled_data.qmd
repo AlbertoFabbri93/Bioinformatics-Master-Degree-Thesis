@@ -1460,7 +1460,7 @@ col_ist_merge_group <- "cell_final_group"
 # Create metadata column distinguishing between tumor and other cells
 breast_cancer_patients_tumor_cells@meta.data %<>%
   mutate("{col_other_cells_ann}" := case_match(
-  breast_cancer_patients_tumor_cells$seurat_clusters,
+  get(chosen_tumor_cluster),
   "7" ~ "Unknown",
   .default = "Tumor",
 ))
@@ -1468,7 +1468,7 @@ breast_cancer_patients_tumor_cells@meta.data %<>%
 # Create a metadata column with all the tumor subclusters
 breast_cancer_patients_tumor_cells@meta.data %<>%
   mutate("{col_tumor_cells_ann}" := case_match(
-  breast_cancer_patients_tumor_cells$seurat_clusters,
+  get(chosen_tumor_cluster),
   "7" ~ "Unknown",
   .default = glue("Tumor {get(chosen_tumor_cluster)}"),
 ))
