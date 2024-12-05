@@ -1708,23 +1708,34 @@ Merge normal and tumor subclusters
 ```{r}
 #| label: merge-cells-metadata
 
-## Copy tumor clusters
-# Find common cells between tumor and original Seurat objects
-common_tumor_cells <- dplyr::intersect(rownames(breast_cancer_patients_filt_cells@meta.data), 
-                          rownames(breast_cancer_patients_tumor_cells@meta.data))
+# Add other cells clusters to analyze object
+breast_cancer_patients_filt_cells <- AddMetaData(
+  object = breast_cancer_patients_filt_cells,
+  metadata = FetchData(
+    object = breast_cancer_patients_analyze,
+    vars = col_ist_merge),
+  col.name = col_ist_merge
+)
+
 # Copy the metadata for the tumor cells
-breast_cancer_patients_filt_cells@meta.data[common_tumor_cells, chosen_tumor_cluster] <- 
-  breast_cancer_patients_tumor_cells@meta.data[common_tumor_cells, chosen_tumor_cluster]
+breast_cancer_patients_filt_cells <- AddMetaData(
+  object = breast_cancer_patients_filt_cells,
+  metadata = FetchData(
+    object = breast_cancer_patients_tumor_cells,
+    vars = col_tumor_cells_ann),
+  col.name = col_tumor_cells_ann
+)
 
 # Name of metadata column with tumor subclusters
 cell_subcluster_col <- "cell_subcluster"
 # Merge the insitutype phenotyping with the tumor clusters
 breast_cancer_patients_filt_cells@meta.data %<>%
   mutate("{cell_subcluster_col}" := if_else(
-    get(col_ist_ann) != "Tumor",
+    get(col_ist_ann) != "Other",
     get(col_ist_ann),
-    glue("Tumor {get(chosen_tumor_cluster)}")
-))
+    get(col_tumor_cells_ann)
+    )
+  )
 print(glue("Number of cell phenotypes (Insitutype + Tumor clusters):
            {length(unique(breast_cancer_patients_filt_cells@meta.data[[cell_subcluster_col]]))}"))
 ```
