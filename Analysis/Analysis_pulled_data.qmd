@@ -1444,6 +1444,10 @@ dev.off()
 print(tumor_clust_diff_expr_genes_heatmap)
 ```
 
+## All cells
+
+Combine the metadata from the various subsets and print a new UMAP with all the cells
+
 ```{r}
 #| label: annotate-other-cells
 
