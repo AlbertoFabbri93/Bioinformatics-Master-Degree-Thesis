@@ -1451,6 +1451,7 @@ print(tumor_clust_diff_expr_genes_heatmap)
 col_other_cells_ann <- "other_clusters_ann"
 col_tumor_cells_ann <- "tumor_clusters_ann"
 col_ist_merge <- "cell_final_type"
+col_ist_merge_group <- "cell_final_group"
 
 # Create metadata column distinguishing between tumor and other cells
 breast_cancer_patients_tumor_cells@meta.data %<>%
@@ -1500,6 +1501,22 @@ DimPlot(
       spacing = unit(0.2, "lines"))
   ) +
   theme_classic(base_size = 9) &
+  NoAxes()
+
+# Merge the ist cells groups with the tumor groups
+breast_cancer_patients_analyze@meta.data %<>%
+mutate("{col_ist_merge_group}" := if_else(
+    get(col_cell_group) != "Other",
+    get(col_cell_group),
+    get(col_other_cells_ann)
+))
+
+DimPlot(
+  object = breast_cancer_patients_analyze,
+  group.by = col_ist_merge_group,
+  reduction = "sct_umap_patients",
+  cols = cell_type_colors) +
+  labs(title = "Final cell groups") &
   NoAxes()
 ```
 
