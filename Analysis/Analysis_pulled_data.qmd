@@ -1368,7 +1368,7 @@ tumor_markers_to_print <- list()
 # Filter markers to get the most significant up-regulated ones per cluster
 most_significant_tumor_markers <- tumor_markers_data %>%
   group_by(cluster) %>%
-  dplyr::filter(avg_log2FC > 1) %>%
+  dplyr::filter(avg_log2FC > 1 & p_val_adj < 0.05) %>%
   slice_head(n = 10) %>%
   ungroup()
 tumor_markers_to_print[["most_significant_tumor_markers"]] <- most_significant_tumor_markers
