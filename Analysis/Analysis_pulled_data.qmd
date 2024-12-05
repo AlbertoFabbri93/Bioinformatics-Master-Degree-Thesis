@@ -1747,8 +1747,8 @@ Plot the spatial distribution of the cell types and label them according to the 
 ```{r}
 #| label: spatial-clusters-plots
 
-# Count the number of tumor clusters
-num_tumor_clusters <- length(levels(breast_cancer_patients_tumor_cells@meta.data[[chosen_tumor_cluster]]))
+# Count the number of tumor clusters by looking at the column "col_ist_merge" and counting the number of unique cluster names that starts with tumor
+num_tumor_clusters <- length(grep("^Tumor", unique(breast_cancer_patients_filt_cells@meta.data[[cell_subcluster_col]])))
 # Create a gray scale for the tumor clusters
 tumor_clusters_colors <- gray.colors(12, start = 0.2, end = 0.9)
 # Create the color palette for the niches
