@@ -625,6 +625,22 @@ patients_sct_plot <- DimPlot(
   NoAxes()
 patients_ist_sct[["patients_sct_plot"]] <- patients_sct_plot
 
+# Plot estrogen receptors
+estrogen_receptor_sct_plot <- DimPlot(
+  object = breast_cancer_patients_analyze,
+  group.by = col_patient_group,
+  reduction = "sct_umap_patients",
+  cols = patient_colors) +
+  labs(title = "All cells") +
+  guides(
+    color = guide_legend(
+      override.aes = list(size=2),
+      title = "Patient"
+    )
+  ) &
+  NoAxes()
+patients_ist_sct[["estrogen_receptor_sct_plot"]] <- estrogen_receptor_sct_plot
+
 Idents(breast_cancer_patients_analyze) <- "neutral"
 # Check the quantity and the expression level of genes after normalization
 vln_plot_feat_count_sct <- VlnPlot(
