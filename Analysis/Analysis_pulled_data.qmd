@@ -539,7 +539,7 @@ breast_cancer_patients_analyze@meta.data %<>%
 ### SCTransform
 
 ```{r}
-#| label: rna-sctransform-calculations
+#| label: rna-sctransform-calculate
 #| eval: false
 
 ## SCTransform
