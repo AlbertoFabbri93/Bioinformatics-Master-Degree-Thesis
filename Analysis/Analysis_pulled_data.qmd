@@ -1490,7 +1490,7 @@ Combine the metadata from the various subsets and print a new UMAP with all the 
 # Name of the other cell annotated column
 col_other_cells_ann <- "other_clusters_ann"
 col_tumor_cells_ann <- "tumor_clusters_ann"
-col_ist_merge <- "cell_final_type"
+col_ist_merge_type <- "cell_final_type"
 col_ist_merge_group <- "cell_final_group"
 
 # Create metadata column distinguishing between tumor and other cells
@@ -1520,7 +1520,7 @@ breast_cancer_patients_analyze <- AddMetaData(
 
 # Merge the other cells clusters with the insitutype clusters
 breast_cancer_patients_analyze@meta.data %<>%
-mutate("{col_ist_merge}" := if_else(
+mutate("{col_ist_merge_type}" := if_else(
     get(col_ist_ann) != "Other",
     get(col_ist_ann),
     get(col_other_cells_ann)
@@ -1528,7 +1528,7 @@ mutate("{col_ist_merge}" := if_else(
 
 DimPlot(
   object = breast_cancer_patients_analyze,
-  group.by = col_ist_merge,
+  group.by = col_ist_merge_type,
   reduction = "sct_umap_patients",
   cols = cell_type_colors) +
   labs(title = "Insitutype clusters") +
@@ -1749,8 +1749,8 @@ breast_cancer_patients_filt_cells <- AddMetaData(
   object = breast_cancer_patients_filt_cells,
   metadata = FetchData(
     object = breast_cancer_patients_analyze,
-    vars = col_ist_merge),
-  col.name = col_ist_merge
+    vars = col_ist_merge_type),
+  col.name = col_ist_merge_type
 )
 
 # Copy the metadata for the tumor cells
