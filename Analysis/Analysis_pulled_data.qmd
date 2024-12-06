@@ -1820,7 +1820,7 @@ save_data(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
 
 # To build the niche assay, Seurat uses only the spatial images and the cell phenotypes (a column from the metadata)
 # Number of niche to calculate
-niches_nums <- c(6, 9)
+niches_nums <- c(6, 9, 12)
 # Build the niche assays
 for (num in niches_nums) {
   # Print the current number of niches being calculated
