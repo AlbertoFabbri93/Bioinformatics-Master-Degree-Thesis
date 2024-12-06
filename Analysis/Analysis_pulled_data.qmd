@@ -1487,13 +1487,16 @@ Combine the metadata from the various subsets and print a new UMAP with all the 
 ```{r}
 #| label: annotate-other-cells
 
-# Name of the other cell annotated column
+# List to save data
+all_cells_images <- list()
+
+# Name of the metadata column
 col_other_cells_ann <- "other_clusters_ann"
 col_tumor_cells_ann <- "tumor_clusters_ann"
 col_ist_merge_type <- "cell_final_type"
 col_ist_merge_group <- "cell_final_group"
 
-# Create metadata column distinguishing between tumor and other cells
+# Create metadata column distinguishing between tumor and other (unknown) cells
 breast_cancer_patients_tumor_cells@meta.data %<>%
   mutate("{col_other_cells_ann}" := case_match(
   get(chosen_tumor_cluster),
@@ -1501,13 +1504,15 @@ breast_cancer_patients_tumor_cells@meta.data %<>%
   .default = "Tumor",
 ))
 
-# Create a metadata column with all the tumor subclusters
+# Create metadata column with all the tumor subclusters
 breast_cancer_patients_tumor_cells@meta.data %<>%
   mutate("{col_tumor_cells_ann}" := case_match(
-  get(chosen_tumor_cluster),
-  "7" ~ "Unknown",
-  .default = glue("Tumor {get(chosen_tumor_cluster)}"),
+  get(col_other_cells_ann),
+  "Tumor" ~ glue("Tumor {get(chosen_tumor_cluster)}"),
+  .default = .data[[col_other_cells_ann]],
 ))
+
+## CELL TYPES
 
 # Add other cells clusters to analyze object
 breast_cancer_patients_analyze <- AddMetaData(
@@ -1526,7 +1531,8 @@ mutate("{col_ist_merge_type}" := if_else(
     get(col_other_cells_ann)
 ))
 
-DimPlot(
+# Print UMAP with final cell types
+all_cell_types_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
   group.by = col_ist_merge_type,
   reduction = "sct_umap_patients",
@@ -1542,6 +1548,7 @@ DimPlot(
   ) +
   theme_classic(base_size = 9) &
   NoAxes()
+all_cells_images[["all_cell_types_sct_plot"]] <- all_cell_types_sct_plot
 
 # Merge the ist cells groups with the tumor groups
 breast_cancer_patients_analyze@meta.data %<>%
@@ -1551,21 +1558,52 @@ mutate("{col_ist_merge_group}" := if_else(
     get(col_other_cells_ann)
 ))
 
-DimPlot(
+# Print UMAP with final cell groups
+all_cell_groups_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
   group.by = col_ist_merge_group,
   reduction = "sct_umap_patients",
   cols = cell_type_colors) +
   labs(title = "Final cell groups") &
   NoAxes()
+all_cells_images[["all_cell_groups_sct_plot"]] <- all_cell_groups_sct_plot
+
+# Tibble with mean protein data for the cell groups
+all_cell_mean_proteins <- breast_cancer_patients_analyze@meta.data %>%
+  group_by(!!sym(col_ist_merge_group)) %>%
+  summarise(
+    `Mean PanCK` = mean(Mean.PanCK),
+    `Mean CD45` = mean(Mean.CD45),
+    `Mean CD68` = mean(Mean.CD68),
+    .groups = "drop"
+  )
+all_cells_images[["all_cell_mean_proteins"]] <- all_cell_mean_proteins
+
+plot_proteins_all_cells <- VlnPlot(
+  breast_cancer_patients_analyze,
+  assay = "SCT",
+  layer = "data",
+  features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
+  pt.size = 0,
+  group.by = col_ist_merge_group,
+  cols = cell_type_colors,
+  combine = FALSE
+)
+plot_proteins_all_cells <- lapply(
+  plot_proteins_all_cells,
+  function(x) x & NoLegend() & labs(subtitle = "Cell groups"))
+names(plot_proteins_all_cells) <- glue('Final_groups_{c("PanCK", "CD45", "CD68")}')
+all_cells_images <- c(all_cells_images, plot_proteins_all_cells)
+
+print(all_cells_images)
 ```
 
 ```{r}
-#| label: tumor-markers-save
+#| label: annotate-other-cells-save
 #| eval: false
 
 # Save the data
-save_data(tumor_markers_to_print, here(images_dir, "Tumor markers"))
+save_data(all_cells_images, here(images_dir, "All cells annotated"))
 ```
 
 ## Gene Set Enrichment Analysis
