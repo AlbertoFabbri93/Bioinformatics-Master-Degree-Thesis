@@ -1881,6 +1881,7 @@ save_data(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
 
 ```{r}
 #| label: build-spatial-niches
+#| eval: false
 
 # To build the niche assay, Seurat uses only the spatial images and the cell phenotypes (a column from the metadata)
 # Number of niche to calculate
@@ -1916,7 +1917,7 @@ for (num in niches_nums) {
 #| eval: false
 
 # Save the object
-saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, glue("breast_cancer_patients_filt_cells_niches.rds")))
+saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patients_analyze.rds"))
 ```
 
 ### Spatial plots of niches
