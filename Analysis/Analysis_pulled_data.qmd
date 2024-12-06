@@ -1079,7 +1079,7 @@ save_data(normal_cells_images, here(images_dir, "Normal cells"))
 saveRDS(breast_cancer_patients_normal_cells, here(objects_dir, "breast_cancer_patients_normal_cells.rds"))
 ```
 
-## Cancerous cells
+## Other cells
 
 ### Cluster
 
@@ -1094,13 +1094,13 @@ breast_cancer_patients_tumor_cells <- readRDS(here(objects_dir, "breast_cancer_p
 #| label: tumor-cells-metadata-columns
 
 # Name of the metadata column with the tumor clusters
-tumor_cluster_name <- "louvain_tumor_cells_clusters"
+col_other_cells_clust_res_prefix <- "other_cells_clusters_res"
 # Find clusters of tumor cells
 # The default resolution is 1, increase it to get more clusters or decrease it to get fewer clusters
 # Try a range of resolutions
 seq_res <- seq(0.1, 0.4, by = 0.1)
 # Create custom cluster names based on the actual resolution values
-tumor_cluster_seq_res <- glue::glue("{tumor_cluster_name}.{seq_res}")
+tumor_cluster_seq_res <- glue::glue("{col_other_cells_clust_res_prefix}{seq_res}")
 ```
 
 ```{r}
@@ -1204,7 +1204,7 @@ tumor_plots_to_save[["tumor_cells_patient_id_plot"]] <- tumor_cells_patient_id_p
 # Chosen resolution
 chosen_tumor_cluster_resolution <- 0.2
 # Chosen cluster
-chosen_tumor_cluster <- glue::glue("{tumor_cluster_name}.{chosen_tumor_cluster_resolution}")
+chosen_tumor_cluster <- glue::glue("{col_other_cells_clust_res_prefix}{chosen_tumor_cluster_resolution}")
 # Set identity to tumor clusters
 Idents(breast_cancer_patients_tumor_cells) <- chosen_tumor_cluster
 
