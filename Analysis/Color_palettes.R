@@ -9,6 +9,14 @@ patient_colors <- c(
   "6" = "#315A2F",
   "7" = "#C23621")
 
+# Color vector for tumor types
+palette_tumor_types <- c(
+  "ER+" = "#63AC74",
+  "HER2+" = "#D5809B",
+  "TN" = "#5670B5",
+  "ER-" = "#9A4D32"
+)
+
 # Color vector for cell types, similar cell types have similar colors
 cell_type_colors <- c(
   
