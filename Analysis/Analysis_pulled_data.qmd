@@ -256,6 +256,42 @@ breast_cancer_patients_filt_cells <- subset(breast_cancer_patients, cells = cell
 cells_to_remove <- WhichCells(breast_cancer_patients_filt_cells, expression = nFeature_RNA < 10 | nCount_RNA > 2500)
 # Remove the cells from the Seurat object
 breast_cancer_patients_filt_cells <- subset(breast_cancer_patients_filt_cells, cells = cells_to_remove, invert = TRUE)
+```
+
+```{r}
+#| label: patients-groups
+#| eval: false
+
+# Define the groups
+patient_groups <- list(
+  "ER+" = c(
+    "2",
+    "4",
+    "6"
+  ),
+  "ER-" = c(
+    "1",
+    "3",
+    "5",
+    "7"
+  )
+)
+
+patient_groups_vector <- setNames(rep(names(patient_groups), sapply(patient_groups, length)), unlist(patient_groups))
+
+# Name of the cell type metadata column
+col_patient_group <- "patient_group"
+# Create the cell type group metadata column
+# If a cell type does not belong to any cell group, copy over the cell type
+breast_cancer_patients_filt_cells@meta.data %<>%
+  mutate(
+    "{col_patient_group}" := patient_groups_vector[as.character(.data$Patient.ID)]
+  )
+```
+
+```{r}
+#| label: save-filtered-cells-object
+#| eval: false
 
 # Save the filtered cells object
 saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
