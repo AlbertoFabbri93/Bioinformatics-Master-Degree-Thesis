@@ -1,6 +1,7 @@
 ## COLOR PALETTES
+
 # Color vector for patients
-patient_colors <- c(
+palette_patients <- c(
   "1" = "#D5809B",
   "2" = "#63AC74",
   "3" = "#5670B5",
@@ -18,7 +19,7 @@ palette_tumor_types <- c(
 )
 
 # Color vector for cell types, similar cell types have similar colors
-cell_type_colors <- c(
+palette_cell_types <- c(
   
   # A type of immune cells that are made in the bone marrow and are found in the blood and in lymph tissue
   "Lymphocites" = "#30D5C8",
