@@ -1497,6 +1497,7 @@ col_ist_merge_type <- "cell_final_type"
 col_ist_merge_group <- "cell_final_group"
 
 # Create metadata column distinguishing between tumor and other (unknown) cells
+# Cluster 7 is annotated as unknown as it is not 100% clear if it is a tumor cluster
 breast_cancer_patients_tumor_cells@meta.data %<>%
   mutate("{col_other_cells_ann}" := case_match(
   get(chosen_tumor_cluster),
