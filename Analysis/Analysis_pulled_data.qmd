@@ -904,7 +904,7 @@ ist_ann_column <- FetchData(
 breast_cancer_patients_normal_cells <- 
   breast_cancer_patients_filt_cells[, which(x = ist_ann_column != "Other")]
 # Create Seurat objects with the cancerous cells
-breast_cancer_patients_tumor_cells <-
+breast_cancer_patients_other_cells <-
   breast_cancer_patients_filt_cells[, which(x = ist_ann_column == "Other")]
 ```
 
@@ -1100,49 +1100,49 @@ saveRDS(breast_cancer_patients_normal_cells, here(objects_dir, "breast_cancer_pa
 ### Cluster
 
 ```{r}
-#| label: tumor-cells-read-from-drive
+#| label: other-cells-read-from-drive
 
-# Load tumor cells object from memory
-breast_cancer_patients_tumor_cells <- readRDS(here(objects_dir, "breast_cancer_patients_tumor_cells.rds"))
+# Load other cells object from memory
+breast_cancer_patients_other_cells <- readRDS(here(objects_dir, "breast_cancer_patients_other_cells.rds"))
 ```
 
 ```{r}
-#| label: tumor-cells-metadata-columns
+#| label: other-cells-metadata-columns
 
-# Name of the metadata column with the tumor clusters
-col_other_cells_clust_res_prefix <- "other_cells_clusters_res"
-# Find clusters of tumor cells
+# Name of the metadata column with the other clusters
+col_other_cells_clust_res_prefix <- "other_cells_clusters_res_"
+# Find clusters of other cells
 # The default resolution is 1, increase it to get more clusters or decrease it to get fewer clusters
 # Try a range of resolutions
 seq_res <- seq(0.1, 0.4, by = 0.1)
 # Create custom cluster names based on the actual resolution values
-tumor_cluster_seq_res <- glue::glue("{col_other_cells_clust_res_prefix}{seq_res}")
+other_cells_cluster_seq_res <- glue::glue("{col_other_cells_clust_res_prefix}{seq_res}")
 ```
 
 ```{r}
-#| label: tumor-cells-compute
+#| label: other-cells-compute
 #| eval: false
 
 # After subsetting a Seurat object it is good to normalize it again
-breast_cancer_patients_tumor_cells <- SCTransform(
-  breast_cancer_patients_tumor_cells,
+breast_cancer_patients_other_cells <- SCTransform(
+  breast_cancer_patients_other_cells,
   return.only.var.genes = FALSE,
   assay = "RNA",
-  new.assay.name = "SCTtumors",
+  new.assay.name = "SCT",
   verbose = TRUE)
 
 # Run PCA
-breast_cancer_patients_tumor_cells <- RunPCA(
-  breast_cancer_patients_tumor_cells,
-  reduction.key = "TCPC_",
-  reduction.name = "pca_tumor_cells",
+breast_cancer_patients_other_cells <- RunPCA(
+  breast_cancer_patients_other_cells,
+  reduction.key = "PC_",
+  reduction.name = "pca",
   seed.use = 42,
   verbose = TRUE)
 # Generate variance elbow plots
-generate_variance_elbow_plots(breast_cancer_patients_tumor_cells, "pca_tumor_cells", 50)
+generate_variance_elbow_plots(breast_cancer_patients_other_cells, "pca", 50)
 # Dimension to use for subsequent analysis, decided lokking at the elbow plot
-tumor_cells_dims <- 1:23
-# Find neighbors of tumor cells
+other_cells_dims <- 1:23
+# Find neighbors of other cells
 # Number of PCA dimensions used in Seurat's FindNeighbors function
 #
 # Using MORE dimensions:
@@ -1156,27 +1156,27 @@ tumor_cells_dims <- 1:23
 # More robust to technical noise
 # May miss subtle biological signals
 # Computationally faster
-breast_cancer_patients_tumor_cells <- FindNeighbors(
-  breast_cancer_patients_tumor_cells,
-  reduction = "pca_tumor_cells",
-  dims = tumor_cells_dims,
+breast_cancer_patients_other_cells <- FindNeighbors(
+  breast_cancer_patients_other_cells,
+  reduction = "pca",
+  dims = other_cells_dims,
   verbose = TRUE)
 
 # Find clusters at different resolutions
-breast_cancer_patients_tumor_cells <- FindClusters(
-  breast_cancer_patients_tumor_cells,
+breast_cancer_patients_other_cells <- FindClusters(
+  breast_cancer_patients_other_cells,
   resolution = seq_res,
-  cluster.name = tumor_cluster_seq_res,
+  cluster.name = other_cells_cluster_seq_res,
   random.seed = 5,
   verbose = TRUE)
 
 # Run UMAP
-breast_cancer_patients_tumor_cells <- RunUMAP(
-  breast_cancer_patients_tumor_cells,
-  reduction = "pca_tumor_cells",
-  reduction.key = "TCUMAP_",
-  reduction.name = "umap_tumor_cells",
-  dims = tumor_cells_dims,
+breast_cancer_patients_other_cells <- RunUMAP(
+  breast_cancer_patients_other_cells,
+  reduction = "pca",
+  reduction.key = "UMAP_",
+  reduction.name = "umap",
+  dims = other_cells_dims,
   verbose = TRUE,
   seed.use = 42)
 ```
@@ -1184,16 +1184,16 @@ breast_cancer_patients_tumor_cells <- RunUMAP(
 ### Plot
 
 ```{r}
-#| label: tumor-cells-plot
+#| label: other-cells-plot
 
-tumor_plots_to_save <- list()
+other_cells_plots_to_save <- list()
 
-# View UMAP with tumor cells at different clustering resolutions
-tumor_cells_different_resolutions <- DimPlot(
-  breast_cancer_patients_tumor_cells,
-  reduction="umap_tumor_cells",
+# View UMAP with other cells at different clustering resolutions
+other_cells_different_resolutions <- DimPlot(
+  breast_cancer_patients_other_cells,
+  reduction="umap",
   ncol=2,
-  group.by=tumor_cluster_seq_res,
+  group.by=other_cells_cluster_seq_res,
   label=TRUE,
   ) & 
   NoLegend() & 
@@ -1202,12 +1202,12 @@ tumor_cells_different_resolutions <- DimPlot(
   plot.margin = unit(c(0, 0, 0, 0), "lines"),
   plot.title = element_text(size = 12, face = "bold")
   )
-tumor_plots_to_save[["tumor_cells_different_resolutions"]] <- tumor_cells_different_resolutions
+other_cells_plots_to_save[["other_cells_different_resolutions"]] <- other_cells_different_resolutions
 
-# View UMAP with tumor cells and patient clusters
-tumor_cells_patient_id_plot <- DimPlot(
-  breast_cancer_patients_tumor_cells,
-  reduction = "umap_tumor_cells",
+# View UMAP with other cells and patient clusters
+other_cells_patient_id_plot <- DimPlot(
+  breast_cancer_patients_other_cells,
+  reduction = "umap",
   label = TRUE,
   label.box=TRUE,
   group.by = "Patient.ID",
@@ -1215,48 +1215,50 @@ tumor_cells_patient_id_plot <- DimPlot(
   labs(title = "Patient ID clusters") &
   NoLegend() &
   NoAxes()
-tumor_plots_to_save[["tumor_cells_patient_id_plot"]] <- tumor_cells_patient_id_plot
+other_cells_plots_to_save[["other_cells_patient_id_plot"]] <- other_cells_patient_id_plot
 
 # Chosen resolution
-chosen_tumor_cluster_resolution <- 0.2
+chosen_other_cells_cluster_resolution <- 0.2
 # Chosen cluster
-chosen_tumor_cluster <- glue::glue("{col_other_cells_clust_res_prefix}{chosen_tumor_cluster_resolution}")
-# Set identity to tumor clusters
-Idents(breast_cancer_patients_tumor_cells) <- chosen_tumor_cluster
+col_other_cells_chosen_cluster <- glue::glue("{col_other_cells_clust_res_prefix}{chosen_other_cells_cluster_resolution}")
+# Set identity to other clusters
+Idents(breast_cancer_patients_other_cells) <- col_other_cells_chosen_cluster
 
 # Generate DimPlot of chosen resolution
-tumor_cells_chosen_resolution_plot <- DimPlot(
-  breast_cancer_patients_tumor_cells,
-  reduction = "umap_tumor_cells",
-  group.by = chosen_tumor_cluster,
+other_cells_chosen_resolution_plot <- DimPlot(
+  breast_cancer_patients_other_cells,
+  reduction = "umap",
+  group.by = col_other_cells_chosen_cluster,
   label = TRUE) +
-  labs(title = "Tumor Cell Clusters") &
+  labs(title = "Other Cell Clusters") &
   NoLegend() &
   NoAxes()
 # Print DimPlots side by side
-tumor_clusters_patient_clusters <- tumor_cells_patient_id_plot + tumor_cells_chosen_resolution_plot
-tumor_plots_to_save[["tumor_clusters_patient_clusters"]] <- tumor_clusters_patient_clusters
+other_cells_clusters_plus_patient_clusters <- other_cells_patient_id_plot + other_cells_chosen_resolution_plot
+other_cells_plots_to_save[["other_cells_clusters_plus_patient_clusters"]] <- other_cells_clusters_plus_patient_clusters
 
-# Generate FeaturePlot of tumor clusters
+# Generate FeaturePlot of other clusters
 # max.cutoff q95 is set so any values above the 95th percentile will be set to the 95th percentile value,
 # this helps prevent extreme outliers from dominating the color scale
 # min.cutoff 0 is set so any positive value will be highlighted
-tumor_cells_feature_plot <- (FeaturePlot(
-  object = breast_cancer_patients_tumor_cells,
-  reduction = "umap_tumor_cells",
+other_cells_feature_plot <- (FeaturePlot(
+  object = breast_cancer_patients_other_cells,
+  reduction = "umap",
   features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
   max.cutoff = "q95",
   min.cutoff = 0,
   label = TRUE) &
   NoAxes()) +
-  plot_annotation(title = "Tumor Cells")
-tumor_plots_to_save[["tumor_cells_feature_plot"]] <- tumor_cells_feature_plot
+  plot_annotation(title = "Other Cells")
+other_cells_plots_to_save[["other_cells_feature_plot"]] <- other_cells_feature_plot
 
-# Calculate statistics for the tumor clusters
-tumor_cells_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %>%
-  dplyr::rename(`Tumor cluster` = !!sym(chosen_tumor_cluster)) %>%
+# Other cells cluster tibble column name
+stat_col_other_cells_clusters <- "Other cell clusters"
+# Calculate statistics for the other cells clusters
+other_cells_cluster_statistics <- breast_cancer_patients_other_cells@meta.data %>%
+  dplyr::rename(!!sym(stat_col_other_cells_clusters) := !!sym(col_other_cells_chosen_cluster)) %>%
   # Group by patient and cluster, then calculate percentage
-  group_by(Patient.ID, `Tumor cluster`) %>%
+  group_by(Patient.ID, !!sym(stat_col_other_cells_clusters)) %>%
   summarise(Count = n(), .groups = "drop") %>%
   group_by(Patient.ID) %>%
   mutate(Percentage = Count / sum(Count) * 100) %>%
@@ -1265,58 +1267,58 @@ tumor_cells_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %
   mutate(Patient.ID = as.factor(Patient.ID))
 
 # Print tibble with the percentages of cells in each cluster per patient
-tumor_cells_percent_clust_patient <- tumor_cells_cluster_statistics %>%
+other_cells_percent_clust_patient <- other_cells_cluster_statistics %>%
   # Specify id_cols so the Count column is dropped
-  pivot_wider(names_from = Patient.ID, values_from = Percentage, id_cols = `Tumor cluster`) %>%
+  pivot_wider(names_from = Patient.ID, values_from = Percentage, id_cols = !!sym(stat_col_other_cells_clusters)) %>%
   # Round the values to two decimal places
   mutate(across(2:8, round, 2)) %>%
   # Sort according to the Tumor cluster column
-  arrange(`Tumor cluster`)
-tumor_plots_to_save[["tumor_cells_percent_clust_patient"]] <- tumor_cells_percent_clust_patient
+  arrange(!!sym(stat_col_other_cells_clusters))
+other_cells_plots_to_save[["other_cells_percent_clust_patient"]] <- other_cells_percent_clust_patient
 
 # Print tibble with the count of cells in each cluster per patient
-tumor_cells_count_clust_patient <- tumor_cells_cluster_statistics %>%
+other_cells_count_clust_patient <- other_cells_cluster_statistics %>%
   # Specify id_cols so the Percentage column is dropped
-  pivot_wider(names_from = Patient.ID, values_from = Count, id_cols = `Tumor cluster`) %>%
+  pivot_wider(names_from = Patient.ID, values_from = Count, id_cols = !!sym(stat_col_other_cells_clusters)) %>%
   # Replace NA values with 0 so that the total cells per cluster can be calculated
   mutate(across(2:8, ~replace_na(.x, 0))) %>%
-  group_by(`Tumor cluster`) %>%
+  group_by(!!sym(stat_col_other_cells_clusters)) %>%
   mutate(`Tot. clust. cells` = sum(across(where(is.numeric)))) %>%
   ungroup() %>%
-  arrange(`Tumor cluster`)
-tumor_plots_to_save[["tumor_cells_count_clust_patient"]] <- tumor_cells_count_clust_patient
+  arrange(!!sym(stat_col_other_cells_clusters))
+other_cells_plots_to_save[["other_cells_count_clust_patient"]] <- other_cells_count_clust_patient
 
-# Plot the distribution of tumor cell clusters by patient
-tumor_cells_cluster_distribution_plot <- tumor_cells_cluster_statistics %>%
+# Plot the distribution of other cell clusters by patient
+other_cells_cluster_distribution_plot <- other_cells_cluster_statistics %>%
   # Plot the data
-  ggplot(aes(x = Percentage, y = `Tumor cluster`)) +
+  ggplot(aes(x = Percentage, y = !!sym(stat_col_other_cells_clusters))) +
   # Add dots for each patient
   geom_point(aes(color = Patient.ID), size = 3, alpha = 0.7) +
   theme_minimal() +
-  labs(x = "Percentage of Cells", y = "Tumor Cluster", 
-       title = "Tumor Cell Clusters Distribution by Patient",
+  labs(x = "Percentage of Cells", y = "Cluster", 
+       title = "Other Cell Clusters Distribution by Patient",
        color = "Patient") +
   theme(legend.position = "right") +
   scale_color_brewer(palette = "Set1") +
   guides(
     color = guide_legend(order = 1),
   )
-tumor_plots_to_save[["tumor_cells_cluster_distribution_plot"]] <- tumor_cells_cluster_distribution_plot
+other_cells_plots_to_save[["other_cells_cluster_distribution_plot"]] <- other_cells_cluster_distribution_plot
 
-# Identify genes in the SCTtumors assay that start with "KRT"
+# Identify genes in the SCT assay that start with "KRT"
 # These should be the genes that contributes the most to the gene expression
 # measured by the antibody panCK
-krt_genes <- grep("^KRT", rownames(breast_cancer_patients_tumor_cells[["SCTtumors"]]), value = TRUE)
+krt_genes <- grep("^KRT", rownames(breast_cancer_patients_other_cells[["SCT"]]), value = TRUE)
 # Calculate the average expression of the KRT genes for each cell
 krt_avg_expression <- Matrix::colMeans(
-  breast_cancer_patients_tumor_cells[["SCTtumors"]]@data[krt_genes, ])
+  breast_cancer_patients_other_cells[["SCT"]]@data[krt_genes, ])
 # Add the average expression as a new metadata column
-breast_cancer_patients_tumor_cells$KRT_Avg_Expression <- krt_avg_expression
+breast_cancer_patients_other_cells$KRT_Avg_Expression <- krt_avg_expression
 
 # Visualize the co-expression of the KRT genes and the panCK antibody
 KRT_panCK_coexpression <- (FeaturePlot(
-  breast_cancer_patients_tumor_cells,
-  reduction = "umap_tumor_cells",
+  breast_cancer_patients_other_cells,
+  reduction = "umap",
   max.cutoff = "q95",
   min.cutoff = 0,
   features = c("Mean.PanCK", "KRT_Avg_Expression"),
@@ -1333,27 +1335,27 @@ KRT_panCK_coexpression[[2]] <-
 KRT_panCK_coexpression[[3]] <-
   KRT_panCK_coexpression[[3]] + 
   labs(title = "PanCK & KRT genes", subtitle = "Co-expression")
-tumor_plots_to_save[["KRT_panCK_coexpression"]] <- KRT_panCK_coexpression
+other_cells_plots_to_save[["KRT_panCK_coexpression"]] <- KRT_panCK_coexpression
 
 # Violin plot with the expression of panCK, CD45 and CD68 for each Insitutype clusters
-tumor_clust_protein_expr <- VlnPlot(
-  breast_cancer_patients_tumor_cells,
-  assay = "SCTtumors",
+other_cells_clust_protein_expr <- VlnPlot(
+  breast_cancer_patients_other_cells,
+  assay = "SCT",
   layer = "data",
   features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
   pt.size = 0,
-  group.by = chosen_tumor_cluster,
+  group.by = col_other_cells_chosen_cluster,
   combine = FALSE
 )
-tumor_clust_protein_expr <- lapply(
-  tumor_clust_protein_expr,
-  function(x) x & NoLegend() & labs(subtitle = "Tumor Clusters"))
-names(tumor_clust_protein_expr) <- glue('Other_cells_{c("PanCK", "CD45", "CD68")}')
-tumor_plots_to_save <- c(tumor_plots_to_save, tumor_clust_protein_expr)
+other_cells_clust_protein_expr <- lapply(
+  other_cells_clust_protein_expr,
+  function(x) x & NoLegend() & labs(subtitle = "Other Clusters"))
+names(other_cells_clust_protein_expr) <- glue('Other_cells_{c("PanCK", "CD45", "CD68")}')
+other_cells_plots_to_save <- c(other_cells_plots_to_save, other_cells_clust_protein_expr)
 
 # Calculate the mean of CD45, CD68 and PanCK for each Insitutype cluster
-tumor_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %>%
-  group_by(!!sym(chosen_tumor_cluster)) %>%
+other_cells_cluster_protein_statistics <- breast_cancer_patients_other_cells@meta.data %>%
+  group_by(!!sym(col_other_cells_chosen_cluster)) %>%
   summarise(
     `Mean PanCK` = mean(Mean.PanCK),
     `Mean CD45` = mean(Mean.CD45),
@@ -1361,98 +1363,110 @@ tumor_cluster_statistics <- breast_cancer_patients_tumor_cells@meta.data %>%
     .groups = "drop"
   ) %>%
   arrange(desc(`Mean PanCK`))
-tumor_plots_to_save[["tumor_cluster_statistics"]] <- tumor_cluster_statistics
+other_cells_plots_to_save[["other_cells_cluster_protein_statistics"]] <- other_cells_cluster_protein_statistics
 
-print(tumor_plots_to_save)
+print(other_cells_plots_to_save)
 ```
 
 ```{r}
-#| label: tumor-cells-save-plots
+#| label: other-cells-save-plots
 #| eval: false
 
-# Save the tumor cells plots
-save_data(tumor_plots_to_save, here(images_dir, "Tumor clusters"))
+# Save the other cells plots
+save_data(other_cells_plots_to_save, here(images_dir, "Tumor clusters"))
 ```
 
 ```{r}
-#| label: tumor-cells-save-rds
+#| label: other-cells-save-rds
 #| eval: false
 
 # Save the Seurat object
-saveRDS(breast_cancer_patients_tumor_cells, here(objects_dir, "breast_cancer_patients_tumor_cells.rds"))
+saveRDS(breast_cancer_patients_other_cells, here(objects_dir, "breast_cancer_patients_other_cells.rds"))
 ```
 
 ### Markers
 
 ```{r}
-#| label: tumor-cells-markers-read-from-drive
+#| label: other-cells-markers-read-from-drive
 
-# Load tumor cells object from memory
-tumor_markers_data <- readRDS(here(objects_dir, "tumor_markers_data.rds"))
-
+# Load other cells object from memory
+other_cells_markers_data <- readRDS(here(objects_dir, "other_cells_markers_data.rds"))
 ```
 
-
 ```{r}
-#| label: tumor-cells-markers-computation
+#| label: other-cells-markers-computation
 #| eval: false
 
-# Find all markers of the tumor clusters
+# Find all markers of the other clusters
 # GSEA needs both positive and negative markers
-tumor_markers_data <- FindAllMarkers(
-  breast_cancer_patients_tumor_cells,
+other_cells_markers_data <- FindAllMarkers(
+  breast_cancer_patients_other_cells,
   test.use = "wilcox",
-  assay = "SCTtumors",
+  assay = "SCT",
   only.pos = FALSE,
   random.seed = 5)
+```
+
+```{r}
+#| label: other-cells-markers-save
+#| eval: false
 
 # Save the data
-saveRDS(tumor_markers_data, here(objects_dir, "tumor_markers_data.rds"))
+saveRDS(other_cells_markers_data, here(objects_dir, "other_cells_markers_data.rds"))
 ```
 
 
 ```{r}
-#| label: tumor-cells-markers-plots
+#| label: other-cells-markers-plots
 
 # List with data to save
-tumor_markers_to_print <- list()
+other_cells_markers_to_print <- list()
 
 # Filter markers to get the most significant up-regulated ones per cluster
-most_significant_tumor_markers <- tumor_markers_data %>%
+most_significant_other_cells_markers <- other_cells_markers_data %>%
   group_by(cluster) %>%
   dplyr::filter(avg_log2FC > 1 & p_val_adj < 0.05) %>%
   slice_head(n = 10) %>%
   ungroup()
-tumor_markers_to_print[["most_significant_tumor_markers"]] <- most_significant_tumor_markers
+other_cells_markers_to_print[["most_significant_other_cells_markers"]] <- most_significant_other_cells_markers
 
-tumor_clust_diff_expr_genes_heatmap <- DoHeatmap(
-    breast_cancer_patients_tumor_cells,
-    features = most_significant_tumor_markers$gene,
-    assay = "SCTtumors",
+other_cells_clust_diff_expr_genes_heatmap <- DoHeatmap(
+    breast_cancer_patients_other_cells,
+    features = most_significant_other_cells_markers$gene,
+    assay = "SCT",
     label = TRUE,
     size = 2
     #group.colors = color_lookup_table,
    ) + theme(
      axis.text.y = element_text(size = 5),
    ) + labs(
-     title = paste("Tumor clusters"),
+     title = paste("Other cells clusters"),
      subtitle = "Top 10 Differentially Expressed Genes per Cluster"
    )
-tumor_markers_to_print[["tumor_clust_diff_expr_genes_heatmap"]] <- tumor_clust_diff_expr_genes_heatmap
+other_cells_markers_to_print[["other_clust_diff_expr_genes_heatmap"]] <- other_cells_clust_diff_expr_genes_heatmap
 
-print(tumor_markers_to_print)
+print(other_cells_markers_to_print)
 ```
+
 ```{r}
 library(ComplexHeatmap)
 library(circlize)
 
 # Prepare the expression matrix
 # Extract the expression data for the selected genes
-expr_matrix <- as.matrix(GetAssayData(breast_cancer_patients_tumor_cells, 
-                                       slot = "data", 
-                                       assay = "SCTtumors")[
-                                         most_significant_tumor_markers$gene, 
-                                       ])
+expr_matrix <- as.matrix(
+  GetAssayData(
+    breast_cancer_patients_other_cells, 
+    layer = "data", 
+    assay = "SCT")[
+    most_significant_other_cells_markers$gene, 
+    ]
+  )
+expr_matrix[1:5, 1:5]
+
+## scale the rows
+expr_matrix<- t(scale(t(expr_matrix)))
+expr_matrix[1:5, 1:5]
 
 # Prepare cell type annotations
 cell_types <- Idents(breast_cancer_patients_tumor_cells)
@@ -1492,8 +1506,12 @@ tumor_clust_diff_expr_genes_heatmap <- Heatmap(
 )
 
 dev.off()
+```{r}
+#| label: other-cells-markers-save
+#| eval: false
 
-print(tumor_clust_diff_expr_genes_heatmap)
+# Save the data
+save_data(other_cells_markers_to_print, here(images_dir, "Other cells markers"))
 ```
 
 ## All cells
@@ -1514,18 +1532,18 @@ col_ist_merge_group <- "cell_final_group"
 
 # Create metadata column distinguishing between tumor and other (unknown) cells
 # Cluster 7 is annotated as unknown as it is not 100% clear if it is a tumor cluster
-breast_cancer_patients_tumor_cells@meta.data %<>%
+breast_cancer_patients_other_cells@meta.data %<>%
   mutate("{col_other_cells_ann}" := case_match(
-  get(chosen_tumor_cluster),
+  get(col_other_cells_chosen_cluster),
   "7" ~ "Unknown",
   .default = "Tumor",
 ))
 
 # Create metadata column with all the tumor subclusters
-breast_cancer_patients_tumor_cells@meta.data %<>%
+breast_cancer_patients_other_cells@meta.data %<>%
   mutate("{col_tumor_cells_ann}" := case_match(
   get(col_other_cells_ann),
-  "Tumor" ~ glue("Tumor {get(chosen_tumor_cluster)}"),
+  "Tumor" ~ glue("Tumor {get(col_other_cells_chosen_cluster)}"),
   .default = .data[[col_other_cells_ann]],
 ))
 
@@ -1535,7 +1553,7 @@ breast_cancer_patients_tumor_cells@meta.data %<>%
 breast_cancer_patients_analyze <- AddMetaData(
   object = breast_cancer_patients_analyze,
   metadata = FetchData(
-    object = breast_cancer_patients_tumor_cells,
+    object = breast_cancer_patients_other_cells,
     vars = col_other_cells_ann),
   col.name = col_other_cells_ann
 )
@@ -1639,7 +1657,7 @@ GSEA_results <- readRDS(here(objects_dir, "GSEA_results.rds"))
 #| eval: false
 
 # Set default assay to RNA
-DefaultAssay(breast_cancer_patients_tumor_cells) <- "RNA"
+DefaultAssay(breast_cancer_patients_other_cells) <- "RNA"
 
 # Set the colors for the p adjust gradient bar
 max_color <- rgb(238, 197, 194, maxColorValue = 255)
@@ -1649,18 +1667,18 @@ options(enrichplot.colours = c(min_color, max_color))
 # List to save the GSEA results
 GSEA_results <- list()
 # Run GSEA for each tumor cluster
-for (cluster in levels(breast_cancer_patients_tumor_cells)) {
+for (cluster in levels(breast_cancer_patients_other_cells)) {
   tumor_cluster_number <- cluster
   print(paste("Running GSEA analysis for cluster:", tumor_cluster_number))
   
   # Get the markers for the tumor cluster
-  tumor_cluster_markers <- tumor_markers_data %>%
+  other_cells_cluster_markers <- other_cells_markers_data %>%
     dplyr::filter(cluster == tumor_cluster_number)
   
   # How to create the gene list
   # http://yulab-smu.top/biomedical-knowledge-mining-book/faq.html#genelist
   # Gene list creation
-  gsea_gene_list <- tumor_cluster_markers %>%
+  gsea_gene_list <- other_cells_cluster_markers %>%
     dplyr::mutate(rank = rank(avg_log2FC, ties.method = "random")) %>%
     dplyr::arrange(desc(rank)) %>%
     with(setNames(avg_log2FC, gene))
@@ -1695,8 +1713,8 @@ saveRDS(GSEA_results, here(objects_dir, "GSEA_results.rds"))
 
 # Create a list of gene counts for each cluster
 cluster_gene_stats <- list()
-for (cluster in levels(breast_cancer_patients_tumor_cells)) {
-  tumor_cluster_markers <- tumor_markers_data %>%
+for (cluster in levels(breast_cancer_patients_other_cells)) {
+  tumor_cluster_markers <- other_cells_markers_data %>%
     dplyr::filter(cluster == !!cluster)
   
   # Calculate gene counts and save them in a list
@@ -1799,20 +1817,11 @@ Merge normal and tumor subclusters
 ```{r}
 #| label: merge-cells-metadata
 
-# Add other cells clusters to analyze object
-breast_cancer_patients_filt_cells <- AddMetaData(
-  object = breast_cancer_patients_filt_cells,
-  metadata = FetchData(
-    object = breast_cancer_patients_analyze,
-    vars = col_ist_merge_type),
-  col.name = col_ist_merge_type
-)
-
 # Copy the metadata for the tumor cells
-breast_cancer_patients_filt_cells <- AddMetaData(
-  object = breast_cancer_patients_filt_cells,
+breast_cancer_patients_analyze <- AddMetaData(
+  object = breast_cancer_patients_analyze,
   metadata = FetchData(
-    object = breast_cancer_patients_tumor_cells,
+    object = breast_cancer_patients_other_cells,
     vars = col_tumor_cells_ann),
   col.name = col_tumor_cells_ann
 )
@@ -1820,7 +1829,7 @@ breast_cancer_patients_filt_cells <- AddMetaData(
 # Name of metadata column with tumor subclusters
 cell_subcluster_col <- "cell_subcluster"
 # Merge the insitutype phenotyping with the tumor clusters
-breast_cancer_patients_filt_cells@meta.data %<>%
+breast_cancer_patients_analyze@meta.data %<>%
   mutate("{cell_subcluster_col}" := if_else(
     get(col_ist_ann) != "Other",
     get(col_ist_ann),
@@ -1838,19 +1847,19 @@ Plot the spatial distribution of the cell types and label them according to the 
 ```{r}
 #| label: spatial-clusters-plots
 
-# Count the number of tumor clusters by looking at the column "col_ist_merge" and counting the number of unique cluster names that starts with tumor
+# Count the number of tumor clusters by looking at the column "col_ist_merge_type" and counting the number of unique cluster names that starts with tumor
 num_tumor_clusters <- length(grep("^Tumor", unique(breast_cancer_patients_filt_cells@meta.data[[cell_subcluster_col]])))
 # Create a gray scale for the tumor clusters
 tumor_clusters_colors <- gray.colors(12, start = 0.2, end = 0.9)
 # Create the color palette for the niches
 cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
-  breast_cancer_patients_filt_cells,
+  breast_cancer_patients_analyze,
   cluster_column_name = cell_subcluster_col,
   known_clusters_colors = palette_cell_types,
   color_palette = tumor_clusters_colors)
 # Create the plots with the cell types for every stamp
 cell_types_stamps_plots <- generate_spatial_plots(
-  breast_cancer_patients_filt_cells,
+  breast_cancer_patients_analyze,
   cluster_var = cell_subcluster_col,
   cluster_name = "Cell types with tumor subclusters",
   legend_fill = "Cell types",
@@ -1881,8 +1890,8 @@ for (num in niches_nums) {
   # Print the current number of niches being calculated
   print(glue("Calculating {num} niches"))
   # Build the niche assay
-  breast_cancer_patients_filt_cells <- BuildNicheAssay(
-    object = breast_cancer_patients_filt_cells,
+  breast_cancer_patients_analyze <- BuildNicheAssay(
+    object = breast_cancer_patients_analyze,
     fov = "LU001FFP03",
     group.by = cell_subcluster_col,
     assay = glue("niches{num}"),
@@ -1918,18 +1927,18 @@ saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, glue("breast_cancer
 # Metadata column with the highest number of niches
 col_highest_niches_num <- glue("niches_{niches_nums[length(niches_nums)]}")
 # Number of niches to plot
-niches_plot <- niches_nums[1]
+niches_plot <- niches_nums[3]
 # Metadata column with the niches to plot
 col_niches_plot <- glue("niches_{niches_plot}")
 
 # Create the color palette for the niches
 niches_color_palette <- generate_colors_lookup_table(
-  breast_cancer_patients_filt_cells,
+  breast_cancer_patients_analyze,
   cluster_column_name = col_highest_niches_num,
   color_palette = brewer.pal(12, name = "Set3"))
 # Create the plots with the niches for every stamp
 niches_stamps_plots <- generate_spatial_plots(
-  breast_cancer_patients_filt_cells,
+  breast_cancer_patients_analyze,
   cluster_var = col_niches_plot,
   cluster_name = "Seurat niches",
   legend_fill = "Niches",
@@ -1955,7 +1964,7 @@ niches_statistics_calc <- list()
 
 # Count and calculate percentages of cell types inside every niche
 # The percentages of the various cells types in a niches adds up to 100%
-cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
+cell_type_counts <- breast_cancer_patients_analyze@meta.data %>%
   group_by(!!sym(col_niches_plot), !!sym(cell_subcluster_col)) %>%
   summarise(count = n()) %>%
   mutate(percentage = (count / sum(count)) * 100) %>%
@@ -1964,7 +1973,7 @@ cell_type_counts <- breast_cancer_patients_filt_cells@meta.data %>%
 niches_statistics_calc[["cell_type_counts"]] <- cell_type_counts
 
 # Get the list of unique niches
-niches <- sort(unique(breast_cancer_patients_filt_cells@meta.data[[col_niches_plot]]))
+niches <- sort(unique(breast_cancer_patients_analyze@meta.data[[col_niches_plot]]))
 # Print the niches
 print(sort(niches))
 
@@ -2060,7 +2069,7 @@ print(niches_statistics_plots)
 niches_patient_data <- list()
 
 # Count and calculate percentage of cell types per niche
-niches_patient_counts <- breast_cancer_patients_filt_cells@meta.data %>%
+niches_patient_counts <- breast_cancer_patients_analyze@meta.data %>%
   mutate("{col_niches_plot}" := factor(!!sym(col_niches_plot), levels = sort(unique(!!sym(col_niches_plot)))),
          Patient.ID = factor(Patient.ID)) %>%
   group_by(Patient.ID, !!sym(col_niches_plot)) %>%
