@@ -1332,7 +1332,7 @@ tumor_clust_protein_expr <- VlnPlot(
 tumor_clust_protein_expr <- lapply(
   tumor_clust_protein_expr,
   function(x) x & NoLegend() & labs(subtitle = "Tumor Clusters"))
-names(tumor_clust_protein_expr) <- c("PanCK", "CD45", "CD68")
+names(tumor_clust_protein_expr) <- glue('Other_cells_{c("PanCK", "CD45", "CD68")}')
 tumor_plots_to_save <- c(tumor_plots_to_save, tumor_clust_protein_expr)
 
 # Calculate the mean of CD45, CD68 and PanCK for each Insitutype cluster
