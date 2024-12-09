@@ -1043,11 +1043,12 @@ normal_cells_cluster_distribution_dotplot <- normal_cells_cluster_statistics %>%
   )
 normal_cells_images[["normal_cells_cluster_distribution_dotplot"]] <- normal_cells_cluster_distribution_dotplot
 
-# Umap normal cells groups
+# Umap normal cells patients
 normal_cells_patients_umap_plot <- DimPlot(
   object = breast_cancer_patients_normal_cells,
   group.by = "Patient.ID",
-  reduction = "sct_umap_normal_cells"
+  reduction = "sct_umap_normal_cells",
+  cols = palette_patients
   )  +
   labs(title = "Normal cells") +
   guides(
@@ -1083,7 +1084,8 @@ normal_cells_images[["normal_cells_type_umap_plot"]] <- normal_cells_type_umap_p
 normal_cells_group_umap_plot <- DimPlot(
   object = breast_cancer_patients_normal_cells,
   group.by = col_cell_group,
-  reduction = "sct_umap_normal_cells"
+  reduction = "sct_umap_normal_cells",
+  cols = palette_cell_types
   )  +
   labs(title = "Normal cells groups") &
   NoAxes()
