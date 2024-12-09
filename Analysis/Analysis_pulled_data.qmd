@@ -259,6 +259,13 @@ breast_cancer_patients_filt_cells <- subset(breast_cancer_patients_filt_cells, c
 ```
 
 ```{r}
+#| label: patients-groups-metadata-columns
+
+# Name of the cell type metadata column
+col_patient_group <- "patient_group"
+```
+
+```{r}
 #| label: patients-groups
 #| eval: false
 
@@ -277,10 +284,8 @@ patient_groups <- list(
   )
 )
 
+# Transform the list into a vector
 patient_groups_vector <- setNames(rep(names(patient_groups), sapply(patient_groups, length)), unlist(patient_groups))
-
-# Name of the cell type metadata column
-col_patient_group <- "patient_group"
 # Create the cell type group metadata column
 # If a cell type does not belong to any cell group, copy over the cell type
 breast_cancer_patients_filt_cells@meta.data %<>%
@@ -474,7 +479,15 @@ breast_cancer_patients_analyze@meta.data %<>%
 ### Cell groups
 
 ```{r}
+#| label: cell-groups-metadata-columns
+
+# Name of the cell type metadata column
+col_cell_group <- "cell_group"
+```
+
+```{r}
 #| label: cells-groups
+#| eval: false
 
 # Define the groups
 cell_groups <- list(
@@ -520,10 +533,8 @@ cell_groups <- list(
   )
 )
 
+# Transform the list into a vector
 cell_groups_vector <- setNames(rep(names(cell_groups), sapply(cell_groups, length)), unlist(cell_groups))
-
-# Name of the cell type metadata column
-col_cell_group <- "cell_group"
 # Create the cell type group metadata column
 # If a cell type does not belong to any cell group, copy over the cell type
 breast_cancer_patients_analyze@meta.data %<>%
@@ -874,6 +885,7 @@ Create two separate Seurat objects for tumor and normal cells using the Insituty
 
 ```{r}
 #| label: insitutype-add-metadata
+#| eval: false
 
 # Add insitutype annotated clusters to filt cells object
 breast_cancer_patients_filt_cells <- AddMetaData(
@@ -896,6 +908,7 @@ breast_cancer_patients_filt_cells <- AddMetaData(
 ```{r}
 #| label: insitutype-split
 #| eval: false
+
 # Extract the Insitutype clusters metadata column
 ist_ann_column <- FetchData(
   object = breast_cancer_patients_filt_cells,
