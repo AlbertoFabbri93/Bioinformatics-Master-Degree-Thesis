@@ -24,7 +24,7 @@ palette_tumor_types <- c(
 palette_cell_types <- c(
   
   # A type of immune cells that are made in the bone marrow and are found in the blood and in lymph tissue
-  "Lymphocites" = "#30D5C8",
+  "Lymphocytes" = "#30D5C8",
     "B cell" = "#D4819C",
     "NK cell" = "#7790BD",
     "Plasma" = "#955C97",

@@ -504,7 +504,7 @@ cell_groups <- list(
     "Endothelial",
     "Fibroblast"
   ),
-  "Lymphocites" = c(
+  "Lymphocytes" = c(
     "B cell",
     "T cell CD4",
     "T cell CD8",
