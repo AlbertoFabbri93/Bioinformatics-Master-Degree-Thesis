@@ -2,13 +2,15 @@
 
 # Color vector for patients
 palette_patients <- c(
-  "1" = "#D5809B",
-  "2" = "#63AC74",
-  "3" = "#5670B5",
-  "4" = "#9ACD32",
-  "5" = "#A5BBD5",
-  "6" = "#315A2F",
-  "7" = "#C23621")
+  
+  "1" = "#ef476f",
+  "2" = "#ffd166",
+  "3" = "#06d6a0",
+  "4" = "#118ab2",
+  "5" = "#073b4c",
+  "6" = "#84a59d",
+  "7" = "#8187dc")
+
 
 # Color vector for tumor types
 palette_tumor_types <- c(
