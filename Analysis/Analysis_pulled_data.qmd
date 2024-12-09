@@ -45,14 +45,15 @@ To run this file it is necessary to have `quarto` installed. `quarto` is a softw
 # Work with single cell and spatial omics data
 library("Seurat")
 
-# Do not import these future symbols because they conflict with the zeallot package
-library (future, exclude = c("%->%", "%<-%"));
-# Parallelize the computation with several worker processes that will run in their own R session
-plan("multisession", workers = 6)
-# Set the maximum size of the future globals
-options(future.globals.maxSize = 6.5 * 2^30)
-# Ensure proper random number seeding globally
-options(future.seed = TRUE)
+# The future package is not supported in Seurat v5
+# # Do not import these future symbols because they conflict with the zeallot package
+# library (future, exclude = c("%->%", "%<-%"));
+# # Parallelize the computation with several worker processes that will run in their own R session
+# plan("multisession", workers = 6)
+# # Set the maximum size of the future globals
+# options(future.globals.maxSize = 6.5 * 2^30)
+# # Ensure proper random number seeding globally
+# options(future.seed = TRUE)
 
 ###### TIDYVERSE ######
 # Data manipulation
