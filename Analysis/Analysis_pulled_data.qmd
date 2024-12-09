@@ -1535,16 +1535,18 @@ save_data(other_cells_markers_to_print, here(images_dir, "Other cells markers"))
 Combine the metadata from the various subsets and print a new UMAP with all the cells
 
 ```{r}
-#| label: annotate-other-cells
-
-# List to save data
-all_cells_images <- list()
+#| label: all-cells-metadata-columns
 
 # Name of the metadata column
 col_other_cells_ann <- "other_clusters_ann"
 col_tumor_cells_ann <- "tumor_clusters_ann"
 col_ist_merge_type <- "cell_final_type"
 col_ist_merge_group <- "cell_final_group"
+```
+
+```{r}
+#| label: all-cells-metadata-add
+#| eval: false
 
 # Create metadata column distinguishing between tumor and other (unknown) cells
 # Cluster 7 is annotated as unknown as it is not 100% clear if it is a tumor cluster
@@ -1582,6 +1584,21 @@ mutate("{col_ist_merge_type}" := if_else(
     get(col_other_cells_ann)
 ))
 
+# Merge the ist cells groups with the tumor groups
+breast_cancer_patients_analyze@meta.data %<>%
+mutate("{col_ist_merge_group}" := if_else(
+    get(col_cell_group) != "Other",
+    get(col_cell_group),
+    get(col_other_cells_ann)
+))
+```
+
+```{r}
+#| label: all-cells-plot
+
+# List to save data
+all_cells_images <- list()
+
 # Print UMAP with final cell types
 all_cell_types_sct_plot <- DimPlot(
   object = breast_cancer_patients_analyze,
@@ -1600,14 +1617,6 @@ all_cell_types_sct_plot <- DimPlot(
   theme_classic(base_size = 9) &
   NoAxes()
 all_cells_images[["all_cell_types_sct_plot"]] <- all_cell_types_sct_plot
-
-# Merge the ist cells groups with the tumor groups
-breast_cancer_patients_analyze@meta.data %<>%
-mutate("{col_ist_merge_group}" := if_else(
-    get(col_cell_group) != "Other",
-    get(col_cell_group),
-    get(col_other_cells_ann)
-))
 
 # Print UMAP with final cell groups
 all_cell_groups_sct_plot <- DimPlot(
@@ -1650,7 +1659,7 @@ print(all_cells_images)
 ```
 
 ```{r}
-#| label: annotate-other-cells-save
+#| label: all-cells-save-data
 #| eval: false
 
 # Save the data
