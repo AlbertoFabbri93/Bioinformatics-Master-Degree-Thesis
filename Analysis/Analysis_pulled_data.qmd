@@ -1546,7 +1546,6 @@ col_ist_merge_group <- "cell_final_group"
 
 ```{r}
 #| label: all-cells-metadata-add
-#| eval: false
 
 # Create metadata column distinguishing between tumor and other (unknown) cells
 # Cluster 7 is annotated as unknown as it is not 100% clear if it is a tumor cluster
@@ -1840,7 +1839,15 @@ saveRDS(GSEA_results, here(objects_dir, "GSEA_results.rds"))
 Merge normal and tumor subclusters
 
 ```{r}
-#| label: merge-cells-metadata
+#| label: merge-cells-metadata-columns
+
+# Name of metadata column with all cell types and tumor subtypes
+col_cell_tumor_cluster_subtype <- "cell_final_subtype"
+```
+
+````{r}
+#| label: merge-cells-metadata-add
+#| eval: false
 
 # Copy the metadata for the tumor cells
 breast_cancer_patients_analyze <- AddMetaData(
@@ -1851,18 +1858,27 @@ breast_cancer_patients_analyze <- AddMetaData(
   col.name = col_tumor_cells_ann
 )
 
-# Name of metadata column with tumor subclusters
-cell_subcluster_col <- "cell_subcluster"
+
 # Merge the insitutype phenotyping with the tumor clusters
 breast_cancer_patients_analyze@meta.data %<>%
-  mutate("{cell_subcluster_col}" := if_else(
+  mutate("{col_cell_tumor_cluster_subtype}" := if_else(
     get(col_ist_ann) != "Other",
     get(col_ist_ann),
     get(col_tumor_cells_ann)
     )
   )
-print(glue("Number of cell phenotypes (Insitutype + Tumor clusters):
-           {length(unique(breast_cancer_patients_filt_cells@meta.data[[cell_subcluster_col]]))}"))
+```
+
+```{r}
+#| label: merge-cells-info
+
+# Vector with cell subtypes
+cell_subtypes <- unique(breast_cancer_patients_analyze@meta.data[[col_cell_tumor_cluster_subtype]])
+
+# Print the number of cell phenotypes including tumor subtypes
+print(glue("Cell phenotypes (Insitutype + Tumor clusters):"))
+print(cell_subtypes)
+print(glue("Number: {length(cell_subtypes)}"))
 ```
 
 ## Spatial plots of clusters
@@ -1873,19 +1889,19 @@ Plot the spatial distribution of the cell types and label them according to the 
 #| label: spatial-clusters-plots
 
 # Count the number of tumor clusters by looking at the column "col_ist_merge_type" and counting the number of unique cluster names that starts with tumor
-num_tumor_clusters <- length(grep("^Tumor", unique(breast_cancer_patients_filt_cells@meta.data[[cell_subcluster_col]])))
+num_tumor_clusters <- length(grep("^Tumor", unique(breast_cancer_patients_filt_cells@meta.data[[col_cell_tumor_cluster_subtype]])))
 # Create a gray scale for the tumor clusters
 tumor_clusters_colors <- gray.colors(12, start = 0.2, end = 0.9)
 # Create the color palette for the niches
 cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
   breast_cancer_patients_analyze,
-  cluster_column_name = cell_subcluster_col,
+  cluster_column_name = col_cell_tumor_cluster_subtype,
   known_clusters_colors = palette_cell_types,
   color_palette = tumor_clusters_colors)
 # Create the plots with the cell types for every stamp
 cell_types_stamps_plots <- generate_spatial_plots(
   breast_cancer_patients_analyze,
-  cluster_var = cell_subcluster_col,
+  cluster_var = col_cell_tumor_cluster_subtype,
   cluster_name = "Cell types with tumor subclusters",
   legend_fill = "Cell types",
   color_lookup_table = cells_all_phenotypes_color_palette)
@@ -1905,12 +1921,17 @@ save_data(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
 ### Build niches
 
 ```{r}
-#| label: build-spatial-niches
-#| eval: false
+#| label: build-niches-params
 
 # To build the niche assay, Seurat uses only the spatial images and the cell phenotypes (a column from the metadata)
 # Number of niche to calculate
 niches_nums <- c(6, 9, 12)
+```
+
+```{r}
+#| label: build-spatial-niches
+#| eval: false
+
 # Build the niche assays
 for (num in niches_nums) {
   # Print the current number of niches being calculated
@@ -1919,7 +1940,7 @@ for (num in niches_nums) {
   breast_cancer_patients_analyze <- BuildNicheAssay(
     object = breast_cancer_patients_analyze,
     fov = "LU001FFP03",
-    group.by = cell_subcluster_col,
+    group.by = col_cell_tumor_cluster_subtype,
     assay = glue("niches{num}"),
     cluster.name = glue("niches_{num}"),
     # Number of niches to find, default is 4
@@ -1991,7 +2012,7 @@ niches_statistics_calc <- list()
 # Count and calculate percentages of cell types inside every niche
 # The percentages of the various cells types in a niches adds up to 100%
 cell_type_counts <- breast_cancer_patients_analyze@meta.data %>%
-  group_by(!!sym(col_niches_plot), !!sym(cell_subcluster_col)) %>%
+  group_by(!!sym(col_niches_plot), !!sym(col_cell_tumor_cluster_subtype)) %>%
   summarise(count = n()) %>%
   mutate(percentage = (count / sum(count)) * 100) %>%
   arrange(.by_group = TRUE)
@@ -2015,12 +2036,12 @@ for (niche in niches) {
   niche_stat <- cell_type_counts %>%
     dplyr::filter(!!sym(col_niches_plot) == niche) %>%
     dplyr::mutate(
-      !!sym(cell_subcluster_col) := ifelse(
+      !!sym(col_cell_tumor_cluster_subtype) := ifelse(
         percentage >= niche_cell_type_cutoff,
-        !!sym(cell_subcluster_col),
+        !!sym(col_cell_tumor_cluster_subtype),
         "Others")
     ) %>%
-    dplyr::group_by(!!sym(cell_subcluster_col), !!sym(col_niches_plot)) %>%
+    dplyr::group_by(!!sym(col_cell_tumor_cluster_subtype), !!sym(col_niches_plot)) %>%
     dplyr::summarize(
       percentage = sum(percentage, na.rm = TRUE),
       count = sum(count, na.rm = TRUE),
@@ -2049,9 +2070,9 @@ for (niche in niches) {
   # Create the bar plot
   niche_barplot <- niche_data %>%
     ggplot(aes(
-      x = !!sym(cell_subcluster_col),
+      x = !!sym(col_cell_tumor_cluster_subtype),
       y = percentage,
-      fill = !!sym(cell_subcluster_col)
+      fill = !!sym(col_cell_tumor_cluster_subtype)
     )) +
     geom_bar(stat = "identity") +
     geom_text(
