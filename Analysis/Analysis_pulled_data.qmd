@@ -1389,7 +1389,7 @@ print(other_cells_plots_to_save)
 #| eval: false
 
 # Save the other cells plots
-save_data(other_cells_plots_to_save, here(images_dir, "Tumor clusters"))
+save_data(other_cells_plots_to_save, here(images_dir, "Other cells clusters"))
 ```
 
 ```{r}
