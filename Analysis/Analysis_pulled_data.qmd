@@ -1479,16 +1479,14 @@ expr_matrix <- as.matrix(
     most_significant_other_cells_markers$gene, 
     ]
   )
-expr_matrix[1:5, 1:5]
-
-## scale the rows
-expr_matrix<- t(scale(t(expr_matrix)))
-expr_matrix[1:5, 1:5]
+# Scale the rows
+zero_var_rows <- apply(expr_matrix, 1, var) == 0
+expr_matrix_scaled <- expr_matrix
+expr_matrix_scaled[!zero_var_rows, ] <- t(scale(t(expr_matrix[!zero_var_rows, ])))
+expr_matrix_scaled[zero_var_rows, ] <- 0
 
 # Prepare cell type annotations
-cell_types <- Idents(breast_cancer_patients_tumor_cells)
-cell_type_df <- data.frame(cell_type = cell_types)
-rownames(cell_type_df) <- colnames(expr_matrix)
+cell_types <- Idents(breast_cancer_patients_other_cells)
 
 # Create color palette for cell types
 unique_cell_types <- unique(cell_types)
@@ -1497,32 +1495,49 @@ cell_type_colors <- setNames(
   unique_cell_types
 )
 
-png(here("test.png"),width=3.25,height=3.25,units="in",res=1200)
-
-# Create the heatmap
-tumor_clust_diff_expr_genes_heatmap <- Heatmap(
-  matrix = expr_matrix,
-  name = "Expression",
-  cluster_rows = TRUE,
-  cluster_columns = TRUE,
-  show_column_names = FALSE,
-  show_row_names = TRUE,
-  row_names_gp = gpar(fontsize = 5),
-  column_split = cell_types,
-  column_title = "Tumor clusters: Top 10 Differentially Expressed Genes per Cluster",
-  top_annotation = HeatmapAnnotation(
-    cell_type = cell_types,
-    col = list(cell_type = cell_type_colors),
-    show_legend = TRUE
-  ),
-  # Color scale for expression
-  col = colorRamp2(
-    c(min(expr_matrix), median(expr_matrix), max(expr_matrix)), 
-    c("blue", "white", "red")
-  )
+# Define palette for expression level
+valid_values <- expr_matrix_scaled[!is.na(expr_matrix_scaled) & !is.infinite(expr_matrix_scaled)]
+palette_expression_level <- colorRamp2(
+  c(min(valid_values), median(valid_values), max(valid_values)),
+  c("#FF00FF", "#000000", "#FFFF00")
 )
 
+# Save png
+png(here("test.png"),width=15,height=20,units="cm",res=1000)
+
+# Create the heatmap with ComplexHeatmap
+Heatmap(
+  matrix = expr_matrix_scaled,
+  name = "Expression",
+  column_split = factor(cell_types),
+  cluster_rows = TRUE,
+  cluster_columns = TRUE,
+  column_title_rot = 0,
+  show_column_names = FALSE,
+  show_column_dend = FALSE,
+  show_row_names = TRUE,
+  show_row_dend = FALSE,
+  cluster_column_slices = TRUE,
+  column_gap = unit(0.5, "mm"),
+  row_names_gp = gpar(fontsize = 5),
+  column_title = "Top 10 Differentially Expressed Genes per Cluster",
+  top_annotation = HeatmapAnnotation(
+    Cluster = cell_types,
+    Patient = breast_cancer_patients_other_cells@meta.data$Patient.ID,
+    col = list(Cluster = cell_type_colors, Patient = palette_patients),
+    show_legend = TRUE,
+    gap = unit(1, "mm"),
+    simple_anno_size = unit(2, "mm"),
+    annotation_name_gp = gpar(fontsize = 6)
+  ),
+  # Color scale for expression
+  col = palette_expression_level
+)
+
+# Save image
 dev.off()
+```
+
 ```{r}
 #| label: other-cells-markers-save
 #| eval: false
