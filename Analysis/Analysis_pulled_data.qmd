@@ -1976,23 +1976,30 @@ for (num in niches_nums) {
 saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patients_analyze.rds"))
 ```
 
-### Spatial plots of niches
+### Setup spatial niches study
 
 ```{r}
-#| label: spatial-niches-plots
+#| label: spatial-niches-study-setup
 
-# Metadata column with the highest number of niches
-col_highest_niches_num <- glue("niches_{niches_nums[length(niches_nums)]}")
 # Number of niches to plot
 niches_plot <- niches_nums[3]
 # Metadata column with the niches to plot
 col_niches_plot <- glue("niches_{niches_plot}")
 
+# Metadata column with the highest number of niches
+col_highest_niches_num <- glue("niches_{niches_nums[length(niches_nums)]}")
 # Create the color palette for the niches
 niches_color_palette <- generate_colors_lookup_table(
   breast_cancer_patients_analyze,
   cluster_column_name = col_highest_niches_num,
   color_palette = brewer.pal(12, name = "Set3"))
+```
+
+### Spatial plots of niches
+
+```{r}
+#| label: spatial-niches-plots
+
 # Create the plots with the niches for every stamp
 niches_stamps_plots <- generate_spatial_plots(
   breast_cancer_patients_analyze,
