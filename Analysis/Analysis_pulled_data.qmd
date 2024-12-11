@@ -1022,7 +1022,7 @@ normal_cells_cluster_distribution_dotplot <- normal_cells_cluster_statistics %>%
                      xmax = MeanPercentage + SDPercentage, 
                      y = !!sym(col_ist_ann),
                      linetype = "Standard Deviation"), 
-                 color = "black", alpha = 0.7, height = 0.5, size = 0.2) +
+                 color = "black", alpha = 0.7, height = 0.5, linewidth = 0.2) +
   theme_minimal() +
   ggforce::facet_col(
     facets = col_cell_group,
