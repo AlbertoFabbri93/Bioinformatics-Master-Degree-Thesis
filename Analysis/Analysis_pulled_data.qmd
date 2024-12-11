@@ -1287,7 +1287,7 @@ other_cells_percent_clust_patient <- other_cells_cluster_statistics %>%
   # Specify id_cols so the Count column is dropped
   pivot_wider(names_from = Patient.ID, values_from = Percentage, id_cols = !!sym(stat_col_other_cells_clusters)) %>%
   # Round the values to two decimal places
-  mutate(across(2:8, round, 2)) %>%
+  mutate(across(2:8, \(x) round(x, 2))) %>%
   # Sort according to the Tumor cluster column
   arrange(!!sym(stat_col_other_cells_clusters))
 other_cells_plots_to_save[["other_cells_percent_clust_patient"]] <- other_cells_percent_clust_patient
