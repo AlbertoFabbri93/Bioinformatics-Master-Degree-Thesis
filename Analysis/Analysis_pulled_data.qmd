@@ -1469,7 +1469,6 @@ print(other_cells_markers_to_print)
 library(ComplexHeatmap)
 library(circlize)
 
-# Prepare the expression matrix
 # Extract the expression data for the selected genes
 expr_matrix <- as.matrix(
   GetAssayData(
@@ -1479,11 +1478,8 @@ expr_matrix <- as.matrix(
     most_significant_other_cells_markers$gene, 
     ]
   )
-# Scale the rows
-zero_var_rows <- apply(expr_matrix, 1, var) == 0
-expr_matrix_scaled <- expr_matrix
-expr_matrix_scaled[!zero_var_rows, ] <- t(scale(t(expr_matrix[!zero_var_rows, ])))
-expr_matrix_scaled[zero_var_rows, ] <- 0
+## scale the rows
+expr_matrix_scaled<- t(scale(t(expr_matrix)))
 
 # Prepare cell type annotations
 cell_types <- Idents(breast_cancer_patients_other_cells)
@@ -1495,12 +1491,10 @@ cell_type_colors <- setNames(
   unique_cell_types
 )
 
-# Define palette for expression level
-valid_values <- expr_matrix_scaled[!is.na(expr_matrix_scaled) & !is.infinite(expr_matrix_scaled)]
-palette_expression_level <- colorRamp2(
-  c(min(valid_values), median(valid_values), max(valid_values)),
-  c("#FF00FF", "#000000", "#FFFF00")
-)
+# Recreate the Seurat expression scale
+palette_expression_level = colorRamp2(
+  c(min(expr_matrix_scaled), median(expr_matrix_scaled), max(expr_matrix_scaled)),
+  c("#FF00FF", "#000000", "#FFFF00"))
 
 # Save png
 png(here("test.png"),width=15,height=20,units="cm",res=1000)
