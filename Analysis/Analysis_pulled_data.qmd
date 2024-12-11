@@ -1420,7 +1420,8 @@ other_cells_markers_data <- FindAllMarkers(
   test.use = "wilcox",
   assay = "SCT",
   only.pos = FALSE,
-  random.seed = 5)
+  random.seed = 5,
+  verbose = TRUE)
 ```
 
 ```{r}
