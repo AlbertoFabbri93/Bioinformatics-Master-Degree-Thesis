@@ -34,6 +34,12 @@ generate_colors_lookup_table <- function(
   return(c(known_clusters_colors, unknown_clusters_colors))
 }
 
+# Function to recreate the ggplot default color palette
+gg_color_hue <- function(n) {
+  hues <- seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
 ###### GENERATE SINGLE PLOTS ######
 
 # Use this plot to print the level of expression of a protein or rna
