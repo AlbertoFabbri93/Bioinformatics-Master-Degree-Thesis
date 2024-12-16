@@ -1469,44 +1469,47 @@ print(other_cells_markers_to_print)
 ```
 
 ```{r}
+#| label: other-cells-markers-complex-heatmap
 
-# Extract the expression data for the selected genes
+# Unique is used to eliminate duplicated genes
+features <- unique(most_significant_other_cells_markers$gene)
+
+# Extract the expression data for the selected genes from the scaled layer
 expr_matrix <- as.matrix(
   GetAssayData(
     breast_cancer_patients_other_cells, 
-    layer = "data", 
-    assay = "SCT")[
-    most_significant_other_cells_markers$gene, 
-    ]
-  )
-## scale the rows
-expr_matrix_scaled<- t(scale(t(expr_matrix)))
+    layer = "scale.data", 
+    assay = "SCT"
+  )[
+    features,
+  ]
+)
 
 # Prepare cell type annotations
 cell_types <- Idents(breast_cancer_patients_other_cells)
+# Create vector with unique and sorted cell types
+unique_cell_types <- sort(unique(cell_types))
 
 # Create color palette for cell types
-unique_cell_types <- unique(cell_types)
 cell_type_colors <- setNames(
-  rainbow(length(unique_cell_types)),
+  gg_color_hue(length(unique_cell_types)),
   unique_cell_types
 )
 
 # Recreate the Seurat expression scale
-palette_expression_level = colorRamp2(
-  c(min(expr_matrix_scaled), median(expr_matrix_scaled), max(expr_matrix_scaled)),
+palette_expression_level = circlize::colorRamp2(
+  c(min(expr_matrix), median(expr_matrix), min(2.5, max(expr_matrix))),
   c("#FF00FF", "#000000", "#FFFF00"))
 
-# Save png
-png(here("test.png"),width=15,height=20,units="cm",res=1000)
-
 # Create the heatmap with ComplexHeatmap
-Heatmap(
-  matrix = expr_matrix_scaled,
-  name = "Expression",
-  column_split = factor(cell_types),
-  cluster_rows = TRUE,
-  cluster_columns = TRUE,
+ht = Heatmap(
+  matrix = expr_matrix,
+  row_order = features,
+  name = "expression",
+  column_split = factor(cell_types, levels = unique_cell_types),
+  # Do not cluster rows or columns otherwise row_order/column_order are ignored
+  cluster_rows = FALSE,
+  cluster_columns = FALSE,
   column_title_rot = 0,
   show_column_names = FALSE,
   show_column_dend = FALSE,
@@ -1515,30 +1518,46 @@ Heatmap(
   cluster_column_slices = TRUE,
   column_gap = unit(0.5, "mm"),
   row_names_gp = gpar(fontsize = 5),
-  column_title = "Top 10 Differentially Expressed Genes per Cluster",
+  column_title = unique_cell_types,
+  column_title_gp = gpar(fontsize = 7),
+  # Add the annotation bars on top
   top_annotation = HeatmapAnnotation(
-    Cluster = cell_types,
-    Patient = breast_cancer_patients_other_cells@meta.data$Patient.ID,
-    col = list(Cluster = cell_type_colors, Patient = palette_patients),
-    show_legend = TRUE,
+    name = "Clusters",
+    which = "column",
+    cluster = cell_types,
+    patient = breast_cancer_patients_other_cells@meta.data$Patient.ID,
+    col = list(cluster = cell_type_colors, patient = palette_patients),
+    show_legend = c(FALSE, TRUE),
     gap = unit(1, "mm"),
     simple_anno_size = unit(2, "mm"),
     annotation_name_gp = gpar(fontsize = 6)
   ),
   # Color scale for expression
-  col = palette_expression_level
+  col = palette_expression_level,
+  # Otherwise you get vertical white lines where there should not be any
+  use_raster = FALSE
 )
-
-# Save image
-dev.off()
+# Put the lengend on a single column
+draw(ht, merge_legend = TRUE)
 ```
 
 ```{r}
 #| label: other-cells-markers-save
 #| eval: false
 
+# Other cells markers folder
+other_cells_markers_dir <- here(images_dir, "Other cells markers")
 # Save the data
-save_data(other_cells_markers_to_print, here(images_dir, "Other cells markers"))
+save_data(other_cells_markers_to_print, other_cells_markers_dir)
+# Save ComplexHeatmap
+png(paste(other_cells_markers_dir, "other_cells_complex_heatmap.png", sep="/"),
+    width = 15,
+    height = 20,
+    units = "cm",
+    res = 1000)
+draw(ht, merge_legend = TRUE)
+# Save image
+dev.off()
 ```
 
 ## All cells
