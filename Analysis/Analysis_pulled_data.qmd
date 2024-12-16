@@ -103,9 +103,12 @@ library("ggraph")
 library("clustree")
 # Add more layout options to ggplot
 library("ggforce")
+# More complex heatmaps
+library("ComplexHeatmap")
 # Additional color palettes
 library("RColorBrewer")
 library("pals")
+library("circlize")
 
 ## GENE SET ENRICHMENT ANALYSIS
 # Used to perform gene set enrichment analysis
@@ -1466,8 +1469,6 @@ print(other_cells_markers_to_print)
 ```
 
 ```{r}
-library(ComplexHeatmap)
-library(circlize)
 
 # Extract the expression data for the selected genes
 expr_matrix <- as.matrix(
