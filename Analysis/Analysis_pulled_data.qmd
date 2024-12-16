@@ -2202,7 +2202,10 @@ save_data(niches_patient_data, here(images_dir, stat_niches_dir))
 ```{r}
 #| label: cellchat
 
-data.input = Seurat::GetAssayData(breast_cancer_patients_analyze, layer = "data", assay = "SCT")
+data.input = Seurat::GetAssayData(
+  breast_cancer_patients_analyze,
+  layer = "data",
+  assay = "SCT")
 spatial.locs = Seurat::GetTissueCoordinates(
   object = breast_cancer_patients_analyze,
   image = "LU001FFP03",
@@ -2219,12 +2222,38 @@ spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
 
 cellchat <- createCellChat(
   object = data.input,
-  meta = breast_cancer_patients_filt_cells@meta.data,
-  group.by = col_ist_ann,
+  meta = breast_cancer_patients_analyze@meta.data,
+  group.by = col_ist_merge_type,
   datatype = "spatial",
   coordinates = spatial.locs,
   spatial.factors = spatial.factors)
 
 CellChatDB <- CellChatDB.human
 showDatabaseCategory(CellChatDB)
+# use all CellChatDB except for "Non-protein Signaling" for cell-cell communication analysis
+CellChatDB.use <- subsetDB(CellChatDB)
+# set the used database in the object
+cellchat@DB <- CellChatDB.use
+
+# subset the expression data of signaling genes for saving computation cost
+cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
+# future::plan("multisession", workers = 4) 
+cellchat <- identifyOverExpressedGenes(cellchat)
+cellchat <- identifyOverExpressedInteractions(cellchat, variable.both = F)
+
+cellchat <- computeCommunProb(
+  cellchat, type = "triMean",
+  distance.use = TRUE,
+  scale.distance = 2.1,
+  contact.range = 10)
+
+cellchat <- filterCommunication(cellchat, min.cells = 10)
+cellchat <- computeCommunProbPathway(cellchat)
+cellchat <- aggregateNet(cellchat)
+
+netVisual_circle(cellchat@net$count, vertex.weight = rowSums(cellchat@net$count), weight.scale = T, label.edge= F, title.name = "Number of interactions")
+netVisual_circle(cellchat@net$weight, vertex.weight = rowSums(cellchat@net$weight), weight.scale = T, label.edge= F, title.name = "Interaction weights/strength")
+
+netVisual_heatmap(cellchat, measure = "count", color.heatmap = "Blues")
+netVisual_heatmap(cellchat, measure = "weight", color.heatmap = "Blues")
 ```
