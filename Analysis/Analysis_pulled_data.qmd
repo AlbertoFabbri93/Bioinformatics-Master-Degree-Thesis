@@ -1875,7 +1875,7 @@ Merge normal and tumor subclusters
 col_cell_tumor_cluster_subtype <- "cell_final_subtype"
 ```
 
-````{r}
+```{r}
 #| label: merge-cells-metadata-add
 #| eval: false
 
