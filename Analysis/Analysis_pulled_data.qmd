@@ -2246,20 +2246,40 @@ cellchat <- subsetData(cellchat) # This step is necessary even if using the whol
 # future::plan("multisession", workers = 4) 
 cellchat <- identifyOverExpressedGenes(cellchat)
 cellchat <- identifyOverExpressedInteractions(cellchat, variable.both = F)
+# Use a diffusion process to smooth genes’ expression values based on their neighbors’ defined in a high-confidence experimentally validated protein-protein network
+cellchat <- smoothData(cellchat, adj = PPI.human)
 
 cellchat <- computeCommunProb(
   cellchat, type = "triMean",
   distance.use = TRUE,
   scale.distance = 2.1,
-  contact.range = 10)
+  contact.range = 10,
+  # Whether use the raw data (i.e., 'object@data.signaling') or the smoothed data (i.e., 'object@data.smooth')
+  raw.use = TRUE)
 
+# Filter out the cell-cell communication if there are only few cells in certain cell groups
 cellchat <- filterCommunication(cellchat, min.cells = 10)
+# Compute the communication probability on signaling pathway level by summarizing the communication probabilities of all ligands-receptors interactions associated with each signaling pathway
 cellchat <- computeCommunProbPathway(cellchat)
+# Calculate the aggregated cell-cell communication network by counting the number of links or summarizing the communication probability
 cellchat <- aggregateNet(cellchat)
 
-netVisual_circle(cellchat@net$count, vertex.weight = rowSums(cellchat@net$count), weight.scale = T, label.edge= F, title.name = "Number of interactions")
+png(filename=here("cellchat_test.png"), width = 15, height = 20, units = "cm", res = 1000)
+netVisual_circle(cellchat@net$count, vertex.weight = rowSums(cellchat@net$count), weight.scale = T, label.edge= F, title.name = "Number of interactions", margin = 0.2, vertex.label.cex = 0.8)
+dev.off()
 netVisual_circle(cellchat@net$weight, vertex.weight = rowSums(cellchat@net$weight), weight.scale = T, label.edge= F, title.name = "Interaction weights/strength")
 
 netVisual_heatmap(cellchat, measure = "count", color.heatmap = "Blues")
 netVisual_heatmap(cellchat, measure = "weight", color.heatmap = "Blues")
+
+# Examine the signaling sent from each cell group
+# Set the parameter edge.weight.max so that edge weights are comparable between differet networks
+groupSize <- as.numeric(table(cellchat@idents))
+mat <- cellchat@net$weight
+par(mfrow = c(3,4), xpd=TRUE)
+for (i in 1:nrow(mat)) {
+  mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat), dimnames = dimnames(mat))
+  mat2[i, ] <- mat[i, ]
+  netVisual_circle(mat2, vertex.weight = groupSize, weight.scale = T, edge.weight.max = max(mat), title.name = rownames(mat)[i])
+}
 ```
