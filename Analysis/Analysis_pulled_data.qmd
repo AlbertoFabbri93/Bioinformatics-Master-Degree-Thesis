@@ -1471,7 +1471,7 @@ print(other_cells_markers_to_print)
 ```{r}
 #| label: other-cells-markers-complex-heatmap
 
-# Unique is used to eliminate duplicated genes
+# Unique is used to eliminate duplicated genes, this is done automatically by Seurat DoHeatmap
 features <- unique(most_significant_other_cells_markers$gene)
 
 # Extract the expression data for the selected genes from the scaled layer
@@ -1518,14 +1518,20 @@ ht = Heatmap(
   cluster_column_slices = TRUE,
   column_gap = unit(0.5, "mm"),
   row_names_gp = gpar(fontsize = 5),
+  # The column title can be either a title for all the columns or a vector with a name for every column
   column_title = unique_cell_types,
   column_title_gp = gpar(fontsize = 7),
   # Add the annotation bars on top
   top_annotation = HeatmapAnnotation(
+    # Give a name to the annotation, not used on the actual plot
     name = "Clusters",
+    # Annotate the columns
     which = "column",
+    # First annotation - clusters
     cluster = cell_types,
+    # Second annotation - patients
     patient = breast_cancer_patients_other_cells@meta.data$Patient.ID,
+    # Color palettes
     col = list(cluster = cell_type_colors, patient = palette_patients),
     show_legend = c(FALSE, TRUE),
     gap = unit(1, "mm"),
@@ -1534,10 +1540,10 @@ ht = Heatmap(
   ),
   # Color scale for expression
   col = palette_expression_level,
-  # Otherwise you get vertical white lines where there should not be any
+  # Otherwise you get random vertical white lines where there should not be any
   use_raster = FALSE
 )
-# Put the lengend on a single column
+# Put the legends on the right in a single column
 draw(ht, merge_legend = TRUE)
 ```
 
