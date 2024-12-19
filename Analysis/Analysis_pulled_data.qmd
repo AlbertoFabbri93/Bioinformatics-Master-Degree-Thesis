@@ -2274,14 +2274,24 @@ netVisual_heatmap(cellchat, measure = "weight", color.heatmap = "Blues")
 
 # Examine the signaling sent from each cell group
 # Set the parameter edge.weight.max so that edge weights are comparable between differet networks
-groupSize <- as.numeric(table(cellchat@idents))
-mat <- cellchat@net$weight
+group_size <- as.numeric(table(cellchat@idents))
+cellchat_weight_mat <- cellchat@net$weight
 par(mfrow = c(3,4), xpd=TRUE)
-for (i in 1:nrow(mat)) {
-  # Create a new matrix with the same dimensions and names as mat, but all elements are initialized to 0
-  mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat), dimnames = dimnames(mat))
-  # Fills the i-th row of mat2 with the corresponding i-th row of mat, all other rows in mat2 remain zero
-  mat2[i, ] <- mat[i, ]
-  netVisual_circle(mat2, vertex.weight = groupSize, weight.scale = T, edge.weight.max = max(mat), title.name = rownames(mat)[i])
+for (i in 1:nrow(cellchat_weight_mat)) {
+  # Create new matrix with the same dimensions and names as the oroginal, but all elements are initialized to 0
+  cellchat_type_weight_mat <- matrix(0, nrow = nrow(cellchat_weight_mat), ncol = ncol(cellchat_weight_mat), dimnames = dimnames(cellchat_weight_mat))
+  # Fills the i-th row of the new matrix with the corresponding i-th row of the original matrix, all other rows in the new matrix remain zero
+  cellchat_type_weight_mat[i, ] <- cellchat_weight_mat[i, ]
+  # Visualizes the i-th row of interaction weights
+  netVisual_circle(
+    net = cellchat_type_weight_mat,
+    # Specify the size of the vertices (nodes) in the network
+    vertex.weight = group_size,
+    # Scales the edge weights (connection thickness) in the plot
+    weight.scale = T,
+    # Set the maximum edge weight (thickness) to the largest value in the original matrix
+    edge.weight.max = max(cellchat_weight_mat),
+    # Add a title to the plot using the name of the i-th row of matrix
+    title.name = rownames(cellchat_weight_mat)[i])
 }
 ```
