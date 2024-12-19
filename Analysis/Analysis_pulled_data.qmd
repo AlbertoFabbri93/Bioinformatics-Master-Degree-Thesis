@@ -1925,7 +1925,7 @@ Plot the spatial distribution of the cell types and label them according to the 
 #| label: spatial-clusters-plots
 
 # Count the number of tumor clusters by looking at the column "col_ist_merge_type" and counting the number of unique cluster names that starts with tumor
-num_tumor_clusters <- length(grep("^Tumor", unique(breast_cancer_patients_filt_cells@meta.data[[col_cell_tumor_cluster_subtype]])))
+num_tumor_clusters <- length(grep("^Tumor", unique(breast_cancer_patients_analyze@meta.data[[col_cell_tumor_cluster_subtype]])))
 # Create a gray scale for the tumor clusters
 tumor_clusters_colors <- gray.colors(12, start = 0.2, end = 0.9)
 # Create the color palette for the niches
@@ -2177,7 +2177,7 @@ niches_patient_dotplot <- ggplot(niches_patient_counts,
                 xmax = as.numeric(Patient.ID) + 0.4,
                 ymin = -Inf, ymax = Inf),
             fill = "grey90", alpha = 0.3, inherit.aes = FALSE) +
-  geom_point(size = 2, position = position_dodge(width = 0.4)) +
+  geom_point(size = 3, position = position_dodge(width = 0.7)) +
   labs(title = paste("Niches distribution across patients"),
        x = "Patient",
        y = "Percentage (%)") +
