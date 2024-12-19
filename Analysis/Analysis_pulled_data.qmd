@@ -467,7 +467,6 @@ breast_cancer_patients_analyze <- AddMetaData(
   object = breast_cancer_patients_analyze,
   metadata = merged_ist_results,
   col.name = col_ist_raw)
-print(get_cluster_info(breast_cancer_patients_analyze, col_ist_raw))
 
 # Rename unknown clusters to tumor
 breast_cancer_patients_analyze@meta.data %<>%
@@ -478,6 +477,28 @@ breast_cancer_patients_analyze@meta.data %<>%
       .default = .data[[col_ist_raw]]
     )
   )
+```
+
+```{r}
+#| label: insitutype-info
+
+ist_info <- list()
+
+ist_summary_table <- breast_cancer_patients_analyze@meta.data %>%
+  count(!!sym(col_ist_ann)) %>%
+  mutate(percentage = n / sum(n) * 100) %>%
+  arrange(!!sym(col_ist_ann)) %>%
+  as_tibble()
+ist_info[["ist_summary_table"]] <- ist_summary_table
+
+print(ist_info)
+```
+
+```{r}
+#| echo: false
+
+# Save the Insitutype plots
+save_data(ist_info, here(images_dir, "Insitutype"))
 ```
 
 ### Cell groups
