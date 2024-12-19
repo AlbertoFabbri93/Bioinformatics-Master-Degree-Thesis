@@ -2278,7 +2278,9 @@ groupSize <- as.numeric(table(cellchat@idents))
 mat <- cellchat@net$weight
 par(mfrow = c(3,4), xpd=TRUE)
 for (i in 1:nrow(mat)) {
+  # Create a new matrix with the same dimensions and names as mat, but all elements are initialized to 0
   mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat), dimnames = dimnames(mat))
+  # Fills the i-th row of mat2 with the corresponding i-th row of mat, all other rows in mat2 remain zero
   mat2[i, ] <- mat[i, ]
   netVisual_circle(mat2, vertex.weight = groupSize, weight.scale = T, edge.weight.max = max(mat), title.name = rownames(mat)[i])
 }
