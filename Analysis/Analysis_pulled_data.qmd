@@ -485,9 +485,11 @@ breast_cancer_patients_analyze@meta.data %<>%
 ist_info <- list()
 
 ist_summary_table <- breast_cancer_patients_analyze@meta.data %>%
-  count(!!sym(col_ist_ann)) %>%
+  count(!!sym(col_ist_ann), Patient.ID) %>%
+  group_by(Patient.ID) %>%
   mutate(percentage = n / sum(n) * 100) %>%
-  arrange(!!sym(col_ist_ann)) %>%
+  arrange(Patient.ID, !!sym(col_ist_ann)) %>%
+  dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
   as_tibble()
 ist_info[["ist_summary_table"]] <- ist_summary_table
 
