@@ -2263,8 +2263,20 @@ save_data(niches_patient_data, here(images_dir, stat_niches_dir))
 ## CellChat
 
 ```{r}
-#| label: cellchat
+#| label: load-cellchat
 
+# Load cellchat object
+cellchat <- readRDS(here(objects_dir, "cellchat.rds"))
+```
+
+```{r}
+#| label: cellchat
+#| eval: false
+
+# Genes should be in rows with rownames and cells in columns with colnames
+# Normalized data (e.g., library-size normalization and then log-transformed with a pseudocount of 1) is required
+# The SCT assay should be fine as it is used in the following vignette:
+# https://htmlpreview.github.io/?https://github.com/jinworks/CellChat/blob/master/tutorial/CellChat_analysis_of_spatial_transcriptomics_data.html
 data.input = Seurat::GetAssayData(
   breast_cancer_patients_analyze,
   layer = "data",
