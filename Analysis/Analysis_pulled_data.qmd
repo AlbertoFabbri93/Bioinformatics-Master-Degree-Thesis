@@ -2281,6 +2281,8 @@ data.input = Seurat::GetAssayData(
   breast_cancer_patients_analyze,
   layer = "data",
   assay = "SCT")
+
+# Spatial locations of spots from full (NOT high/low) resolution images are required
 spatial.locs = Seurat::GetTissueCoordinates(
   object = breast_cancer_patients_analyze,
   image = "LU001FFP03",
@@ -2291,8 +2293,12 @@ spatial.locs = Seurat::GetTissueCoordinates(
 # For CosMx data, the spatial coordinates are in pixels and the conversion factor of converting spatial coordinates from Pixels to Micrometers is 0.18. Because CosMx does not include the uniform cell size like 10X Visium and Slide-seq, users can compute the minimum cell centroid-to-centroid distance via computeCellDistance and use its half value as the tolerance factor. Of note, CellChat does not need an accurate tolerance factor, which is used for determining whether considering the cell-pair as spatially proximal if their distance is greater than interaction.range but smaller than “interaction.range + tol”.
 
 conversion.factor = 0.18
-d = computeCellDistance(spatial.locs)
-spot.size = min(d)*conversion.factor # converting the distance in Pixels to Micrometers
+d = computeCellDistance(
+  coordinates = spatial.locs,
+  # to convert the distance from pixels to micrometers
+  ratio = conversion.factor)
+median_cell_distance = median(d)
+spot.size = min(d2) # converting the distance in Pixels to Micrometers
 spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
 
 cellchat <- createCellChat(
@@ -2322,6 +2328,7 @@ cellchat <- computeCommunProb(
   cellchat, type = "triMean",
   distance.use = TRUE,
   scale.distance = 2.1,
+  contact.dependent = TRUE,
   contact.range = 10,
   # Whether use the raw data (i.e., 'object@data.signaling') or the smoothed data (i.e., 'object@data.smooth')
   raw.use = TRUE)
