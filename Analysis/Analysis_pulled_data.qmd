@@ -2298,7 +2298,7 @@ d = computeCellDistance(
   # to convert the distance from pixels to micrometers
   ratio = conversion.factor)
 median_cell_distance = median(d)
-spot.size = min(d2) # converting the distance in Pixels to Micrometers
+spot.size = min(d) # converting the distance in Pixels to Micrometers
 spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
 
 cellchat <- createCellChat(
