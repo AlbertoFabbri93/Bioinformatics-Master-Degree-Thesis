@@ -2290,15 +2290,17 @@ spatial.locs = Seurat::GetTissueCoordinates(
 # Set the rownames equal to the cell names and remove the cell column
   tibble::column_to_rownames(var = "cell")
 
-# For CosMx data, the spatial coordinates are in pixels and the conversion factor of converting spatial coordinates from Pixels to Micrometers is 0.18. Because CosMx does not include the uniform cell size like 10X Visium and Slide-seq, users can compute the minimum cell centroid-to-centroid distance via computeCellDistance and use its half value as the tolerance factor. Of note, CellChat does not need an accurate tolerance factor, which is used for determining whether considering the cell-pair as spatially proximal if their distance is greater than interaction.range but smaller than “interaction.range + tol”.
-
-conversion.factor = 0.18
-d = computeCellDistance(
+# For CosMx data, the spatial coordinates are in pixels and the conversion factor can be found in the NanoString documentation:
+# https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space/posts/flat-file-exports/flat-files-compare.html
+# Because CosMx does not include the uniform cell size, users can compute the minimum cell centroid-to-centroid distance via computeCellDistance and use its half value as the tolerance factor.
+# CellChat does not need an accurate tolerance factor, which is used for determining whether considering the cell-pair as spatially proximal if their distance is greater than interaction.range but smaller than “interaction.range + tol”.
+conversion.factor = 0.12028
+distance_matrix = computeCellDistance(
   coordinates = spatial.locs,
   # to convert the distance from pixels to micrometers
   ratio = conversion.factor)
-median_cell_distance = median(d)
-spot.size = min(d) # converting the distance in Pixels to Micrometers
+median_cell_distance = median(distance_matrix)
+spot.size = min(distance_matrix) # converting the distance in Pixels to Micrometers
 spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
 
 cellchat <- createCellChat(
