@@ -2317,19 +2317,37 @@ cellchat <- createCellChat(
   spatial.factors = spatial.factors,
   do.sparse = TRUE)
 
+# SET THE DATABASE TO BE USED
 # Ligand-receptor interactions in CellChat database for human
 CellChatDB <- CellChatDB.human
 # Show the description of CellChatDB databse
 showDatabaseCategory(CellChatDB)
-# use all CellChatDB except for "Non-protein Signaling" for cell-cell communication analysis
+# Use all CellChatDB except for "Non-protein Signaling" for cell-cell communication analysis
 CellChatDB.use <- subsetDB(CellChatDB, non_protein = FALSE)
-# set the used database in the object
+# Set the used database in the object
 cellchat@DB <- CellChatDB.use
 
-# subset the expression data of signaling genes for saving computation cost
-cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
-# future::plan("multisession", workers = 4) 
-cellchat <- identifyOverExpressedGenes(cellchat)
+# Subset the expression data of signaling genes for saving computation cost
+# This step is necessary even if using the whole database
+cellchat <- subsetData(cellchat)
+
+# Identify over-expressed signaling genes associated with each cell group
+cellchat <- identifyOverExpressedGenes(
+  object = cellchat,
+  # Only return positive markers
+  only.pos = TRUE,
+  # whether to return the object
+  # otherwise return a data frame consisting of over-expressed signaling genes associated with each cell group
+  return.object = TRUE,
+  # Threshold of the fraction of cells expressed in one cluster
+  thresh.pc = 0,
+  # Threshold of the log fold change values
+  thresh.fc = 0,
+  # Threshold of p-values
+  thresh.p = 0.05,
+  # the minimum number of expressed cells required for the genes that are considered for cell-cell communication analysis
+  min.cells = 10)
+
 cellchat <- identifyOverExpressedInteractions(cellchat, variable.both = F)
 # Use a diffusion process to smooth genes’ expression values based on their neighbors’ defined in a high-confidence experimentally validated protein-protein network
 cellchat <- smoothData(cellchat, adj = PPI.human)
