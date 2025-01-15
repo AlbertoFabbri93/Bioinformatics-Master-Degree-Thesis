@@ -2317,10 +2317,12 @@ cellchat <- createCellChat(
   spatial.factors = spatial.factors,
   do.sparse = TRUE)
 
+# Ligand-receptor interactions in CellChat database for human
 CellChatDB <- CellChatDB.human
+# Show the description of CellChatDB databse
 showDatabaseCategory(CellChatDB)
 # use all CellChatDB except for "Non-protein Signaling" for cell-cell communication analysis
-CellChatDB.use <- subsetDB(CellChatDB)
+CellChatDB.use <- subsetDB(CellChatDB, non_protein = FALSE)
 # set the used database in the object
 cellchat@DB <- CellChatDB.use
 
