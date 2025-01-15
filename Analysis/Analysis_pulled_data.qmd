@@ -2304,12 +2304,18 @@ spot.size = min(distance_matrix)
 spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
 
 cellchat <- createCellChat(
+  # A normalized (NOT count) data matrix (genes by cells)
   object = data.input,
+  # A data frame (rows are cells with rownames) consisting of cell information used for defining cell groups
   meta = breast_cancer_patients_analyze@meta.data,
+  # A char name of the variable in meta data, defining cell groups
   group.by = col_ist_merge_type,
   datatype = "spatial",
+  # A data matrix in which each row gives the spatial locations/coordinates of each cell
   coordinates = spatial.locs,
-  spatial.factors = spatial.factors)
+  # A data frame containing two distance factors 'ratio' and 'tol', which is dependent on spatial transcriptomics technologies
+  spatial.factors = spatial.factors,
+  do.sparse = TRUE)
 
 CellChatDB <- CellChatDB.human
 showDatabaseCategory(CellChatDB)
