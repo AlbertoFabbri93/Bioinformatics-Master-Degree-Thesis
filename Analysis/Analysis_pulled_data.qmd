@@ -2348,9 +2348,23 @@ cellchat <- identifyOverExpressedGenes(
   # the minimum number of expressed cells required for the genes that are considered for cell-cell communication analysis
   min.cells = 10)
 
-cellchat <- identifyOverExpressedInteractions(cellchat, variable.both = F)
+# Identify over-expressed ligand-receptor interactions (pairs) within the used CellChatDB
+cellchat <- identifyOverExpressedInteractions(
+  object = cellchat,
+  # Set if it is required that both ligand and receptor from one pair are over-expressed
+  variable.both = TRUE,
+  # Whether returning a CellChat object
+  # If FALSE, it will return a data frame containing the over-expressed ligand-receptor pairs
+  return.object = TRUE)
+
 # Use a diffusion process to smooth genes’ expression values based on their neighbors’ defined in a high-confidence experimentally validated protein-protein network
-cellchat <- smoothData(cellchat, adj = PPI.human)
+cellchat <- smoothData(
+  object = cellchat,
+  # Adjacency matrix of protein-protein interaction network to use
+  adj = PPI.human,
+  # Numeric in [0,1] alpha = 0: no smoothing
+  # A larger value alpha results in increasing levels of smoothing
+  alpha = 0.5)
 
 cellchat <- computeCommunProb(
   cellchat, type = "triMean",
