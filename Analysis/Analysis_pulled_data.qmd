@@ -385,9 +385,13 @@ print(glue("Total: {breast_cancer_cores_total}"))
 
 # Print stamps info
 print("Stamps")
-breast_cancer_stamps_total <- length(unique(paste(
+breast_cancer_stamps_names <- sort(unique(paste(
   breast_cancer_patients@meta.data$core_serial,
   breast_cancer_patients@meta.data$stamp)))
+# Replace the space between "M?" and the number with an underscore
+breast_cancer_stamps_names <- gsub("([A-Za-z]+)(\\d) (\\d+)", "\\1\\2_\\3", breast_cancer_stamps_names)
+print(glue("Names: {glue_collapse(breast_cancer_stamps_names, sep = ', ')}"))
+breast_cancer_stamps_total <- length(breast_cancer_stamps_names)
 print(glue("Total: {breast_cancer_stamps_total}"))
 
 # Print FOVs info
