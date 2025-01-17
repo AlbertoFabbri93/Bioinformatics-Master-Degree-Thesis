@@ -2358,6 +2358,9 @@ cellchat <- identifyOverExpressedInteractions(
   return.object = TRUE)
 
 # Use a diffusion process to smooth genes’ expression values based on their neighbors’ defined in a high-confidence experimentally validated protein-protein network
+# The smoothed data is also called "projected" because it is generated through a process that predicts or estimates missing or unobserved values in the dataset
+# The term "projected" highlights the idea that the smoothed data is not strictly observed but is inferred or extrapolated from the existing raw data, using statistical or computational models
+# This projection helps overcome technical limitations like dropout effects in single-cell RNA sequencing, especially when sequencing depth is shallow
 cellchat <- smoothData(
   object = cellchat,
   # Adjacency matrix of protein-protein interaction network to use
@@ -2366,8 +2369,17 @@ cellchat <- smoothData(
   # A larger value alpha results in increasing levels of smoothing
   alpha = 0.5)
 
+# Compute the communication probability/strength between any interacting cell groups
 cellchat <- computeCommunProb(
-  cellchat, type = "triMean",
+  object = cellchat,
+  # Methods for computing the average gene expression per cell group
+  type = "triMean",
+  # Whether use the raw data (i.e., 'object@data.signaling') or the smoothed data (i.e., 'object@data.smooth')
+  # Set it to false because of the low sequencing depth of the data being analyzed
+  raw.use = FALSE,
+  # Whether consider the proportion of cells in each group across all sequenced cells
+  # Set it to true as the dataset reflects the natural abundance of different cell types in the sample
+  population.size = FALSE,
   distance.use = TRUE,
   scale.distance = 2.1,
   contact.dependent = TRUE,
