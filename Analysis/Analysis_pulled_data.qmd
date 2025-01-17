@@ -2380,8 +2380,15 @@ cellchat <- computeCommunProb(
   # Whether consider the proportion of cells in each group across all sequenced cells
   # Set it to true as the dataset reflects the natural abundance of different cell types in the sample
   population.size = FALSE,
+  # Whether to use distance constraints to compute communication probability
+  # Set to true to make communication probability inversely proportional to the computed distance
   distance.use = TRUE,
-  scale.distance = 2.1,
+  # The maximum interaction/diffusion length of ligands (Unit: microns)
+  # This hard threshold is used to filter out the connections between spatially distant regions
+  interaction.range = 250,
+  scale.distance = 0.1,
+  # The minimum number of interacting cell pairs required for defining spatially proximal cell groups
+  k.min = 10,
   contact.dependent = TRUE,
   contact.range = 10,
   # Whether use the raw data (i.e., 'object@data.signaling') or the smoothed data (i.e., 'object@data.smooth')
