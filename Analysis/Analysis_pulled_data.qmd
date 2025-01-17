@@ -306,6 +306,189 @@ breast_cancer_patients_filt_cells@meta.data %<>%
 saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
 ```
 
+## Data overview
+
+### Cores table
+
+Create a table with an entry for every FOV in the Seurat object analyzed in this study. The table will contain the patient ID, the serial core, the stamp, and the FOV.
+
+```{r}
+#| label: data-overview
+#| echo: false
+
+# List of the gene data (1000-plex RNA)
+print("List of the genes in the data:")
+rownames(breast_cancer_patients)
+
+# Create a data frame to store the table
+patient_table <- data.frame(
+  Patient_ID = character(),
+  Serial_Cores = character(),
+  Stamps = character(),
+  FOVs = character(),
+  stringsAsFactors = FALSE
+)
+# Iterate over each patient
+for (patient_id in sort(unique(unlist(breast_cancer_patients$Patient.ID)))) {
+  # Subset the data for the current patient
+  patient_data <- subset(x = breast_cancer_patients@meta.data, subset = Patient.ID == patient_id)
+
+  # Get the unique serial cores for the current patient
+  serial_cores <- unique(patient_data$core_serial)
+
+  # Iterate over each serial core
+  for (serial_core_id in serial_cores) {
+    # Subset the data for the current serial core
+    serial_core_data <- subset(x = patient_data, subset = core_serial == serial_core_id)
+
+    # Get the unique stamps for the current serial core
+    stamps <- unique(serial_core_data$stamp)
+    
+    # Iterate over each stamp
+    for (stamp_id in stamps) {
+      # Subset the data for the current stamp
+      stamp_data <- subset(x = serial_core_data, subset = stamp == stamp_id)
+
+      # Get the unique FOVs for the current stamp
+      fovs <- unique(stamp_data$fov)
+
+      # Add a row to the patient table for each FOV
+      for (fov_id in fovs) {
+        patient_table <- rbind(patient_table, data.frame(
+          Patient_ID = patient_id,
+          Serial_Cores = serial_core_id,
+          Stamps = stamp_id,
+          FOVs = fov_id
+        ))
+      }
+    }
+  }
+}
+# Print the patient table
+print(patient_table)
+
+# Print patients info
+print("Patients")
+patients_ids <- sort(unique(unlist(breast_cancer_patients$Patient.ID)))
+print(glue("IDs: {glue_collapse(patients_ids, sep = ', ')}"))
+patients_total <- length(patients_ids)
+print(glue("Total: {patients_total}"))
+
+# Print cores info
+print("Cores")
+breast_cancer_cores_names <- sort(unique(breast_cancer_patients@meta.data$core_serial))
+print(glue("Names: {glue_collapse(breast_cancer_cores_names, sep = ', ')}"))
+breast_cancer_cores_total <- length(breast_cancer_cores_names)
+print(glue("Total: {breast_cancer_cores_total}"))
+
+# Print stamps info
+print("Stamps")
+breast_cancer_stamps_total <- length(unique(paste(
+  breast_cancer_patients@meta.data$core_serial,
+  breast_cancer_patients@meta.data$stamp)))
+print(glue("Total: {breast_cancer_stamps_total}"))
+
+# Print FOVs info
+print("FOVs")
+breast_cancer_fovs_nums <- sort(unique(unlist(breast_cancer_patients$fov)))
+print(glue("Numbers: {glue_collapse(breast_cancer_fovs, sep = ', ')}"))
+breast_cancer_fovs_total <- length(breast_cancer_fovs_nums)
+print(glue("Total: {breast_cancer_fovs_total}"))
+```
+
+### Tissue micro array
+
+Print the patients' information and create two representation of the TMA: one with the primary diagnosis highlighted and one with the quality of the FOVs with a primary diagnosis of breast cancer highlighted.
+
+```{r}
+#| label: TMA-info
+
+# List with plots & dataframe to be saved
+TMA_info_to_save <- list()
+# List with plots & dataframe to be displayed
+TMA_info_to_display <- list()
+
+# Information about the patients involved in the study
+patient_info <- read_excel(here("Analysis", "metadata", "updatedPACC_Copy of METBRA_patient_v1_now_updated_dec_2022_GOOD_mar_2024_Lanzing.xlsx"))
+TMA_info_to_display[["Patient_info"]] <- patient_info
+
+# FOVs & Core serials
+LU001FFP03_FOV <- read_excel(here("Analysis", "metadata", "LU001FFP03_FOV.xlsx"))
+# Core serials, Patients' ID & Primary Diagnosis
+TMA_METBRA_COSMX <- read_excel(
+  path = here("Analysis", "metadata", "TMA_METBRA_COSMX Analysis.xlsx"),
+  sheet = "TMA_list")
+# FOVs & associated primary diagnosis
+FOVs_primary_diagnosis <- left_join(
+  x = LU001FFP03_FOV,
+  y = TMA_METBRA_COSMX,
+  by = c("core_serial" = "Full Serial Number"))
+# X, Y & Z FOVs positions
+tissue_micro_array <- read_csv(gzfile(
+  here("Analysis", "flat_files", "LU001FFP03", "LU001FFP03_fov_positions_file.csv.gz")),
+  col_types = cols(
+  Slide = col_integer(),
+  X_mm = col_double(),
+  Y_mm = col_double(),
+  Z_mm = col_double(),
+  ZOffset_mm = col_double(),
+  ROI = col_integer(),
+  FOV = col_integer(),
+  Order = col_integer(),
+  Run_Tissue_name = col_character()))
+# FOVs, associated primary diagnosis & X, Y, Z positions
+FOVs_prim_diag_pos <- left_join(
+  x = tissue_micro_array,
+  y = FOVs_primary_diagnosis,
+  by = c("FOV" = "fov"))
+# FOVs, associated primary diagnosis, X, Y positions & quality
+FOVs_prim_diag_pos_qual <- FOVs_prim_diag_pos %>%
+  dplyr::mutate(Quality = case_when(
+    is.na(`Primary Diagnosis`) ~ NA_character_,
+    `Primary Diagnosis` != "breast cancer" ~ NA_character_,
+    FOV %in% breast_cancer_fovs ~ "good",
+    TRUE ~ "bad"
+  ))
+
+# Plots shared parameters
+square_size <- 5
+square_text_size <- 1.6
+title <- "TMA LU001FFP03"
+
+# TMA plot with FOVs positions and associated primary diagnosis
+LU001FFP03_TMA_primary_diag <- ggplot(FOVs_prim_diag_pos_qual, aes(x = X_mm, y = Y_mm)) +
+  geom_point(aes(color = `Primary Diagnosis`), shape = 15, size = square_size) +
+  geom_text(aes(label = FOV), size = square_text_size) +
+  coord_equal() +
+  labs(title = title,
+       color = "Primary diagnosis") +
+  scale_color_manual(values = c("breast cancer" = "#00B5EE", "lung cancer" = "#E26EF7"),
+                     na.translate = TRUE, 
+                     na.value = "grey50",
+                     breaks = c("breast cancer", "lung cancer"))
+LU001FFP03_TMA_primary_diag_name <- paste0("TMA_LU001FFP03_primary_diagnosis_highlighted")
+TMA_info_to_save[[LU001FFP03_TMA_primary_diag_name]] <- LU001FFP03_TMA_primary_diag
+
+# TMA plot with FOVs positions and quality of those with primary diagnosis of breast cancer
+LU001FFP03_TMA_breast_cancers_stamps_quality <- ggplot(
+  FOVs_prim_diag_pos_qual, aes(x = X_mm, y = Y_mm)) +
+  geom_point(aes(color = `Quality`), shape = 15, size = square_size) +
+  geom_text(aes(label = FOV), size = square_text_size) +
+  coord_equal() +
+  labs(title = title,
+       color = "Breast cancer\nstamps quality") +
+  scale_color_manual(values = c("good" = "#00BB44", "bad" = "#F8766D"),
+                     na.translate = TRUE, 
+                     na.value = "grey50",
+                     breaks = c("good", "bad"))
+LU001FFP03_TMA_breast_cancer_stamps_highlighted_name <- 
+  paste0("TMA_LU001FFP03_breast_cancer_stamps_quality")
+TMA_info_to_save[[LU001FFP03_TMA_breast_cancer_stamps_highlighted_name]] <- 
+  LU001FFP03_TMA_breast_cancers_stamps_quality
+
+print(c(TMA_info_to_display, TMA_info_to_save))
+```
+
 ## Quality assurance
 
 ```{r}
