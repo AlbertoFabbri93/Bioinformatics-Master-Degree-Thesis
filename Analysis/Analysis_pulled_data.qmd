@@ -391,7 +391,7 @@ print(glue("Total: {breast_cancer_stamps_total}"))
 # Print FOVs info
 print("FOVs")
 breast_cancer_fovs_nums <- sort(unique(unlist(breast_cancer_patients$fov)))
-print(glue("Numbers: {glue_collapse(breast_cancer_fovs, sep = ', ')}"))
+print(glue("Numbers: {glue_collapse(breast_cancer_fovs_nums, sep = ', ')}"))
 breast_cancer_fovs_total <- length(breast_cancer_fovs_nums)
 print(glue("Total: {breast_cancer_fovs_total}"))
 ```
@@ -446,7 +446,7 @@ FOVs_prim_diag_pos_qual <- FOVs_prim_diag_pos %>%
   dplyr::mutate(Quality = case_when(
     is.na(`Primary Diagnosis`) ~ NA_character_,
     `Primary Diagnosis` != "breast cancer" ~ NA_character_,
-    FOV %in% breast_cancer_fovs ~ "good",
+    FOV %in% breast_cancer_fovs_nums ~ "good",
     TRUE ~ "bad"
   ))
 
@@ -487,6 +487,15 @@ TMA_info_to_save[[LU001FFP03_TMA_breast_cancer_stamps_highlighted_name]] <-
   LU001FFP03_TMA_breast_cancers_stamps_quality
 
 print(c(TMA_info_to_display, TMA_info_to_save))
+```
+
+```{r}
+#| label: save-plots-TMA-info
+#| include: false
+#| echo: false
+#| eval: false
+
+save_data(TMA_info_to_save, here(images_dir, "TMA"), images_ext)
 ```
 
 ## Quality assurance
