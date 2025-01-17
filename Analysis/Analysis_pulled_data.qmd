@@ -321,12 +321,11 @@ print("List of the genes in the data:")
 rownames(breast_cancer_patients)
 
 # Create a data frame to store the table
-patient_table <- data.frame(
+patient_table <- tibble(
   Patient_ID = character(),
   Serial_Cores = character(),
   Stamps = character(),
-  FOVs = character(),
-  stringsAsFactors = FALSE
+  FOVs = character()
 )
 # Iterate over each patient
 for (patient_id in sort(unique(unlist(breast_cancer_patients$Patient.ID)))) {
@@ -354,16 +353,19 @@ for (patient_id in sort(unique(unlist(breast_cancer_patients$Patient.ID)))) {
 
       # Add a row to the patient table for each FOV
       for (fov_id in fovs) {
-        patient_table <- rbind(patient_table, data.frame(
-          Patient_ID = patient_id,
-          Serial_Cores = serial_core_id,
-          Stamps = stamp_id,
-          FOVs = fov_id
-        ))
+        patient_table <- patient_table %>% add_row(
+          Patient_ID = as.character(patient_id),
+          Serial_Cores = as.character(serial_core_id),
+          Stamps = as.character(stamp_id),
+          FOVs = as.character(fov_id)
+        )
       }
     }
   }
 }
+# Sort the patient_table by Patient_ID, Serial_Cores, and Stamps
+patient_table <- patient_table %>%
+  arrange(Patient_ID, Serial_Cores, Stamps, desc(FOVs))
 # Print the patient table
 print(patient_table)
 
