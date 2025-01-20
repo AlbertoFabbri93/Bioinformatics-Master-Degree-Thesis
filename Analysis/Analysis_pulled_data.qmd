@@ -2565,7 +2565,7 @@ cellchat <- createCellChat(
   # A data frame (rows are cells with rownames) consisting of cell information used for defining cell groups
   meta = breast_cancer_patients_analyze@meta.data,
   # A char name of the variable in meta data, defining cell groups
-  group.by = col_ist_merge_type,
+  group.by = col_cell_tumor_cluster_subtype,
   datatype = "spatial",
   # A data matrix in which each row gives the spatial locations/coordinates of each cell
   coordinates = spatial_coordinates,
