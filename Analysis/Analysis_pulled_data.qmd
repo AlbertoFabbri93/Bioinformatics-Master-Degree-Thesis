@@ -2688,11 +2688,26 @@ cellchat <- aggregateNet(
 saveRDS(cellchat, here(objects_dir, "cellchat.rds"))
 ```
 
-png(filename=here("cellchat_test.png"), width = 15, height = 20, units = "cm", res = 1000)
-netVisual_circle(cellchat@net$count, vertex.weight = rowSums(cellchat@net$count), weight.scale = T, label.edge= F, title.name = "Number of interactions", margin = 0.2, vertex.label.cex = 0.8)
-dev.off()
-netVisual_circle(cellchat@net$weight, vertex.weight = rowSums(cellchat@net$weight), weight.scale = T, label.edge= F, title.name = "Interaction weights/strength")
+### Plot
 
+```{r}
+# Circle plots of cell-cell communication network
+# Plot the number of interactions
+netVisual_circle(
+  net = cellchat@net$count,
+  vertex.weight = rowSums(cellchat@net$count),
+  weight.scale = TRUE,
+  label.edge= FALSE,
+  title.name = "Number of interactions",
+  margin = 0.2,
+  vertex.label.cex = 0.8)
+# Plot the interaction strength
+netVisual_circle(
+  net = cellchat@net$weight,
+  vertex.weight = rowSums(cellchat@net$weight),
+  weight.scale = TRUE,
+  label.edge= FALSE,
+  title.name = "Interaction weights/strength")
 netVisual_heatmap(cellchat, measure = "count", color.heatmap = "Blues")
 netVisual_heatmap(cellchat, measure = "weight", color.heatmap = "Blues")
 
