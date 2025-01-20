@@ -2570,7 +2570,7 @@ cellchat <- createCellChat(
   # A data matrix in which each row gives the spatial locations/coordinates of each cell
   coordinates = spatial_coordinates,
   # A data frame containing two distance factors 'ratio' and 'tol', which is dependent on spatial transcriptomics technologies
-  spatial.factors = spatial.factors,
+  spatial.factors = spatial_factors,
   do.sparse = TRUE)
 
 # SET THE DATABASE TO BE USED
@@ -2635,20 +2635,29 @@ cellchat <- computeCommunProb(
   raw.use = FALSE,
   # Whether consider the proportion of cells in each group across all sequenced cells
   # Set it to true as the dataset reflects the natural abundance of different cell types in the sample
-  population.size = FALSE,
+  population.size = TRUE,
   # Whether to use distance constraints to compute communication probability
   # Set to true to make communication probability inversely proportional to the computed distance
   distance.use = TRUE,
   # The maximum interaction/diffusion length of ligands (Unit: microns)
   # This hard threshold is used to filter out the connections between spatially distant regions
+  # The default is 250 (good as the minum distance between cells on different stamps is 1000)
   interaction.range = 250,
-  scale.distance = 0.1,
+  # The scale.distance ensures that the minimum scaled distance across all pairs of cells is in the range [1, 2]
+  # It adjusts spatial distances to be compatible with the algorithm's internal calculations
+  # Set the scale distance so that the minumum scaled distance is 1
+  scale.distance = 1 / core_stamp_min_max_dist$global$min,
   # The minimum number of interacting cell pairs required for defining spatially proximal cell groups
   k.min = 10,
+  # Whether using the 'contact-dependent' manner for inference signaling, that is determining interacting cell pairs by requiring cells to be in direct membrane-membrane contact
+  # By default 'contact.dependent = TRUE' when inferring contact-dependent and juxtacrine signaling
   contact.dependent = TRUE,
-  contact.range = 10,
-  # Whether use the raw data (i.e., 'object@data.signaling') or the smoothed data (i.e., 'object@data.smooth')
-  raw.use = TRUE)
+  # The interaction range (Unit: microns) to restrict the contact-dependent signaling when 'contact.dependent = TRUE'
+  # For spatial transcriptomics in a single-cell resolution, 'contact.range' is approximately equal to the estimated cell diameter (i.e., the cell center-to-center distance)
+  contact.range = 5,
+  # Number of bootstrap iterations to perform when calculating statistical significance for communication probabilities
+  # Bootstrapping is a resampling method used to estimate the variability of a statistic by repeatedly sampling from the data with replacement
+  nboot = 100)
 
 # Filter out the cell-cell communication if there are only few cells in certain cell groups
 cellchat <- filterCommunication(cellchat, min.cells = 10)
