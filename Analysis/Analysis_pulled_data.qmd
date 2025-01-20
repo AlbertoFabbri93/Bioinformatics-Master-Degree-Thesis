@@ -2542,7 +2542,7 @@ cellchat <- readRDS(here(objects_dir, "cellchat.rds"))
 ```
 
 ```{r}
-#| label: cellchat
+#| label: compute-cellchat
 #| eval: false
 
 # Genes should be in rows with rownames and cells in columns with colnames
@@ -2660,11 +2660,33 @@ cellchat <- computeCommunProb(
   nboot = 100)
 
 # Filter out the cell-cell communication if there are only few cells in certain cell groups
-cellchat <- filterCommunication(cellchat, min.cells = 10)
+cellchat <- filterCommunication(
+  object = cellchat,
+  # The minmum number of cells required in each cell group for cell-cell communication
+  min.cells = 10,
+  # The minmum number of cells required in each cell group for cell-cell communication
+  rare.keep = TRUE,
+  # Whether to keep the non-filtered cell-cell communication in the CellChat object
+  # This is useful for avoiding re-running 'computeCommunProb' if you want to adjust the parameters when running 'filterCommunication'.
+  nonFilter.keep = TRUE)
+
 # Compute the communication probability on signaling pathway level by summarizing the communication probabilities of all ligands-receptors interactions associated with each signaling pathway
-cellchat <- computeCommunProbPathway(cellchat)
+cellchat <- computeCommunProbPathway(
+  object = cellchat,
+  # Threshold of the p-value for determining significant interaction
+  thresh = 0.05)
+
 # Calculate the aggregated cell-cell communication network by counting the number of links or summarizing the communication probability
-cellchat <- aggregateNet(cellchat)
+cellchat <- aggregateNet(
+  object = cellchat,
+  # Whether removing the isolate cell groups without any interactions when applying subsetCommunication
+  remove.isolate = TRUE,
+  # Threshold of the p-value for determining significant interaction
+  thresh = 0.05)
+
+# Save cellchat object
+saveRDS(cellchat, here(objects_dir, "cellchat.rds"))
+```
 
 png(filename=here("cellchat_test.png"), width = 15, height = 20, units = "cm", res = 1000)
 netVisual_circle(cellchat@net$count, vertex.weight = rowSums(cellchat@net$count), weight.scale = T, label.edge= F, title.name = "Number of interactions", margin = 0.2, vertex.label.cex = 0.8)
