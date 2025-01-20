@@ -2691,8 +2691,12 @@ saveRDS(cellchat, here(objects_dir, "cellchat.rds"))
 ### Plot
 
 ```{r}
+# CellChat images folder
+cellchat_images <- glue("{images_dir}/CellChat")
+
 # Circle plots of cell-cell communication network
 # Plot the number of interactions
+png(filename=here(cellchat_images,"cellchat_circleplot_count.png"), width = 15, height = 20, units = "cm", res = 1000)
 netVisual_circle(
   net = cellchat@net$count,
   vertex.weight = rowSums(cellchat@net$count),
@@ -2701,15 +2705,23 @@ netVisual_circle(
   title.name = "Number of interactions",
   margin = 0.2,
   vertex.label.cex = 0.8)
+dev.off()
 # Plot the interaction strength
+png(filename=here(cellchat_images,"cellchat_circleplot_weight.png"), width = 15, height = 20, units = "cm", res = 1000)
 netVisual_circle(
   net = cellchat@net$weight,
   vertex.weight = rowSums(cellchat@net$weight),
   weight.scale = TRUE,
   label.edge= FALSE,
   title.name = "Interaction weights/strength")
+dev.off()
+
+png(filename=here(cellchat_images,"cellchat_heatmap_count.png"), width = 15, height = 20, units = "cm", res = 1000)
 netVisual_heatmap(cellchat, measure = "count", color.heatmap = "Blues")
+dev.off()
+png(filename=here(cellchat_images,"cellchat_heatmap_weight.png"), width = 15, height = 20, units = "cm", res = 1000)
 netVisual_heatmap(cellchat, measure = "weight", color.heatmap = "Blues")
+dev.off()
 
 # Examine the signaling sent from each cell group
 # Set the parameter edge.weight.max so that edge weights are comparable between differet networks
