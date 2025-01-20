@@ -2662,9 +2662,9 @@ cellchat <- computeCommunProb(
 # Filter out the cell-cell communication if there are only few cells in certain cell groups
 cellchat <- filterCommunication(
   object = cellchat,
-  # The minmum number of cells required in each cell group for cell-cell communication
+  # The minimum number of cells required in each cell group for cell-cell communication
   min.cells = 10,
-  # The minmum number of cells required in each cell group for cell-cell communication
+  # Whether to keep the interactions associated with the rare populations when min.samples >= 2
   rare.keep = TRUE,
   # Whether to keep the non-filtered cell-cell communication in the CellChat object
   # This is useful for avoiding re-running 'computeCommunProb' if you want to adjust the parameters when running 'filterCommunication'.
