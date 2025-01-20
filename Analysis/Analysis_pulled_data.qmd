@@ -2460,6 +2460,79 @@ save_data(niches_patient_data, here(images_dir, stat_niches_dir))
 
 ## CellChat
 
+### Distances
+
+```{r}
+#| label: calculate-distances
+
+# Spatial locations of spots from full (NOT high/low) resolution images are required
+# Extract the cell coordinates from the Seurat object
+spatial_coordinates = Seurat::GetTissueCoordinates(
+  object = breast_cancer_patients_analyze,
+  image = "LU001FFP03",
+) %>%
+# Set the rownames equal to the cell names and remove the cell column
+  tibble::column_to_rownames(var = "cell")
+
+# Divide the spatial coordinates into the different fovs using the cell names
+spatial_coordinates_fovs <- spatial_coordinates %>%
+  # Convert rownames to a column for easier manipulation
+  mutate(rownames = rownames(.)) %>% 
+  separate(rownames, into = c("cell", "fov"), sep = "_") %>%
+  group_split(fov)
+# Change list names to the fovs names
+names(spatial_coordinates_fovs) <- sapply(spatial_coordinates_fovs, function(df) unique(df$fov))
+
+# Create a list of vectors with every core-stamp combination and associated FOVs
+core_stamp_to_fovs <- patient_table %>%
+  mutate(Core_Stamp = paste(Serial_Cores, Stamps, sep = "_")) %>%
+  dplyr::select(Core_Stamp, FOVs) %>%
+  group_by(Core_Stamp) %>%
+  summarize(FOVs = list(FOVs), .groups = "drop") %>%
+  {purrr::set_names(.$FOVs, .$Core_Stamp)}
+
+# Create a new list with the merged fovs spatial locations belonging to the same core-stamp
+core_stamp_spatial <- list()
+for (core_stamp in names(core_stamp_to_fovs)) {
+  core_stamp_spatial[[core_stamp]] <- do.call(rbind, spatial_coordinates_fovs[core_stamp_to_fovs[[core_stamp]]]) %>%
+  # Transform the tibbles to dataframes whose rownames are cell_fov 
+  mutate(cell_fov = paste(cell, fov, sep = "_")) %>%
+  column_to_rownames(var = "cell_fov") %>%
+  dplyr::select(-cell, -fov)
+}
+
+# For CosMx data, the spatial coordinates are in pixels and the conversion factor can be found in the NanoString documentation:
+# https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space/posts/flat-file-exports/flat-files-compare.html
+conversion.factor = 0.12028
+# Calculate the distances between all the cells inside a single core-stamp
+core_stamp_distance_matrix <- list()
+for (stamp in names(core_stamp_spatial)) {
+core_stamp_distance_matrix[[stamp]] = computeCellDistance(
+  coordinates = core_stamp_spatial[[stamp]],
+  # to convert the distance from pixels to micrometers
+  ratio = conversion.factor,
+  # In order for the interaction range to take effect, the tolerance should also be specified
+  interaction.range = NULL,
+  tol = NULL)
+}
+
+# Initialize list to store results
+core_stamp_min_max_dist <- list(global = list(max = -Inf, min = Inf))
+# Loop through each stamp to compute min and max distances
+for (stamp in names(core_stamp_distance_matrix)) {
+  current_distances <- core_stamp_distance_matrix[[stamp]]
+  core_stamp_min_max_dist[[stamp]] <- list(
+    max = max(current_distances),
+    min = min(current_distances)
+  )
+  # Update global max and min
+  core_stamp_min_max_dist$global$max <- max(core_stamp_min_max_dist$global$max, core_stamp_min_max_dist[[stamp]]$max)
+  core_stamp_min_max_dist$global$min <- min(core_stamp_min_max_dist$global$min, core_stamp_min_max_dist[[stamp]]$min)
+}
+```
+
+### Infer cell-cell communication
+
 ```{r}
 #| label: load-cellchat
 
