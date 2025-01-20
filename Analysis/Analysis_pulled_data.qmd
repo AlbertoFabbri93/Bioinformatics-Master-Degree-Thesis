@@ -2503,14 +2503,14 @@ for (core_stamp in names(core_stamp_to_fovs)) {
 
 # For CosMx data, the spatial coordinates are in pixels and the conversion factor can be found in the NanoString documentation:
 # https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space/posts/flat-file-exports/flat-files-compare.html
-conversion.factor = 0.12028
+conversion_factor = 0.12028
 # Calculate the distances between all the cells inside a single core-stamp
 core_stamp_distance_matrix <- list()
 for (stamp in names(core_stamp_spatial)) {
 core_stamp_distance_matrix[[stamp]] = computeCellDistance(
   coordinates = core_stamp_spatial[[stamp]],
   # to convert the distance from pixels to micrometers
-  ratio = conversion.factor,
+  ratio = conversion_factor,
   # In order for the interaction range to take effect, the tolerance should also be specified
   interaction.range = NULL,
   tol = NULL)
@@ -2522,8 +2522,8 @@ core_stamp_min_max_dist <- list(global = list(max = -Inf, min = Inf))
 for (stamp in names(core_stamp_distance_matrix)) {
   current_distances <- core_stamp_distance_matrix[[stamp]]
   core_stamp_min_max_dist[[stamp]] <- list(
-    max = max(current_distances),
-    min = min(current_distances)
+    max = max(current_distances, na.rm = TRUE),
+    min = min(current_distances, na.rm = TRUE)
   )
   # Update global max and min
   core_stamp_min_max_dist$global$max <- max(core_stamp_min_max_dist$global$max, core_stamp_min_max_dist[[stamp]]$max)
@@ -2548,42 +2548,26 @@ cellchat <- readRDS(here(objects_dir, "cellchat.rds"))
 # Normalized data (e.g., library-size normalization and then log-transformed with a pseudocount of 1) is required
 # The SCT assay should be fine as it is used in the following vignette:
 # https://htmlpreview.github.io/?https://github.com/jinworks/CellChat/blob/master/tutorial/CellChat_analysis_of_spatial_transcriptomics_data.html
-data.input = Seurat::GetAssayData(
+cell_expression_data = Seurat::GetAssayData(
   breast_cancer_patients_analyze,
   layer = "data",
   assay = "SCT")
 
-# Spatial locations of spots from full (NOT high/low) resolution images are required
-spatial.locs = Seurat::GetTissueCoordinates(
-  object = breast_cancer_patients_analyze,
-  image = "LU001FFP03",
-) %>%
-# Set the rownames equal to the cell names and remove the cell column
-  tibble::column_to_rownames(var = "cell")
-
-# For CosMx data, the spatial coordinates are in pixels and the conversion factor can be found in the NanoString documentation:
-# https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space/posts/flat-file-exports/flat-files-compare.html
 # Because CosMx does not include the uniform cell size, users can compute the minimum cell centroid-to-centroid distance via computeCellDistance and use its half value as the tolerance factor.
 # CellChat does not need an accurate tolerance factor, which is used for determining whether considering the cell-pair as spatially proximal if their distance is greater than interaction.range but smaller than “interaction.range + tol”.
-conversion.factor = 0.12028
-distance_matrix = computeCellDistance(
-  coordinates = spatial.locs,
-  # to convert the distance from pixels to micrometers
-  ratio = conversion.factor)
-median_cell_distance = median(distance_matrix)
-spot.size = min(distance_matrix)
-spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
+spatial_factors = data.frame(ratio = conversion_factor, tol = core_stamp_min_max_dist$global$min / 2)
 
+# Create a new CellChat object from a data matrix
 cellchat <- createCellChat(
   # A normalized (NOT count) data matrix (genes by cells)
-  object = data.input,
+  object = cell_expression_data,
   # A data frame (rows are cells with rownames) consisting of cell information used for defining cell groups
   meta = breast_cancer_patients_analyze@meta.data,
   # A char name of the variable in meta data, defining cell groups
   group.by = col_ist_merge_type,
   datatype = "spatial",
   # A data matrix in which each row gives the spatial locations/coordinates of each cell
-  coordinates = spatial.locs,
+  coordinates = spatial_coordinates,
   # A data frame containing two distance factors 'ratio' and 'tol', which is dependent on spatial transcriptomics technologies
   spatial.factors = spatial.factors,
   do.sparse = TRUE)
