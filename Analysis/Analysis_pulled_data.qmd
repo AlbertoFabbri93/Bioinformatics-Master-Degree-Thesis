@@ -2625,6 +2625,16 @@ cellchat <- smoothData(
   # A larger value alpha results in increasing levels of smoothing
   alpha = 0.5)
 
+# Compute averaged expression values for each cell group
+avg_expr_cell_group <- computeAveExpr(
+  object = cellchat,
+  # a char vector with the features to use
+  features = NULL,
+  # methods for computing the average gene expression per cell group
+  type = "truncatedMean",
+  # the fraction (0 to 0.25) of observations to be trimmed from each end of x before the mean is computed
+  trim = 0.1)
+
 # Compute the communication probability/strength between any interacting cell groups
 cellchat <- computeCommunProb(
   object = cellchat,
