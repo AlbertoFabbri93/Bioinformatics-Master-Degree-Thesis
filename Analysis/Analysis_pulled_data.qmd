@@ -2602,7 +2602,7 @@ cellchat <- identifyOverExpressedGenes(
   # Threshold of p-values
   thresh.p = 0.05,
   # the minimum number of expressed cells required for the genes that are considered for cell-cell communication analysis
-  min.cells = 10)
+  min.cells = 8)
 
 # Identify over-expressed ligand-receptor interactions (pairs) within the used CellChatDB
 cellchat <- identifyOverExpressedInteractions(
@@ -2623,7 +2623,7 @@ cellchat <- smoothData(
   adj = PPI.human,
   # Numeric in [0,1] alpha = 0: no smoothing
   # A larger value alpha results in increasing levels of smoothing
-  alpha = 0.5)
+  alpha = 0.4)
 
 # Compute averaged expression values for each cell group
 avg_expr_cell_group <- computeAveExpr(
@@ -2642,7 +2642,7 @@ cellchat <- computeCommunProb(
   type = "triMean",
   # Whether use the raw data (i.e., 'object@data.signaling') or the smoothed data (i.e., 'object@data.smooth')
   # Set it to false because of the low sequencing depth of the data being analyzed
-  raw.use = FALSE,
+  raw.use = TRUE,
   # Whether consider the proportion of cells in each group across all sequenced cells
   # Set it to true as the dataset reflects the natural abundance of different cell types in the sample
   population.size = TRUE,
@@ -2658,13 +2658,13 @@ cellchat <- computeCommunProb(
   # Set the scale distance so that the minumum scaled distance is 1
   scale.distance = 1 / core_stamp_min_max_dist$global$min,
   # The minimum number of interacting cell pairs required for defining spatially proximal cell groups
-  k.min = 10,
+  k.min = 8,
   # Whether using the 'contact-dependent' manner for inference signaling, that is determining interacting cell pairs by requiring cells to be in direct membrane-membrane contact
   # By default 'contact.dependent = TRUE' when inferring contact-dependent and juxtacrine signaling
   contact.dependent = TRUE,
   # The interaction range (Unit: microns) to restrict the contact-dependent signaling when 'contact.dependent = TRUE'
   # For spatial transcriptomics in a single-cell resolution, 'contact.range' is approximately equal to the estimated cell diameter (i.e., the cell center-to-center distance)
-  contact.range = 5,
+  contact.range = 6,
   # Number of bootstrap iterations to perform when calculating statistical significance for communication probabilities
   # Bootstrapping is a resampling method used to estimate the variability of a statistic by repeatedly sampling from the data with replacement
   nboot = 100)
@@ -2673,7 +2673,7 @@ cellchat <- computeCommunProb(
 cellchat <- filterCommunication(
   object = cellchat,
   # The minimum number of cells required in each cell group for cell-cell communication
-  min.cells = 10,
+  min.cells = 8,
   # Whether to keep the interactions associated with the rare populations when min.samples >= 2
   rare.keep = TRUE,
   # Whether to keep the non-filtered cell-cell communication in the CellChat object
