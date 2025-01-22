@@ -2742,7 +2742,7 @@ png(filename=here(cellchat_images,"cellchat_heatmap_count.png"), width = 15, hei
 netVisual_heatmap(
   object = cellchat,
   measure = "count",
-  color.heatmap = "Blues",
+  color.heatmap = c("#f0f8ff", "#2166ac"),
   font.size = 7,
   color.use = palette_cellchat)
 dev.off()
@@ -2750,7 +2750,6 @@ png(filename=here(cellchat_images,"cellchat_heatmap_weight.png"), width = 15, he
 netVisual_heatmap(
   object = cellchat,
   measure = "weight",
-  color.heatmap = "Blues",
   font.size = 7,
   color.use = palette_cellchat)
 dev.off()
