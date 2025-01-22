@@ -2770,4 +2770,7 @@ for (i in 1:nrow(cellchat_weight_mat)) {
     # Add a title to the plot using the name of the i-th row of matrix
     title.name = rownames(cellchat_weight_mat)[i])
 }
+
+# Print signaling pathways showing significant communications
+print(cellchat@netP$pathways)
 ```
