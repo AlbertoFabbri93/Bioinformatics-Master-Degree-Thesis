@@ -2702,6 +2702,10 @@ cellchat <- aggregateNet(
   # Threshold of the p-value for determining significant interaction
   thresh = 0.05)
 
+# Compute the network centrality scores
+# the slot 'netP' means the inferred intercellular communication network of signaling pathways
+cellchat <- netAnalysis_computeCentrality(cellchat, slot.name = "netP")
+
 # Save cellchat object
 saveRDS(cellchat, here(objects_dir, "cellchat.rds"))
 ```
