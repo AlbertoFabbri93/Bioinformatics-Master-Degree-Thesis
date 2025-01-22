@@ -2666,10 +2666,15 @@ cellchat <- computeCommunProb(
   contact.dependent = TRUE,
   # The interaction range (Unit: microns) to restrict the contact-dependent signaling when 'contact.dependent = TRUE'
   # For spatial transcriptomics in a single-cell resolution, 'contact.range' is approximately equal to the estimated cell diameter (i.e., the cell center-to-center distance)
-  contact.range = 6,
+  # Set it to 10 as it is the typical size of a human cell
+  contact.range = 10,
+  # Number of neighbors to restrict the contact-dependent signaling within the neatest neighbors when 'contact.dependent = TRUE'.   # By default, CellChat uses 'contact.range' to restrict the contact-dependent signaling; however, users can also provide a value of 'contact.knn.k', in order to determine interacting cell pairs based on the k-nearest neighbors (knn).
+  # Do not use this parameter as contact range is a better option
+  contact.knn.k = NULL,
   # Number of bootstrap iterations to perform when calculating statistical significance for communication probabilities
   # Bootstrapping is a resampling method used to estimate the variability of a statistic by repeatedly sampling from the data with replacement
-  nboot = 100)
+  nboot = 100,
+  seed.use = 1L)
 
 # Filter out the cell-cell communication if there are only few cells in certain cell groups
 cellchat <- filterCommunication(
