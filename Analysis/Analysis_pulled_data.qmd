@@ -2503,14 +2503,14 @@ for (core_stamp in names(core_stamp_to_fovs)) {
 
 # For CosMx data, the spatial coordinates are in pixels and the conversion factor can be found in the NanoString documentation:
 # https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space/posts/flat-file-exports/flat-files-compare.html
-conversion_factor = 0.12028
+cosmx_pixel_to_micron_conversion_factor = 0.12028
 # Calculate the distances between all the cells inside a single core-stamp
 core_stamp_distance_matrix <- list()
 for (stamp in names(core_stamp_spatial)) {
 core_stamp_distance_matrix[[stamp]] = computeCellDistance(
   coordinates = core_stamp_spatial[[stamp]],
   # to convert the distance from pixels to micrometers
-  ratio = conversion_factor,
+  ratio = cosmx_pixel_to_micron_conversion_factor,
   # In order for the interaction range to take effect, the tolerance should also be specified
   interaction.range = NULL,
   tol = NULL)
@@ -2556,7 +2556,7 @@ cell_expression_data = Seurat::GetAssayData(
 
 # Because CosMx does not include the uniform cell size, users can compute the minimum cell centroid-to-centroid distance via computeCellDistance and use its half value as the tolerance factor.
 # CellChat does not need an accurate tolerance factor, which is used for determining whether considering the cell-pair as spatially proximal if their distance is greater than interaction.range but smaller than “interaction.range + tol”.
-spatial_factors = data.frame(ratio = conversion_factor, tol = core_stamp_min_max_dist$global$min / 2)
+spatial_factors = data.frame(ratio = cosmx_pixel_to_micron_conversion_factor, tol = core_stamp_min_max_dist$global$min / 2)
 
 # Create a new CellChat object from a data matrix
 cellchat <- createCellChat(
