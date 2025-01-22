@@ -2773,5 +2773,15 @@ for (i in 1:nrow(cellchat_weight_mat)) {
 }
 
 # Print signaling pathways showing significant communications
-print(cellchat@netP$pathways)
+pathways_with_significant_signaling <- cellchat@netP$pathways
+print(pathways_with_significant_signaling)
+
+# Visualize the computed centrality scores using heatmap, allowing ready identification of major signaling roles of cell groups
+for (pathway in pathways_with_significant_signaling) {
+  png(filename=here(cellchat_images,glue("Signaling_pathway_network_{pathway}.png")), width = 15, height = 8, units = "cm", res = 1000)
+  par(mfrow = c(1, 1), xpd = TRUE)
+  image <- netAnalysis_signalingRole_network(cellchat, signaling = pathway, width = 12, height = 2.5, font.size = 7)
+  print(image)
+  dev.off()
+}
 ```
