@@ -2184,7 +2184,7 @@ num_tumor_clusters <- length(grep("^Tumor", unique(breast_cancer_patients_analyz
 # Create a gray scale for the tumor clusters
 tumor_clusters_colors <- gray.colors(12, start = 0.2, end = 0.9)
 # Create the color palette for the niches
-cells_all_phenotypes_color_palette <- generate_colors_lookup_table(
+palette_all_cells_types <- generate_colors_lookup_table(
   breast_cancer_patients_analyze,
   cluster_column_name = col_cell_tumor_cluster_subtype,
   known_clusters_colors = palette_cell_types,
@@ -2195,7 +2195,7 @@ cell_types_stamps_plots <- generate_spatial_plots(
   cluster_var = col_cell_tumor_cluster_subtype,
   cluster_name = "Cell types with tumor subclusters",
   legend_fill = "Cell types",
-  color_lookup_table = cells_all_phenotypes_color_palette)
+  color_lookup_table = palette_all_cells_types)
 # Display the plots
 print(cell_types_stamps_plots)
 ```
@@ -2396,7 +2396,7 @@ for (niche in niches) {
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           # Move caption to the left
           plot.caption = element_text(hjust = 0)) +
-    scale_fill_manual(values = cells_all_phenotypes_color_palette) +
+    scale_fill_manual(values = palette_all_cells_types) +
     NoLegend()
 
   # Add the plot to the list
