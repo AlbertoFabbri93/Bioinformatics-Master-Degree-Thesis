@@ -2617,13 +2617,14 @@ cellchat <- identifyOverExpressedInteractions(
 # The smoothed data is also called "projected" because it is generated through a process that predicts or estimates missing or unobserved values in the dataset
 # The term "projected" highlights the idea that the smoothed data is not strictly observed but is inferred or extrapolated from the existing raw data, using statistical or computational models
 # This projection helps overcome technical limitations like dropout effects in single-cell RNA sequencing, especially when sequencing depth is shallow
-cellchat <- smoothData(
-  object = cellchat,
-  # Adjacency matrix of protein-protein interaction network to use
-  adj = PPI.human,
-  # Numeric in [0,1] alpha = 0: no smoothing
-  # A larger value alpha results in increasing levels of smoothing
-  alpha = 0.4)
+# Smoothing the data returns a lot of weak, insignificant interactions. Do not use!
+# cellchat <- smoothData(
+#   object = cellchat,
+#   # Adjacency matrix of protein-protein interaction network to use
+#   adj = PPI.human,
+#   # Numeric in [0,1] alpha = 0: no smoothing
+#   # A larger value alpha results in increasing levels of smoothing
+#   alpha = 0.4)
 
 # Compute averaged expression values for each cell group
 avg_expr_cell_group <- computeAveExpr(
