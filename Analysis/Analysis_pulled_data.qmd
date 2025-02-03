@@ -299,6 +299,53 @@ breast_cancer_patients_filt_cells@meta.data %<>%
 ```
 
 ```{r}
+#| label: cells-size
+
+# Calculate the cell Width from Heigh and AspectRatio
+breast_cancer_patients_filt_cells@meta.data %<>%
+  mutate(
+    Width := .data$Height * .data$AspectRatio
+  )
+
+# For CosMx data, the spatial coordinates are in pixels and the conversion factor can be found in the NanoString documentation:
+# https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space/posts/flat-file-exports/flat-files-compare.html
+cosmx_pixel_to_micron_conversion_factor = 0.12028
+
+# Calculate the width of the cells in micrometers
+breast_cancer_patients_filt_cells@meta.data %<>%
+  mutate(
+    Width_microns := .data$Width * cosmx_pixel_to_micron_conversion_factor
+  )
+# Calculate the height of the cells in micrometers
+breast_cancer_patients_filt_cells@meta.data %<>%
+  mutate(
+    Height_microns := .data$Height * cosmx_pixel_to_micron_conversion_factor
+  )
+
+# Create table with cell sizes
+cells_sizes <- breast_cancer_patients_filt_cells@meta.data %>%
+  pivot_longer(
+    cols = c(Width_microns, Height_microns), 
+    names_to = "Dimension", 
+    values_to = "Value") %>%
+  dplyr::select(cell_ID, fov, Dimension, Value)
+
+# Plot overlapping histograms with height and width bins
+ggplot(cells_sizes, aes(x = Value, fill = Dimension)) +
+  geom_histogram(position = "identity", binwidth = 1, alpha = 0.5, color = "black", size = 0.2) +
+  labs(
+    title = "Count of height and width values",
+    x = "Length (microns)",
+    y = "Count",
+    fill = "Dimension"
+  )  +
+  scale_fill_manual(
+    values = c("Height_microns" = "blue", "Width_microns" = "red"),
+    labels = c("Height_microns" = "Height", "Width_microns" = "Width")) +
+  theme_minimal()
+```
+
+```{r}
 #| label: save-filtered-cells-object
 #| eval: false
 
@@ -2501,9 +2548,6 @@ for (core_stamp in names(core_stamp_to_fovs)) {
   dplyr::select(-cell, -fov)
 }
 
-# For CosMx data, the spatial coordinates are in pixels and the conversion factor can be found in the NanoString documentation:
-# https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space/posts/flat-file-exports/flat-files-compare.html
-cosmx_pixel_to_micron_conversion_factor = 0.12028
 # Calculate the distances between all the cells inside a single core-stamp
 core_stamp_distance_matrix <- list()
 for (stamp in names(core_stamp_spatial)) {
