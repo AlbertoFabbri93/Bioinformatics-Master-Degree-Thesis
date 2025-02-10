@@ -2855,3 +2855,32 @@ for (pathway in pathways_with_significant_signaling) {
   dev.off()
 }
 ```
+
+```{r}
+#| label: cellchat-nets-dataframes
+
+# List with data to print
+cellchat_dfs <- list()
+
+# Data frame consisting of all the inferred cell-cell communications at the level of ligands/receptors
+cellchat_comm_net <- as.tibble(
+  subsetCommunication(
+    object = cellchat,
+    slot.name = "net"))
+cellchat_dfs[["cellchat_comm_net"]] <- cellchat_comm_net
+# Data frame with the inferred communications at the level of signaling pathways
+cellchat_comm_netp <- as.tibble(
+  subsetCommunication(
+    object = cellchat,
+    slot.name = "netP"))
+cellchat_dfs[["cell_chat_omm_netp"]] <- cellchat_comm_netp
+
+# Print all the data frames
+print(cellchat_dfs)
+```
+
+```{r}
+#| label: save-cellchat-nets-dataframe
+
+save_data(cellchat_dfs, here(cellchat_images))
+```
