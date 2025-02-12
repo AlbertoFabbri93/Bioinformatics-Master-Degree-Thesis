@@ -2778,8 +2778,11 @@ cellchat_images <- glue("{images_dir}/CellChat")
 # Create a palette with only the idents used by cellchat otherwise it throws an error
 palette_cellchat <- palette_all_cells_types[names(palette_all_cells_types) %in% levels(cellchat@idents)]
 
-# Circle plots of cell-cell communication network
+## Plots of cell-cell communication network
+
 # Plot the number of interactions
+# The number of interactions refers to the count of significant ligand-receptor pairs identified between cell populations.
+# Circle plot
 png(filename=here(cellchat_images,"cellchat_circleplot_count.png"), width = 15, height = 18, units = "cm", res = 1000)
 netVisual_circle(
   net = cellchat@net$count,
@@ -2791,17 +2794,7 @@ netVisual_circle(
   vertex.label.cex = 0.8,
   color.use = palette_cellchat)
 dev.off()
-# Plot the interaction strength
-png(filename=here(cellchat_images,"cellchat_circleplot_weight.png"), width = 15, height = 18, units = "cm", res = 1000)
-netVisual_circle(
-  net = cellchat@net$weight,
-  vertex.weight = rowSums(cellchat@net$weight),
-  weight.scale = TRUE,
-  label.edge= FALSE,
-  title.name = "Interaction weights/strength",
-  color.use = palette_cellchat)
-dev.off()
-
+# Heatmap
 png(filename=here(cellchat_images,"cellchat_heatmap_count.png"), width = 15, height = 14, units = "cm", res = 1000)
 netVisual_heatmap(
   object = cellchat,
@@ -2811,6 +2804,20 @@ netVisual_heatmap(
   font.size = 7,
   color.use = palette_cellchat)
 dev.off()
+
+# Plot the interaction strength
+# The interaction strength is calculated as a function of both the expression levels of the signalling molecules (ligands and receptors) and their interaction probability
+# Circle plot
+png(filename=here(cellchat_images,"cellchat_circleplot_weight.png"), width = 15, height = 18, units = "cm", res = 1000)
+netVisual_circle(
+  net = cellchat@net$weight,
+  vertex.weight = rowSums(cellchat@net$weight),
+  weight.scale = TRUE,
+  label.edge= FALSE,
+  title.name = "Interaction weights/strength",
+  color.use = palette_cellchat)
+dev.off()
+# Heatmap
 png(filename=here(cellchat_images,"cellchat_heatmap_weight.png"), width = 15, height = 14, units = "cm", res = 1000)
 netVisual_heatmap(
   object = cellchat,
