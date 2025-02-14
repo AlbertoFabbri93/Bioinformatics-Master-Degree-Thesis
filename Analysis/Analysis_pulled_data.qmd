@@ -2592,12 +2592,27 @@ cellchat <- readRDS(here(objects_dir, "cellchat.rds"))
 #| label: compute-cellchat
 #| eval: false
 
+# Create table with clusters size
+cluster_sizes <- table(breast_cancer_patients_analyze@meta.data[[col_cell_tumor_cluster_subtype]])
+# Extract total number of cells
+total_cells <- nrow(breast_cancer_patients_analyze@meta.data)
+# Calculate the minimum number of cells for a cluster to be included in the cellchat analysis based on its percentage on the total
+cluster_perc = 0.002
+min_cells <- ceiling(total_cells * cluster_perc)
+# Keep only clusters with at least min_cells
+cellchat_clusters_to_analyze <- names(cluster_sizes[cluster_sizes >= min_cells])
+# Subset Seurat object to include only large clusters
+breast_cancer_patients_cellchat_clusters_to_analyze <- subset(
+  breast_cancer_patients_analyze, 
+  subset = !!as.name(col_cell_tumor_cluster_subtype) %in% cellchat_clusters_to_analyze
+)
+
 # Genes should be in rows with rownames and cells in columns with colnames
 # Normalized data (e.g., library-size normalization and then log-transformed with a pseudocount of 1) is required
 # The SCT assay should be fine as it is used in the following vignette:
 # https://htmlpreview.github.io/?https://github.com/jinworks/CellChat/blob/master/tutorial/CellChat_analysis_of_spatial_transcriptomics_data.html
 cell_expression_data = Seurat::GetAssayData(
-  breast_cancer_patients_analyze,
+  breast_cancer_patients_cellchat_clusters_to_analyze,
   layer = "data",
   assay = "SCT")
 
@@ -2610,7 +2625,7 @@ cellchat <- createCellChat(
   # A normalized (NOT count) data matrix (genes by cells)
   object = cell_expression_data,
   # A data frame (rows are cells with rownames) consisting of cell information used for defining cell groups
-  meta = breast_cancer_patients_analyze@meta.data,
+  meta = breast_cancer_patients_cellchat_clusters_to_analyze@meta.data,
   # A char name of the variable in meta data, defining cell groups
   group.by = col_cell_tumor_cluster_subtype,
   datatype = "spatial",
