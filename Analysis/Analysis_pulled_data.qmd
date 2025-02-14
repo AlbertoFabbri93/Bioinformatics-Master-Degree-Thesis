@@ -105,6 +105,8 @@ library("clustree")
 library("ggforce")
 # More complex heatmaps
 library("ComplexHeatmap")
+# Print table as interactive HTML widget
+library("DT")
 # Additional color palettes
 library("RColorBrewer")
 library("pals")
@@ -2210,13 +2212,14 @@ breast_cancer_patients_analyze@meta.data %<>%
 ```{r}
 #| label: merge-cells-info
 
-# Vector with cell subtypes
-cell_subtypes <- unique(breast_cancer_patients_analyze@meta.data[[col_cell_tumor_cluster_subtype]])
-
-# Print the number of cell phenotypes including tumor subtypes
-print(glue("Cell phenotypes (Insitutype + Tumor clusters):"))
-print(cell_subtypes)
-print(glue("Number: {length(cell_subtypes)}"))
+# Create a tibble with cell count and percentage of every cluster
+cell_types_count <- breast_cancer_patients_analyze@meta.data %>%
+  count(.data[[col_cell_tumor_cluster_subtype]], name = "cell_count") %>%
+  mutate(percentage = round((cell_count / sum(cell_count)) * 100, 3)) %>%
+  dplyr::rename(cluster = .data[[col_cell_tumor_cluster_subtype]]) %>%
+  as_tibble()
+# Print the tibble as an html widget that can be sorted
+datatable(cell_types_count)
 ```
 
 ## Spatial plots of clusters
