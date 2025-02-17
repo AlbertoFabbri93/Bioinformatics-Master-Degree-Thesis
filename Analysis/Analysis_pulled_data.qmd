@@ -2655,10 +2655,20 @@ cellchat <- createCellChat(
 CellChatDB <- CellChatDB.human
 # Show the description of CellChatDB databse
 showDatabaseCategory(CellChatDB)
-# Use all CellChatDB except for "Non-protein Signaling" for cell-cell communication analysis
-CellChatDB.use <- subsetDB(CellChatDB, non_protein = FALSE)
+# Subset with all CellChatDB interactions except for the "Non-protein Signaling" category
+CellChatDB_all_protein_signalling <- subsetDB(CellChatDB, non_protein = FALSE)
+# Subset with cell-cell contact interactions
+CellChatDB_cell_cell_contact <- subsetDB(CellChatDB, search = "Cell-Cell Contact")
+# Subsets with non-contact interactions
+CellChatDB_secreted_signaling <- subsetDB(CellChatDB, search = "Secreted Signaling")
+CellChatDB_ecm_receptor <- subsetDB(CellChatDB, search = "ECM-Receptor")
+# Set the databased that should be used
+CellChatDB_suffix = "ecm_receptor"
+CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
 # Set the used database in the object
-cellchat@DB <- CellChatDB.use
+cellchat@DB <- get(CellChatDB_used)
+# Show categories in used database
+showDatabaseCategory(cellchat@DB)
 
 # Subset the expression data of signaling genes for saving computation cost
 # This step is necessary even if using the whole database
@@ -2792,7 +2802,11 @@ saveRDS(cellchat, here(objects_dir, "cellchat.rds"))
 
 ```{r}
 # CellChat images folder
-cellchat_images <- glue("{images_dir}/CellChat")
+cellchat_images <- file.path(images_dir, "CellChat", CellChatDB_suffix)
+# Check if the directory exists; if not, create it (including parent directories if needed)
+if (!dir.exists(here(cellchat_images))) {
+  dir.create(here(cellchat_images), recursive = FALSE)
+}
 # Create a palette with only the idents used by cellchat otherwise it throws an error
 palette_cellchat <- palette_all_cells_types[levels(cellchat@idents)]
 
@@ -2899,7 +2913,7 @@ for (pathway in pathways_with_significant_signaling) {
   dev.off()
 }
 
-png(filename = here(cellchat_images,"cellchat_bubbleplot_interactions.png"), width = 20, height = 15, units = "cm", res = 1000)
+png(filename = here(cellchat_images,"cellchat_bubbleplot_interactions.png"), width = 28, height = 15, units = "cm", res = 1000)
 # Show all the significant interactions (L-R pairs) from some cell groups to other cell groups
 netVisual_bubble(
   object = cellchat,
