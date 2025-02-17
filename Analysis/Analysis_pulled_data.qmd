@@ -2794,7 +2794,7 @@ saveRDS(cellchat, here(objects_dir, "cellchat.rds"))
 # CellChat images folder
 cellchat_images <- glue("{images_dir}/CellChat")
 # Create a palette with only the idents used by cellchat otherwise it throws an error
-palette_cellchat <- palette_all_cells_types[names(palette_all_cells_types) %in% levels(cellchat@idents)]
+palette_cellchat <- palette_all_cells_types[levels(cellchat@idents)]
 
 ## Plots of cell-cell communication network
 
@@ -2881,7 +2881,8 @@ for (i in 1:nrow(cellchat_weight_mat)) {
     # Set the maximum edge weight (thickness) to the largest value in the original matrix
     edge.weight.max = max(cellchat_weight_mat),
     # Add a title to the plot using the name of the i-th row of matrix
-    title.name = "Interaction weights/strength")
+    title.name = "Interaction weights/strength",
+    color.use = palette_cellchat)
   dev.off()
 }
 
