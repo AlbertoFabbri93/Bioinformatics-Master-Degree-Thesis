@@ -2912,6 +2912,8 @@ for (pathway in pathways_with_significant_signaling) {
   dev.off()
 }
 
+setEPS()
+postscript(file = here(cellchat_images,"cellchat_bubbleplot_interactions.eps"))
 png(filename = here(cellchat_images,"cellchat_bubbleplot_interactions.png"), width = 28, height = 15, units = "cm", res = 1000)
 # Show all the significant interactions (L-R pairs) from some cell groups to other cell groups
 netVisual_bubble(
