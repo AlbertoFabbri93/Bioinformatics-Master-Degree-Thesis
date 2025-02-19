@@ -2653,8 +2653,6 @@ cellchat <- createCellChat(
 
 # Ligand-receptor interactions in CellChat database for human
 CellChatDB <- CellChatDB.human
-# Show the description of CellChatDB databse
-showDatabaseCategory(CellChatDB)
 # Subset with all CellChatDB interactions except for the "Non-protein Signaling" category
 CellChatDB_all_protein_signalling <- subsetDB(CellChatDB, non_protein = FALSE)
 # Subset with cell-cell contact interactions
@@ -2663,11 +2661,11 @@ CellChatDB_cell_cell_contact <- subsetDB(CellChatDB, search = "Cell-Cell Contact
 CellChatDB_secreted_signaling <- subsetDB(CellChatDB, search = "Secreted Signaling")
 CellChatDB_ecm_receptor <- subsetDB(CellChatDB, search = "ECM-Receptor")
 # Set the databased that should be used
-CellChatDB_suffix = "ecm_receptor"
+CellChatDB_suffix = "all_protein_signalling"
 CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
 # Set the used database in the object
 cellchat@DB <- get(CellChatDB_used)
-# Show categories in used database
+# Show description of the used database
 showDatabaseCategory(cellchat@DB)
 
 # Subset the expression data of signaling genes for saving computation cost
@@ -2719,7 +2717,7 @@ avg_expr_cell_group <- computeAveExpr(
   # a char vector with the features to use
   features = NULL,
   # methods for computing the average gene expression per cell group
-  type = "truncatedMean",
+  type = "triMean",
   # the fraction (0 to 0.25) of observations to be trimmed from each end of x before the mean is computed
   trim = 0.22)
 
@@ -2795,7 +2793,7 @@ cellchat <- aggregateNet(
 cellchat <- netAnalysis_computeCentrality(cellchat, slot.name = "netP")
 
 # Save cellchat object
-saveRDS(cellchat, here(objects_dir, "cellchat.rds"))
+saveRDS(cellchat, here(objects_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
 ```
 
 ### Plot
