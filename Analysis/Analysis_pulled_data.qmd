@@ -2584,8 +2584,37 @@ for (stamp in names(core_stamp_distance_matrix)) {
 ```{r}
 #| label: load-cellchat
 
+# SET THE DATABASE TO BE USED
+
+# The CellChat database contains 4 types of interactions:
+
+### Secreted signaling (Paracrine Signaling):
+#   In this type, cells secrete signaling molecules (like growth factors or cytokines) that affect nearby target cells. The molecules diffuse through the extracellular space and bind to receptors on neighboring cells.
+
+### ECM-Receptor signaling:
+# This involves interactions between cells and the extracellular matrix (ECM). Cells can bind to ECM components through specific receptors (like integrins), which triggers various cellular responses. These interactions are vital for cell adhesion, migration, and tissue maintenance.
+
+### Cell-Cell contact (Juxtacrine signaling):
+#   This involves direct physical contact between cells, where membrane-bound ligands on one cell interact with receptors on an adjacent cell
+
+### Non-protein Signaling:
+# This category includes signaling through non-protein molecules such as neurotransmitters, lipids, and other small molecules.
+
+# Ligand-receptor interactions in CellChat database for human
+CellChatDB <- CellChatDB.human
+# Subset with all CellChatDB interactions except for the "Non-protein Signaling" category
+CellChatDB_all_protein_signalling <- subsetDB(CellChatDB, non_protein = FALSE)
+# Subset with cell-cell contact interactions
+CellChatDB_cell_cell_contact <- subsetDB(CellChatDB, search = "Cell-Cell Contact")
+# Subsets with non-contact interactions
+CellChatDB_secreted_signaling <- subsetDB(CellChatDB, search = "Secreted Signaling")
+CellChatDB_ecm_receptor <- subsetDB(CellChatDB, search = "ECM-Receptor")
+# Set the databased that should be used
+CellChatDB_suffix <- "all_protein_signalling"
+CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
+
 # Load cellchat object
-cellchat <- readRDS(here(objects_dir, "cellchat.rds"))
+cellchat <- readRDS(here(objects_dir, "cellchat_{CellChatDB_suffix}.rds"))
 ```
 
 ```{r}
@@ -2635,34 +2664,6 @@ cellchat <- createCellChat(
   spatial.factors = spatial_factors,
   do.sparse = TRUE)
 
-# SET THE DATABASE TO BE USED
-
-# The CellChat database contains 4 types of interactions:
-
-### Secreted signaling (Paracrine Signaling):
-#   In this type, cells secrete signaling molecules (like growth factors or cytokines) that affect nearby target cells. The molecules diffuse through the extracellular space and bind to receptors on neighboring cells.
-
-### ECM-Receptor signaling:
-# This involves interactions between cells and the extracellular matrix (ECM). Cells can bind to ECM components through specific receptors (like integrins), which triggers various cellular responses. These interactions are vital for cell adhesion, migration, and tissue maintenance.
-
-### Cell-Cell contact (Juxtacrine signaling):
-#   This involves direct physical contact between cells, where membrane-bound ligands on one cell interact with receptors on an adjacent cell
-
-### Non-protein Signaling:
-# This category includes signaling through non-protein molecules such as neurotransmitters, lipids, and other small molecules.
-
-# Ligand-receptor interactions in CellChat database for human
-CellChatDB <- CellChatDB.human
-# Subset with all CellChatDB interactions except for the "Non-protein Signaling" category
-CellChatDB_all_protein_signalling <- subsetDB(CellChatDB, non_protein = FALSE)
-# Subset with cell-cell contact interactions
-CellChatDB_cell_cell_contact <- subsetDB(CellChatDB, search = "Cell-Cell Contact")
-# Subsets with non-contact interactions
-CellChatDB_secreted_signaling <- subsetDB(CellChatDB, search = "Secreted Signaling")
-CellChatDB_ecm_receptor <- subsetDB(CellChatDB, search = "ECM-Receptor")
-# Set the databased that should be used
-CellChatDB_suffix = "all_protein_signalling"
-CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
 # Set the used database in the object
 cellchat@DB <- get(CellChatDB_used)
 # Show description of the used database
