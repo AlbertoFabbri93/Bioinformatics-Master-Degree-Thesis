@@ -2721,7 +2721,7 @@ avg_expr_cell_group <- computeAveExpr(
   # methods for computing the average gene expression per cell group
   type = "truncatedMean",
   # the fraction (0 to 0.25) of observations to be trimmed from each end of x before the mean is computed
-  trim = 0.1)
+  trim = 0.22)
 
 # Compute the communication probability/strength between any interacting cell groups
 cellchat <- computeCommunProb(
@@ -2729,7 +2729,7 @@ cellchat <- computeCommunProb(
   # Methods for computing the average gene expression per cell group
   type = "triMean",
   # The fraction (0 to 0.25) of observations to be trimmed from each end of x before the mean is computed
-  trim = 0.1,
+  trim = 0.22,
   # Whether use the raw data (i.e., 'object@data.signaling') or the smoothed data (i.e., 'object@data.smooth')
   # Set it to false because of the low sequencing depth of the data being analyzed
   raw.use = TRUE,
