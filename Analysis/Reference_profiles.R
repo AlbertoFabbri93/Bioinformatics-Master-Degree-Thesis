@@ -102,8 +102,11 @@ brain_profiles_matrix_adj <- brain_profiles_matrix_adj / quantile(brain_profiles
 
 # Find shared cell types
 shared_cell_types <- dplyr::intersect(colnames(io_profiles_matrix_adj), colnames(brain_profiles_matrix_adj))
+# Rename columns
+colnames(io_profiles_matrix_adj)[colnames(io_profiles_matrix_adj) == "Endothelial"] <- "Endothelial IO"
+colnames(brain_profiles_matrix_adj)[colnames(brain_profiles_matrix_adj) == "Endothelial"] <- "Endothelial Brain"
 # Select from which profile shared cell types should be removed
-omit_from_brain <- c("Endothelial")
+omit_from_brain <- c()
 omit_from_io <- c()
 
 # Merge the IO and Brain profiles using the common genes
