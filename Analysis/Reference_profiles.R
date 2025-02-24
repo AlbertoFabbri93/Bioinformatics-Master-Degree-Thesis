@@ -84,18 +84,32 @@ rownames(brain_profiles_matrix) = brain_genes_list
 # missing_brain_length <- length(missing_brain)
 
 # MERGED IO & BRAIN PROFILES ----------------------------------------------
-# Find the common genes between the two reference profiles
-io_brain_common_genes_list = dplyr::intersect(io_genes_list, brain_genes_list)
-# Length of the list of common genes
-io_brain_common_genes_list_length = length(io_brain_common_genes_list)
+# Find the shared genes between the two reference profiles
+io_brain_shared_genes_list = dplyr::intersect(io_genes_list, brain_genes_list)
+# Length of the list of shared genes
+io_brain_shared_genes_list_length = length(io_brain_shared_genes_list)
+
+# Align genes in the IO and Brain profiles
+io_profiles_matrix_adj <- io_profiles_matrix[io_brain_shared_genes_list,]
+brain_profiles_matrix_adj <- brain_profiles_matrix[io_brain_shared_genes_list,]
+
+# Scale each dataset so that the 99th percentile value becomes 1000,  
+# ensuring comparability while preserving relative differences.  
+# The 99th percentile is the value below which 99% of the data falls,  
+# helping to reduce the influence of extreme values.
+io_profiles_matrix_adj <- io_profiles_matrix_adj / quantile(io_profiles_matrix_adj, 0.99) * 1000
+brain_profiles_matrix_adj <- brain_profiles_matrix_adj / quantile(brain_profiles_matrix_adj, 0.99) * 1000
 
 # Find shared cell types
-shared_cell_types <- dplyr::intersect(colnames(io_profiles_matrix), colnames(brain_profiles_matrix))
-# Remove shared cell types from the brain profiles
-brain_profiles_matrix_trimmed <- brain_profiles_matrix[,!colnames(brain_profiles_matrix) %in% shared_cell_types]
+shared_cell_types <- dplyr::intersect(colnames(io_profiles_matrix_adj), colnames(brain_profiles_matrix_adj))
+# Select from which profile shared cell types should be removed
+omit_from_brain <- c("Endothelial")
+omit_from_io <- c()
 
 # Merge the IO and Brain profiles using the common genes
-io_brain_profiles_matrix <- cbind(io_profiles_matrix[io_brain_common_genes_list,], brain_profiles_matrix_trimmed[io_brain_common_genes_list,])
+io_brain_profiles_matrix <- cbind(
+  io_profiles_matrix_adj[, dplyr::setdiff(colnames(io_profiles_matrix_adj), omit_from_io)], 
+  brain_profiles_matrix_adj[, dplyr::setdiff(colnames(brain_profiles_matrix_adj), omit_from_brain)])
 # Sort columns alphabetically
 io_brain_profiles_matrix <- io_brain_profiles_matrix[,order(colnames(io_brain_profiles_matrix))]
 
