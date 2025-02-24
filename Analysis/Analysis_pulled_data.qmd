@@ -720,7 +720,12 @@ breast_cancer_patients_analyze@meta.data %<>%
   mutate(
     "{col_ist_ann}" := case_match(
       .data[[col_ist_raw]],
+      # Rename the cluster of cells that do not correspond to any profile
       c("a") ~ "Other",
+      # Merge cell profiles that are not widely recognized by the literature
+      c("Astrocyte A", "Astrocyte B") ~ "Astrocyte",
+      c("Inhibitory neuron A", "Inhibitory neuron B", "Inhibitory neuron C") ~ "Inhibitory neuron",
+      c("Microglia A", "Microglia B") ~ "Microglia",
       .default = .data[[col_ist_raw]]
     )
   )
@@ -787,6 +792,7 @@ cell_groups <- list(
     "Plasmablast"
   ),
   "Brain cells" = c(
+    "Inhibitory neuron",
     "Inhibitory neuron A",
     "Inhibitory neuron B",
     "Inhibitory neuron C",
@@ -799,9 +805,11 @@ cell_groups <- list(
     "Oligodendrocyte precursor cell",
     "Oligodendrocyte",
     # Microglia cells
+    "Microglia",
     "Microglia A",
     "Microglia B",
     # Astrocyte cells
+    "Astrocyte",
     "Astrocyte A",
     "Astrocyte B"
   )

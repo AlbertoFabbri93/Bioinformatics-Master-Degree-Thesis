@@ -50,9 +50,10 @@ palette_cell_types <- c(
     
   "Brain cells" = "#111111",
     # Inhibitory neurons
-    "Inhibitory neuron A" = "#E3D26F",
-    "Inhibitory neuron B" = "#E3D26F",
-    "Inhibitory neuron C" = "#E3D26F",
+    "Inhibitory neuron" = "#E3D26F",
+    "Inhibitory neuron A" = "#E3D27F",
+    "Inhibitory neuron B" = "#E3D28F",
+    "Inhibitory neuron C" = "#E3D29F",
     # Excitatory neurons
     "L2/3 neuron" = "#89808C",
     "L4 neuron" = "#89808C",
@@ -62,11 +63,13 @@ palette_cell_types <- c(
     "Oligodendrocyte precursor cell" = "#CEBACF",
     "Oligodendrocyte" = "#CEBACF",
     # Microglia cells
-    "Microglia A" = "#C08552",
-    "Microglia B" = "#C08552",
+    "Microglia" = "#C08552",
+    "Microglia A" = "#C08562",
+    "Microglia B" = "#C08572",
     # Astrocyte cells
-    "Astrocyte A" = "#F9E0D9",
-    "Astrocyte B" = "#F9E0D9",
+    "Astrocyte" = "#F9E0D9",
+    "Astrocyte A" = "#F9E0E9",
+    "Astrocyte B" = "#F9E0F9",
   
   # Other cells
     "Tumor" = "#C0C0C0",
