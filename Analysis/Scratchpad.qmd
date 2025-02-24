@@ -397,3 +397,167 @@ ggplot(aes(x = `Cell Quantity Proportion`)) +
   theme_minimal()
 
 ```
+
+## Investigate cluster
+
+Investigate what other cells/clusters are close to the cells belonging to a specific cluster
+
+```{r}
+#| label: tumor-cells-heterogeneous-clusters
+
+# Create a list to store the plots
+heterogeneous_clusters_plots <- list()
+
+# Set identity
+Idents(breast_cancer_patients_tumor_cells) <- chosen_tumor_cluster
+# Vector of heterogeneous clusters
+heterogeneous_clusters <- c("7")
+# Create a list with a vector of the cells in each cluster
+heterogeneous_clusters_cells <- lapply(heterogeneous_clusters, function(cluster) {
+  breast_cancer_patients_tumor_cells %>%
+    WhichCells(., ident = cluster)
+})
+# Give the heterogeneous clusters cells the name of the cluster
+names(heterogeneous_clusters_cells) <- heterogeneous_clusters
+# Set identity
+Idents(breast_cancer_patients_normal_cells) <- ann_insitutype_col_name
+# Vector of normal cells clusters to highlight
+normal_clusters_show <- c("Astrocyte A", "Astrocyte B")
+# Create a list with a vector of the cells in each normal cluster
+normal_clusters_show_cells <- lapply(normal_clusters_show, function(cluster) {
+  breast_cancer_patients_normal_cells %>%
+    WhichCells(., ident = cluster)
+})
+
+# For every heterogeneous cluster, create a DimPlot with the cells from that cluster and the cells in the normal clusters
+heterogeneous_clusters_umaps <- lapply(seq_along(heterogeneous_clusters_cells), function(i) {
+  # Retrieve the cluster name using the index
+  cluster_name <- names(heterogeneous_clusters_cells)[i]
+  
+  # Merge cells from the tumor and normal cells into a vector
+  all_cells <- c(heterogeneous_clusters_cells[[i]], unlist(normal_clusters_show_cells))
+  
+  DimPlot(
+    object = breast_cancer_patients_analyze,
+    cells = all_cells,
+    reduction = "sct_umap_patients",
+    group.by = ann_insitutype_col_name,
+    cols = cell_type_colors,
+    label = FALSE
+  ) + labs(title = paste("Tumor cluster", cluster_name))
+})
+# Save to list, call them heterogeneous_clusters_umaps + the cluster name
+heterogeneous_clusters_umaps <- setNames(heterogeneous_clusters_umaps, paste0("het_clusters_umap_tum_clust_", heterogeneous_clusters))
+heterogeneous_clusters_plots[["heterogeneous_clusters_umaps"]] <- heterogeneous_clusters_umaps
+
+# Print list
+print(heterogeneous_clusters_plots)
+```
+
+## Tumor cells neighbourhood
+
+```{r}
+#| label: tumor-cells-neighboring-cells
+
+# Get all the UMAP embeddings
+umap_embeddings <- Embeddings(breast_cancer_patients_analyze, reduction = "sct_umap_patients")
+
+# Subset the embedding to include only thr cells from the cluster of interest
+# List the clusters that should be in the neighborhood of the cell
+clus <- c("Macrophage", "Monocyte", "Microglia A", "Microglia B")
+Idents(breast_cancer_patients_filt_cells) <- cell_subcluster_col
+neighbour_cells <- WhichCells(breast_cancer_patients_filt_cells, ident = clus)
+# Subset breast_cancer_patients_analyze
+umap_embeddings_neighbour_cells <- umap_embeddings[neighbour_cells, ]
+
+
+
+# 2. Get the cluster information
+# clusters <- unique(breast_cancer_patients_filt_cells@meta.data[[cell_subcluster_col]])
+# Get the cell cluster information from the Seurat object
+
+
+clusters <- Idents(breast_cancer_patients_filt_cells)
+
+# 3. Define a function to find cells near cluster boundaries
+# find_boundary_cells <- function(breast_cancer_patients_analyze, target_cluster = "Tumor 7", 
+#                                 distance_threshold = 0.2, 
+#                                 min_neighboring_clusters = 1) {
+  
+  
+  # Get cluster identities
+  target_cluster = "Tumor 7"
+  # Extract the cells belonging to the cluster Tumor 7
+  target_cluster_cells <- WhichCells(breast_cancer_patients_filt_cells, ident = target_cluster)
+  
+  # Find cells in the target cluster
+  # target_cluster_cells <- names(clusters[clusters == target_cluster])
+  target_cluster_embeddings <- umap_embeddings[target_cluster_cells, ]
+  
+  point_distance <- function(point1, point2) {
+  sqrt((point1[1] - point2[1])^2 + (point1[2] - point2[2])^2)
+}
+  
+  # Find unique neighboring clusters
+  neighboring_cells <- c()
+  
+  distance_threshold = 0.2
+  for (i in 1:nrow(target_cluster_embeddings)) {
+    
+    clust_cell <- target_cluster_embeddings[i,]
+    
+    # Calculate distances to all other cells
+    for (j in 1:nrow(umap_embeddings_neighbour_cells)) {
+      
+      neighbour_cell <- umap_embeddings_neighbour_cells[j,]
+      cell_to_cell_euclidian_distance <- point_distance(clust_cell, neighbour_cell)
+      
+      # if the distance is less than the distance threshold add the cell to the list
+      if (cell_to_cell_euclidian_distance <= distance_threshold) {
+        neighboring_cells <- c(neighboring_cells, rownames(target_cluster_embeddings[i,,drop=FALSE]))
+        break
+      }
+    }
+  }
+  
+#  return(neighboring_cells)
+#}
+
+# 4. Example usage
+# Select cells from cluster 2 that are within 0.5 units of at least 1 other cluster
+# boundary_cells <- find_boundary_cells(seu, 
+#                                       target_cluster = 2, 
+#                                       distance_threshold = 0.5, 
+#                                       min_neighboring_clusters = 1)
+
+# 5. Subset the Seurat object to these cells
+# seu_boundary <- subset(seu, cells = boundary_cells)
+
+DimPlot(
+    object = breast_cancer_patients_analyze,
+    cells = c(neighboring_cells, neighbour_cells),
+    reduction = "sct_umap_patients",
+    group.by = ann_insitutype_col_name,
+    cols = cell_type_colors,
+    label = FALSE
+  )
+
+DimPlot(
+    object = breast_cancer_patients_analyze,
+    cells = neighboring_cells,
+    reduction = "sct_umap_patients",
+    group.by = ann_insitutype_col_name,
+    cols = cells_all_phenotypes_color_palette,
+    #cols = cell_type_colors,
+    label = FALSE
+  )
+
+# Check if all cells in neighboring_cells are in Tumor cluster 7
+all(neighboring_cells %in% target_cluster_cells)
+all(target_cluster_cells %in% neighboring_cells)
+length(neighboring_cells)
+length(target_cluster_cells)
+# which cells are not in tumor cluster 7?
+rownames(breast_cancer_patients_analyze@meta.data[neighboring_cells]) %in% target_cluster_cells
+  
+```
