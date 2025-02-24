@@ -888,3 +888,12 @@ generate_comparison_plots <- function(patient_data) {
   
   return(plot_list)
 }
+
+####### STATISTICAL FUNCTIONS #######
+
+# Calculate the trimean of vector of values
+trimean <- function(x) {
+  q <- quantile(x, probs = c(0.25, 0.5, 0.75), na.rm = TRUE)
+  result <- (q[1] + 2 * q[2] + q[3]) / 4
+  return(base::unname(result))
+}

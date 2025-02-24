@@ -329,6 +329,15 @@ breast_cancer_patients_filt_cells@meta.data %<>%
   mutate(
     Height_microns := .data$Height * cosmx_pixel_to_micron_conversion_factor
   )
+# Calculate the average diameter of the cells in microns
+breast_cancer_patients_filt_cells@meta.data %<>%
+  mutate(
+    Diameter_microns := (.data$Width_microns + .data$Height_microns) / 2
+  )
+# Trimean of the diameter of all cells
+trimean_diameter_all_cells = trimean(breast_cancer_patients_filt_cells@meta.data$Diameter_microns)
+# Mean of the diameter of all cells
+mean_diameter_all_cells = mean(breast_cancer_patients_filt_cells@meta.data$Diameter_microns)
 
 # Create table with cell sizes
 cells_sizes <- breast_cancer_patients_filt_cells@meta.data %>%
