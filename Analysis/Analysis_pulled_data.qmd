@@ -731,21 +731,34 @@ breast_cancer_patients_analyze@meta.data %<>%
   )
 ```
 
+### Info
+
 ```{r}
 #| label: insitutype-info
 
 ist_info <- list()
 
-ist_summary_table <- breast_cancer_patients_analyze@meta.data %>%
+# Create a tibble with cell count and percentage of every cluster
+ist_summary_cell_types_count <- breast_cancer_patients_analyze@meta.data %>%
+  count(.data[[col_ist_ann]], name = "cell_count") %>%
+  mutate(percentage = round((cell_count / sum(cell_count)) * 100, 3)) %>%
+  dplyr::rename(cluster = .data[[col_ist_ann]]) %>%
+  as_tibble()
+ist_info[["ist_summary_cell_types_count"]] <- ist_summary_cell_types_count
+
+# Create a table with the cell count and percentage divided by patient
+ist_summary_cell_types_count_per_patient <- breast_cancer_patients_analyze@meta.data %>%
   count(!!sym(col_ist_ann), Patient.ID) %>%
   group_by(Patient.ID) %>%
-  mutate(percentage = n / sum(n) * 100) %>%
+  mutate(percentage = round(n / sum(n) * 100, 4)) %>%
   arrange(Patient.ID, !!sym(col_ist_ann)) %>%
   dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
   as_tibble()
-ist_info[["ist_summary_table"]] <- ist_summary_table
+ist_info[["ist_summary_cell_types_count_per_patient"]] <- ist_summary_cell_types_count_per_patient
 
-print(ist_info)
+for (table in ist_info) {
+  print(datatable(table))
+}
 ```
 
 ```{r}
