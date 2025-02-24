@@ -2614,7 +2614,7 @@ CellChatDB_suffix <- "all_protein_signalling"
 CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
 
 # Load cellchat object
-cellchat <- readRDS(here(objects_dir, "cellchat_{CellChatDB_suffix}.rds"))
+cellchat <- readRDS(here(objects_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
 ```
 
 ```{r}
@@ -2800,6 +2800,9 @@ saveRDS(cellchat, here(objects_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
 ### Plot
 
 ```{r}
+#| label: cellchat-plots
+#| eval: false
+
 # CellChat images folder
 cellchat_images <- file.path(images_dir, "CellChat", CellChatDB_suffix)
 # Check if the directory exists; if not, create it (including parent directories if needed)
@@ -2950,6 +2953,7 @@ print(cellchat_dfs)
 
 ```{r}
 #| label: save-cellchat-nets-dataframe
+#| eval: false
 
 save_data(cellchat_dfs, here(cellchat_images))
 ```
