@@ -271,6 +271,8 @@ breast_cancer_patients_filt_cells <- subset(breast_cancer_patients_filt_cells, c
 col_patient_group <- "patient_group"
 ```
 
+## Add metadata
+
 ```{r}
 #| label: patients-groups
 #| eval: false
@@ -299,6 +301,10 @@ breast_cancer_patients_filt_cells@meta.data %<>%
     "{col_patient_group}" := patient_groups_vector[as.character(.data$Patient.ID)]
   )
 ```
+
+## Data overview
+
+### Cell sizes
 
 ```{r}
 #| label: cells-size
@@ -354,8 +360,6 @@ ggplot(cells_sizes, aes(x = Value, fill = Dimension)) +
 # Save the filtered cells object
 saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
 ```
-
-## Data overview
 
 ### Cores table
 
