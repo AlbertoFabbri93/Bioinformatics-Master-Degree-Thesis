@@ -561,3 +561,43 @@ length(target_cluster_cells)
 rownames(breast_cancer_patients_analyze@meta.data[neighboring_cells]) %in% target_cluster_cells
   
 ```
+
+
+### GENERATE COMPARE CLUSTERING METHODS PLOT 
+
+```{r}
+generate_compare_clustering_methods_plot <- function(
+    patient_data,
+    cluster_1_var,
+    cluster_1_name,
+    cluster_2_var,
+    cluster_2_name) {
+  
+  # Read patient number
+  patient_num <- get_patient_num(patient_data)
+  
+  # Create the contingency table (table used to study the correlation between the two variables)
+  contingency_tab_clusters <- table(
+    patient_data[[cluster_1_var]],
+    patient_data[[cluster_2_var]],
+    dnn = c(cluster_1_name, cluster_2_name))
+  
+  # Convert the table to a data frame for ggplot2
+  df_compare_clusters <- as.data.frame(as.table(contingency_tab_clusters))
+  df_compare_clusters$Freq <- log10(df_compare_clusters$Freq + 10)
+  
+  # Plot using ggplot2 with geom_tile
+  heatmap_seurat_vs_insitutype <- ggplot(df_compare_clusters, aes(cluster_1_name, cluster_2_name, fill = Freq)) +
+    geom_tile(color = "white") +
+    scale_fill_viridis_c() +
+    labs(fill = "Correlation") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(
+      title = paste("Patient", patient_num),
+      subtitle = paste(cluster_1_name, "vs", cluster_2_name, "clusters")
+    )
+  
+  return(heatmap_seurat_vs_insitutype)
+}
+```
