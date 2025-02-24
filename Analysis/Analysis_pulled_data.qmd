@@ -265,13 +265,21 @@ breast_cancer_patients_filt_cells <- subset(breast_cancer_patients_filt_cells, c
 ```
 
 ```{r}
+#| label: save-filtered-cells-object
+#| eval: false
+
+# Save the filtered cells object
+saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
+```
+
+## Add metadata
+
+```{r}
 #| label: patients-groups-metadata-columns
 
 # Name of the cell type metadata column
 col_patient_group <- "patient_group"
 ```
-
-## Add metadata
 
 ```{r}
 #| label: patients-groups
@@ -308,6 +316,8 @@ breast_cancer_patients_filt_cells@meta.data %<>%
 
 ```{r}
 #| label: cells-size
+
+cell_sizes_info <- list()
 
 # Calculate the cell Width from Heigh and AspectRatio
 breast_cancer_patients_filt_cells@meta.data %<>%
@@ -348,7 +358,7 @@ cells_sizes <- breast_cancer_patients_filt_cells@meta.data %>%
   dplyr::select(cell_ID, fov, Dimension, Value)
 
 # Plot overlapping histograms with height and width bins
-ggplot(cells_sizes, aes(x = Value, fill = Dimension)) +
+cell_width_height_hist <- ggplot(cells_sizes, aes(x = Value, fill = Dimension)) +
   geom_histogram(position = "identity", binwidth = 1, alpha = 0.5, color = "black", size = 0.2) +
   labs(
     title = "Count of height and width values",
@@ -360,14 +370,18 @@ ggplot(cells_sizes, aes(x = Value, fill = Dimension)) +
     values = c("Height_microns" = "blue", "Width_microns" = "red"),
     labels = c("Height_microns" = "Height", "Width_microns" = "Width")) +
   theme_minimal()
+cell_sizes_info[["cell_width_height_hist"]] <- cell_width_height_hist
+
+# Print everything
+print(cell_sizes_info)
 ```
 
 ```{r}
-#| label: save-filtered-cells-object
+#| label: save-cells-size-info
 #| eval: false
 
 # Save the filtered cells object
-saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
+save_data(cell_sizes_info, here(images_dir), images_ext)
 ```
 
 ### Cores table
@@ -739,6 +753,7 @@ breast_cancer_patients_analyze@meta.data %<>%
       c("Astrocyte A", "Astrocyte B") ~ "Astrocyte",
       c("Inhibitory neuron A", "Inhibitory neuron B", "Inhibitory neuron C") ~ "Inhibitory neuron",
       c("Microglia A", "Microglia B") ~ "Microglia",
+      c("Endothelial IO", "Endothelial Brain") ~ "Endothelial",
       .default = .data[[col_ist_raw]]
     )
   )
