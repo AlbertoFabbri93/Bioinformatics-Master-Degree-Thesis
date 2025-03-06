@@ -73,8 +73,6 @@ library("tidyr")
 library("zeallot")
 # Add interpreted string literals
 library("glue")
-# Sane way to declare file paths
-library("here")
 # Machine learning library from NanoString
 library("InSituType")
 # Used for the barplots
@@ -124,11 +122,10 @@ keytypes(org.Hs.eg.db)
 library("conflicted")
 
 # Import custom written functions
-source_files_dir <- ("Analysis")
-source(here(source_files_dir, "Utils.R"))
-source(here(source_files_dir, "Plotting.R"))
-source(here(source_files_dir, "Color_palettes.R"))
-source(here(source_files_dir, "Reference_profiles.R"))
+source(file.path(gl_source_files_dir, "Utils.R"))
+source(file.path(gl_source_files_dir, "Plotting.R"))
+source(file.path(gl_source_files_dir, "Color_palettes.R"))
+source(file.path(gl_source_files_dir, "Reference_profiles.R"))
 ```
 
 ## Tidy Seurat object
@@ -141,7 +138,7 @@ The NanoString data is stored in a single assay. The data is divided into three 
 #| label: load-cleaned-object
 
 # Load cleaned object from memory
-breast_cancer_patients <- readRDS(here(objects_dir, "breast_cancer_patients.rds"))
+breast_cancer_patients <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients.rds"))
 ```
 
 ```{r}
@@ -149,7 +146,7 @@ breast_cancer_patients <- readRDS(here(objects_dir, "breast_cancer_patients.rds"
 #| eval: false
 
 # Load the original Seurat object
-breast_cancer_patients_mixed_features <- readRDS(here(objects_dir, "breast.cancer.patients.original.rds"))
+breast_cancer_patients_mixed_features <- readRDS(file.path(gl_obj_dir, "breast.cancer.patients.original.rds"))
 
 tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
 
@@ -227,7 +224,7 @@ tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
 breast_cancer_patients <- tidy_seurat_object_assay(breast_cancer_patients_mixed_features, "Nanostring")
 
 # Save the cleaned object
-saveRDS(breast_cancer_patients, here(objects_dir, "breast_cancer_patients.rds"))
+saveRDS(breast_cancer_patients, file.path(gl_obj_dir, "breast_cancer_patients.rds"))
 ```
 
 ### Filter out anomalous cells
@@ -236,7 +233,7 @@ saveRDS(breast_cancer_patients, here(objects_dir, "breast_cancer_patients.rds"))
 #| label: load-filtered-cells-object
 
 # Load filtered cells object from memory
-breast_cancer_patients_filt_cells <- readRDS(here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
+breast_cancer_patients_filt_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_filt_cells.rds"))
 ```
 
 ```{r}
@@ -245,7 +242,7 @@ breast_cancer_patients_filt_cells <- readRDS(here(objects_dir, "breast_cancer_pa
 
 # Read csv file with cells to remove from Seurat object
 cells_to_remove <- read_csv(
-  here("Analysis", "metadata", "rbc_filtered_out.csv"),
+  file.path(gl_metadata_dir, "rbc_filtered_out.csv"),
   col_types = cols("Cell.ID" = "c"))
 
 # Remove the cells from the Seurat object
@@ -262,7 +259,7 @@ breast_cancer_patients_filt_cells <- subset(breast_cancer_patients_filt_cells, c
 #| eval: false
 
 # Save the filtered cells object
-saveRDS(breast_cancer_patients_filt_cells, here(objects_dir, "breast_cancer_patients_filt_cells.rds"))
+saveRDS(breast_cancer_patients_filt_cells, file.path(gl_obj_dir, "breast_cancer_patients_filt_cells.rds"))
 ```
 
 ## Add metadata
@@ -374,7 +371,7 @@ print(cell_sizes_info)
 #| eval: false
 
 # Save the filtered cells object
-save_data(cell_sizes_info, here(images_dir))
+save_data(cell_sizes_info, file.path(gl_img_dir))
 ```
 
 ### Cores table
@@ -484,14 +481,14 @@ TMA_info_to_save <- list()
 TMA_info_to_display <- list()
 
 # Information about the patients involved in the study
-patient_info <- read_excel(here("Analysis", "metadata", "updatedPACC_Copy of METBRA_patient_v1_now_updated_dec_2022_GOOD_mar_2024_Lanzing.xlsx"))
+patient_info <- read_excel(file.path(gl_metadata_dir, "updatedPACC_Copy of METBRA_patient_v1_now_updated_dec_2022_GOOD_mar_2024_Lanzing.xlsx"))
 TMA_info_to_display[["Patient_info"]] <- patient_info
 
 # FOVs & Core serials
-LU001FFP03_FOV <- read_excel(here("Analysis", "metadata", "LU001FFP03_FOV.xlsx"))
+LU001FFP03_FOV <- read_excel(file.path(gl_metadata_dir, "LU001FFP03_FOV.xlsx"))
 # Core serials, Patients' ID & Primary Diagnosis
 TMA_METBRA_COSMX <- read_excel(
-  path = here("Analysis", "metadata", "TMA_METBRA_COSMX Analysis.xlsx"),
+  path = file.path(gl_metadata_dir, "TMA_METBRA_COSMX Analysis.xlsx"),
   sheet = "TMA_list")
 # FOVs & associated primary diagnosis
 FOVs_primary_diagnosis <- left_join(
@@ -500,7 +497,7 @@ FOVs_primary_diagnosis <- left_join(
   by = c("core_serial" = "Full Serial Number"))
 # X, Y & Z FOVs positions
 tissue_micro_array <- read_csv(gzfile(
-  here("Analysis", "flat_files", "LU001FFP03", "LU001FFP03_fov_positions_file.csv.gz")),
+  file.path(gl_root_dir, "Analysis", "flat_files", "LU001FFP03", "LU001FFP03_fov_positions_file.csv.gz")),
   col_types = cols(
   Slide = col_integer(),
   X_mm = col_double(),
@@ -570,7 +567,7 @@ print(c(TMA_info_to_display, TMA_info_to_save))
 #| echo: false
 #| eval: false
 
-save_data(TMA_info_to_save, here(images_dir, "TMA"))
+save_data(TMA_info_to_save, file.path(gl_img_dir, "TMA"))
 ```
 
 ## Quality assurance
@@ -606,8 +603,8 @@ col_ist_ann <- "patients_ist_semisup_clusters_ann"
 #| label: insitutype-read-from-drive
 
 # Read the Insitutype data from the drive
-breast_cancer_patients_analyze <- readRDS(here(objects_dir, "breast_cancer_patients_analyze.rds"))
-patients_ist_semisup <- readRDS(here(objects_dir, "patients_ist_semisup.rds"))
+breast_cancer_patients_analyze <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_analyze.rds"))
+patients_ist_semisup <- readRDS(file.path(gl_obj_dir, "patients_ist_semisup.rds"))
 ```
 
 ```{r}
@@ -786,7 +783,7 @@ for (table in ist_info) {
 #| echo: false
 
 # Save the Insitutype plots
-save_data(ist_info, here(images_dir, "Insitutype"))
+save_data(ist_info, file.path(gl_img_dir, "Insitutype"))
 ```
 
 ### Cell groups
@@ -1180,9 +1177,9 @@ print(insitutype_data)
 #| eval: false
 
 # Save the Insitutype plots
-save_data(patients_ist_sct, here(images_dir, "Insitutype"))
-save_data(patients_ist_rna, here(images_dir, "Insitutype"))
-save_data(insitutype_data, here(images_dir, "Insitutype"))
+save_data(patients_ist_sct, file.path(gl_img_dir, "Insitutype"))
+save_data(patients_ist_rna, file.path(gl_img_dir, "Insitutype"))
+save_data(insitutype_data, file.path(gl_img_dir, "Insitutype"))
 ```
 
 ```{r}
@@ -1190,9 +1187,9 @@ save_data(insitutype_data, here(images_dir, "Insitutype"))
 #| eval: false
 
 # Save insitutype list
-saveRDS(patients_ist_semisup, here(objects_dir, "patients_ist_semisup.rds"))
+saveRDS(patients_ist_semisup, file.path(gl_obj_dir, "patients_ist_semisup.rds"))
 # Save Seurat object
-saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patients_analyze.rds"))
+saveRDS(breast_cancer_patients_analyze, file.path(gl_obj_dir, "breast_cancer_patients_analyze.rds"))
 ```
 
 ## Split
@@ -1245,7 +1242,7 @@ breast_cancer_patients_other_cells <-
 #| label: normal-cells-read-from-drive
 
 # Load normal cells object from memory
-breast_cancer_patients_normal_cells <- readRDS(here(objects_dir, "breast_cancer_patients_normal_cells.rds"))
+breast_cancer_patients_normal_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_normal_cells.rds"))
 ```
 
 ```{r}
@@ -1415,7 +1412,7 @@ print(normal_cells_images)
 #| eval: false
 
 # Save the normal cells plots
-save_data(normal_cells_images, here(images_dir, "Normal cells"))
+save_data(normal_cells_images, file.path(gl_img_dir, "Normal cells"))
 ```
 
 ```{r}
@@ -1423,7 +1420,7 @@ save_data(normal_cells_images, here(images_dir, "Normal cells"))
 #| eval: false
 
 # Save the Seurat object
-saveRDS(breast_cancer_patients_normal_cells, here(objects_dir, "breast_cancer_patients_normal_cells.rds"))
+saveRDS(breast_cancer_patients_normal_cells, file.path(gl_obj_dir, "breast_cancer_patients_normal_cells.rds"))
 ```
 
 ## Other cells
@@ -1434,7 +1431,7 @@ saveRDS(breast_cancer_patients_normal_cells, here(objects_dir, "breast_cancer_pa
 #| label: other-cells-read-from-drive
 
 # Load other cells object from memory
-breast_cancer_patients_other_cells <- readRDS(here(objects_dir, "breast_cancer_patients_other_cells.rds"))
+breast_cancer_patients_other_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_other_cells.rds"))
 ```
 
 ```{r}
@@ -1704,7 +1701,7 @@ print(other_cells_plots_to_save)
 #| eval: false
 
 # Save the other cells plots
-save_data(other_cells_plots_to_save, here(images_dir, "Other cells clusters"))
+save_data(other_cells_plots_to_save, file.path(gl_img_dir, "Other cells clusters"))
 ```
 
 ```{r}
@@ -1712,7 +1709,7 @@ save_data(other_cells_plots_to_save, here(images_dir, "Other cells clusters"))
 #| eval: false
 
 # Save the Seurat object
-saveRDS(breast_cancer_patients_other_cells, here(objects_dir, "breast_cancer_patients_other_cells.rds"))
+saveRDS(breast_cancer_patients_other_cells, file.path(gl_obj_dir, "breast_cancer_patients_other_cells.rds"))
 ```
 
 ### Markers
@@ -1721,7 +1718,7 @@ saveRDS(breast_cancer_patients_other_cells, here(objects_dir, "breast_cancer_pat
 #| label: other-cells-markers-read-from-drive
 
 # Load other cells object from memory
-other_cells_markers_data <- readRDS(here(objects_dir, "other_cells_markers_data.rds"))
+other_cells_markers_data <- readRDS(file.path(gl_obj_dir, "other_cells_markers_data.rds"))
 ```
 
 ```{r}
@@ -1744,7 +1741,7 @@ other_cells_markers_data <- FindAllMarkers(
 #| eval: false
 
 # Save the data
-saveRDS(other_cells_markers_data, here(objects_dir, "other_cells_markers_data.rds"))
+saveRDS(other_cells_markers_data, file.path(gl_obj_dir, "other_cells_markers_data.rds"))
 ```
 
 
@@ -1897,7 +1894,7 @@ print(main_markers_list)
 #| eval: false
 
 # Other cells markers folder
-other_cells_markers_dir <- here(images_dir, "Other cells markers")
+other_cells_markers_dir <- file.path(gl_img_dir, "Other cells markers")
 # Save the data
 save_data(other_cells_markers_to_print, other_cells_markers_dir)
 # Save ComplexHeatmap
@@ -2044,7 +2041,7 @@ print(all_cells_images)
 #| eval: false
 
 # Save the data
-save_data(all_cells_images, here(images_dir, "All cells annotated"))
+save_data(all_cells_images, file.path(gl_img_dir, "All cells annotated"))
 ```
 
 ## Gene Set Enrichment Analysis
@@ -2055,7 +2052,7 @@ save_data(all_cells_images, here(images_dir, "All cells annotated"))
 #| label: gsea-load-objects
 
 # Load the GSEA results
-GSEA_results <- readRDS(here(objects_dir, "GSEA_results.rds"))
+GSEA_results <- readRDS(file.path(gl_obj_dir, "GSEA_results.rds"))
 ```
 
 ```{r}
@@ -2104,7 +2101,7 @@ for (cluster in levels(breast_cancer_patients_other_cells)) {
 }
 
 # Save the GSEA results
-saveRDS(GSEA_results, here(objects_dir, "GSEA_results.rds"))
+saveRDS(GSEA_results, file.path(gl_obj_dir, "GSEA_results.rds"))
 ```
 
 ### GSEA plots
@@ -2208,11 +2205,11 @@ print(GSEA_tibbles)
 #| eval: false
 
 # Save the GSEA plots
-save_data(GSEA_plots, here(images_dir, "GSEA plots"))
+save_data(GSEA_plots, file.path(gl_img_dir, "GSEA plots"))
 # Save the GSEA tibbles
-save_data(GSEA_tibbles, here(images_dir, "GSEA tables"))
+save_data(GSEA_tibbles, file.path(gl_img_dir, "GSEA tables"))
 # Save the GSEA results
-saveRDS(GSEA_results, here(objects_dir, "GSEA_results.rds"))
+saveRDS(GSEA_results, file.path(gl_obj_dir, "GSEA_results.rds"))
 ```
 
 
@@ -2296,7 +2293,7 @@ print(cell_types_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_data(cell_types_stamps_plots, here(images_dir, "Stamps_with_clusters"))
+save_data(cell_types_stamps_plots, file.path(gl_img_dir, "Stamps_with_clusters"))
 ```
 
 ## Spatial niches
@@ -2346,7 +2343,7 @@ for (num in niches_nums) {
 #| eval: false
 
 # Save the object
-saveRDS(breast_cancer_patients_analyze, here(objects_dir, "breast_cancer_patients_analyze.rds"))
+saveRDS(breast_cancer_patients_analyze, file.path(gl_obj_dir, "breast_cancer_patients_analyze.rds"))
 ```
 
 ### Setup spatial niches study
@@ -2388,7 +2385,7 @@ print(niches_stamps_plots)
 #| eval: false
 
 # Save the plots
-save_data(niches_stamps_plots, here(images_dir, glue("Stamps_with_{niches_plot}_niches")))
+save_data(niches_stamps_plots, file.path(gl_img_dir, glue("Stamps_with_{niches_plot}_niches")))
 ```
 
 ### Statistics about niches
@@ -2545,9 +2542,9 @@ print(niches_patient_data)
 # Folder name
 stat_niches_dir <- glue("Statistics_{niches_plot}_niches")
 # Save the plots
-save_data(niches_statistics_calc, here(images_dir, stat_niches_dir))
-save_data(niches_statistics_plots, here(images_dir, stat_niches_dir))
-save_data(niches_patient_data, here(images_dir, stat_niches_dir))
+save_data(niches_statistics_calc, file.path(gl_img_dir, stat_niches_dir))
+save_data(niches_statistics_plots, file.path(gl_img_dir, stat_niches_dir))
+save_data(niches_patient_data, file.path(gl_img_dir, stat_niches_dir))
 ```
 
 ## CellChat
@@ -2656,7 +2653,7 @@ CellChatDB_suffix <- "all_protein_signalling"
 CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
 
 # Load cellchat object
-cellchat <- readRDS(here(objects_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
+cellchat <- readRDS(path.file(gl_obj_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
 ```
 
 ```{r}
@@ -2836,7 +2833,7 @@ cellchat <- aggregateNet(
 cellchat <- netAnalysis_computeCentrality(cellchat, slot.name = "netP")
 
 # Save cellchat object
-saveRDS(cellchat, here(objects_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
+saveRDS(cellchat, file.path(gl_obj_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
 ```
 
 ### Plot
