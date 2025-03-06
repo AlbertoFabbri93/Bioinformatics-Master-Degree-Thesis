@@ -600,6 +600,9 @@ The clustering performed by Insitutype  uses the raw counts, therefore it is use
 col_ist_raw <- "patients_ist_semisup_clusters"
 # Name of the metadata column with the annotated insitutype clusters
 col_ist_ann <- "patients_ist_semisup_clusters_ann"
+
+# Folder where to save the Insitutype plots
+dir_ist_plots <- file.path(gl_img_dir, "Insitutype")
 ```
 
 ### Compute
@@ -788,7 +791,7 @@ for (table in ist_info) {
 #| echo: false
 
 # Save the Insitutype plots
-save_data(ist_info, file.path(gl_img_dir, "Insitutype"))
+save_data(ist_info, dir_ist_plots)
 ```
 
 ### Cell groups
@@ -1182,7 +1185,6 @@ print(insitutype_data)
 #| eval: false
 
 # Save the Insitutype plots
-dir_ist_plots <- file.path(gl_img_dir, "Insitutype")
 save_data(patients_ist_sct, dir_ist_plots)
 save_data(patients_ist_rna, dir_ist_plots)
 save_data(insitutype_data, dir_ist_plots)
