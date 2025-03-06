@@ -2,6 +2,7 @@
 
 # This function saves a list of plots and data frames to a specified folder
 save_data <- function(data_list, folder_path, img_ext = gl_img_ext) {
+  
   # Ensure the folder exists, if not, create it
   if (!dir.exists(folder_path)) {
     dir.create(folder_path, recursive = TRUE)
@@ -14,11 +15,16 @@ save_data <- function(data_list, folder_path, img_ext = gl_img_ext) {
     
     for (name in names(lst)) {
       # "trellis" refers to a class of objects created by the lattice package
-      if (inherits(lst[[name]], "ggplot") || inherits(lst[[name]], "trellis")) {
+      # Check if the element is a ggplot, trellis, or recordedplot (base R plot)
+      if (inherits(lst[[name]], "ggplot") || inherits(lst[[name]], "trellis") || inherits(lst[[name]], "recordedplot")) {
         flat_list[[name]] <- lst[[name]]
-      } else if (is.data.frame(lst[[name]])) {
+      }
+      # Check if the element is a data frame
+      else if (is.data.frame(lst[[name]])) {
         flat_list[[name]] <- lst[[name]]
-      } else if (is.list(lst[[name]])) {
+      }
+      # If the element is a nested list, recursively flatten it
+      else if (is.list(lst[[name]])) {
         flat_list <- c(flat_list, flatten_list(lst[[name]]))
       }
     }
@@ -31,12 +37,34 @@ save_data <- function(data_list, folder_path, img_ext = gl_img_ext) {
   
   # Iterate over the flattened list of items and save each plot or data frame
   for (item_name in names(flat_items)) {
-    # Construct the file path
+    
+    # Save ggplot objects using ggsave
     if (inherits(flat_items[[item_name]], "ggplot")) {
       for (ext in img_ext) {
         file_path <- file.path(folder_path, paste0(item_name, ext))
         ggsave(filename = file_path, plot = flat_items[[item_name]])
       }
+      
+    # Save trellis and base R (recordedplot) objects
+    } else if (inherits(flat_items[[item_name]], "trellis") || inherits(flat_items[[item_name]], "recordedplot")) {
+      for (ext in img_ext) {
+        file_path <- file.path(folder_path, paste0(item_name, ext))
+        
+        # Open the appropriate graphics device based on the file extension
+        if (ext == ".png") png(file_path)
+        else if (ext == ".pdf") pdf(file_path)
+        else if (ext == ".jpeg" || ext == ".jpg") jpeg(file_path)
+        else if (ext == ".tiff") tiff(file_path)
+        else if (ext == ".eps") postscript(file_path)
+        
+        # Replay the base R or trellis plot to save it
+        replayPlot(flat_items[[item_name]])
+        
+        # Close the graphics device
+        dev.off()
+      }
+      
+    # Save data frames as CSV files
     } else if (is.data.frame(flat_items[[item_name]])) {
       file_path <- file.path(folder_path, paste0(item_name, ".csv"))
       # Save the data frame as a csv to the specified file path
