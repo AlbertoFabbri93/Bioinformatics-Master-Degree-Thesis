@@ -2842,21 +2842,17 @@ saveRDS(cellchat, file.path(gl_obj_dir, glue("cellchat_{CellChatDB_suffix}.rds")
 #| label: cellchat-plots
 #| eval: false
 
-# CellChat images folder
-cellchat_images <- file.path(gl_img_dir, "CellChat", CellChatDB_suffix)
-# Check if the directory exists; if not, create it (including parent directories if needed)
-if (!dir.exists(here(cellchat_images))) {
-  dir.create(here(cellchat_images), recursive = FALSE)
-}
 # Create a palette with only the idents used by cellchat otherwise it throws an error
 palette_cellchat <- palette_all_cells_types[levels(cellchat@idents)]
+
+# Create a list to store plots
+plot_list_cellchat <- list()
 
 ## Plots of cell-cell communication network
 
 # Plot the number of interactions
 # The number of interactions refers to the count of significant ligand-receptor pairs identified between cell populations.
 # Circle plot
-png(filename = here(cellchat_images,"cellchat_circleplot_count.png"), width = 15, height = 18, units = "cm", res = 1000)
 netVisual_circle(
   net = cellchat@net$count,
   vertex.weight = rowSums(cellchat@net$count),
@@ -2866,9 +2862,8 @@ netVisual_circle(
   margin = 0.2,
   vertex.label.cex = 0.8,
   color.use = palette_cellchat)
-dev.off()
+plot_list_cellchat[["cellchat_circleplot_count"]] <- recordPlot()
 # Heatmap
-png(filename = here(cellchat_images,"cellchat_heatmap_count.png"), width = 15, height = 14, units = "cm", res = 1000)
 netVisual_heatmap(
   object = cellchat,
   measure = "count",
@@ -2876,12 +2871,11 @@ netVisual_heatmap(
   color.heatmap = c("#f0f8ff", "#2166ac"),
   font.size = 7,
   color.use = palette_cellchat)
-dev.off()
+plot_list_cellchat[["cellchat_heatmap_count"]] <- recordPlot()
 
 # Plot the interaction strength
 # The interaction strength is calculated as a function of both the expression levels of the signalling molecules (ligands and receptors) and their interaction probability
 # Circle plot
-png(filename = here(cellchat_images,"cellchat_circleplot_weight.png"), width = 15, height = 18, units = "cm", res = 1000)
 netVisual_circle(
   net = cellchat@net$weight,
   vertex.weight = rowSums(cellchat@net$weight),
@@ -2889,26 +2883,48 @@ netVisual_circle(
   label.edge= FALSE,
   title.name = "Interaction weights/strength",
   color.use = palette_cellchat)
-dev.off()
+plot_list_cellchat[["cellchat_circleplot_weight"]] <- recordPlot()
 # Heatmap
-png(filename = here(cellchat_images,"cellchat_heatmap_weight.png"), width = 15, height = 14, units = "cm", res = 1000)
 netVisual_heatmap(
   object = cellchat,
   measure = "weight",
   font.size = 7,
   color.use = palette_cellchat)
-dev.off()
+plot_list_cellchat[["cellchat_heatmap_weight"]] <- recordPlot()
 
+# Print signaling pathways showing significant communications
+pathways_with_significant_signaling <- cellchat@netP$pathways
+print(pathways_with_significant_signaling)
+
+# Visualize the computed centrality scores using heatmap, allowing ready identification of major signaling roles of cell groups
+for (pathway in pathways_with_significant_signaling) {
+  par(mfrow = c(1, 1), xpd = TRUE)
+  image <- netAnalysis_signalingRole_network(cellchat, signaling = pathway, width = 12, height = 2.5, font.size = 7)
+  print(image)
+  plot_list_cellchat[[glue("Signaling_pathway_network_{pathway}")]] <- recordPlot()
+}
+
+# Show all the significant interactions (L-R pairs) from some cell groups to other cell groups
+netVisual_bubble(
+  object = cellchat,
+  sources.use = NULL,
+  targets.use = NULL,
+  remove.isolate = TRUE,
+  signaling = NULL)
+plot_list_cellchat[["cellchat_bubbleplot_interactions"]] <- recordPlot()
+
+# pathways.show <- c("COLLAGEN") 
+# netVisual_aggregate(cellchat, signaling = pathways.show, layout = "spatial")
+```
+
+```{r}
 # Examine the signaling sent from each cell group
 # Set the parameter edge.weight.max so that edge weights are comparable between differet networks
 group_size <- as.numeric(table(cellchat@idents))
 cellchat_weight_mat <- cellchat@net$weight
-# Create a subfolder to save images
-cellchat_cell_types_output_dir <- file.path(cellchat_images, "Cell_types")
-# Create the directory if it does not exist
-if (!dir.exists(here(cellchat_cell_types_output_dir))) {
-  dir.create(here(cellchat_cell_types_output_dir), recursive = FALSE)
-}
+# Create a list to store plots
+plot_list_cellchat_cell_types <- list()
+
 for (i in 1:nrow(cellchat_weight_mat)) {
   # Create new matrix with the same dimensions and names as the original, but all elements are initialized to 0
   cellchat_type_weight_mat <- matrix(
@@ -2918,16 +2934,8 @@ for (i in 1:nrow(cellchat_weight_mat)) {
     dimnames = dimnames(cellchat_weight_mat))
   # Fills the i-th row of the new matrix with the corresponding i-th row of the original matrix, all other rows in the new matrix remain zero
   cellchat_type_weight_mat[i, ] <- cellchat_weight_mat[i, ]
-  png(
-    filename = here(
-      cellchat_cell_types_output_dir,
-      glue("Cellchat_circleplot_{gsub(' ', '_', rownames(cellchat_weight_mat)[i])}.png")),
-    width = 15,
-    height = 18,
-    units = "cm",
-    res = 1000)
   # Visualizes the i-th row of interaction weights
-  netVisual_circle(
+  cellchat_cell_type_circleplot <- netVisual_circle(
     net = cellchat_type_weight_mat,
     # Specify the size of the vertices (nodes) in the network
     vertex.weight = group_size,
@@ -2938,33 +2946,9 @@ for (i in 1:nrow(cellchat_weight_mat)) {
     # Add a title to the plot using the name of the i-th row of matrix
     title.name = "Interaction weights/strength",
     color.use = palette_cellchat)
-  dev.off()
+  print(cellchat_cell_type_circleplot)
+  plot_list_cellchat_cell_types[[glue("Cellchat_circleplot_{gsub(' ', '_', rownames(cellchat_weight_mat)[i])}")]] <- recordPlot()
 }
-
-# Print signaling pathways showing significant communications
-pathways_with_significant_signaling <- cellchat@netP$pathways
-print(pathways_with_significant_signaling)
-
-# Visualize the computed centrality scores using heatmap, allowing ready identification of major signaling roles of cell groups
-for (pathway in pathways_with_significant_signaling) {
-  png(filename=here(cellchat_images,glue("Signaling_pathway_network_{pathway}.png")), width = 15, height = 8, units = "cm", res = 1000)
-  par(mfrow = c(1, 1), xpd = TRUE)
-  image <- netAnalysis_signalingRole_network(cellchat, signaling = pathway, width = 12, height = 2.5, font.size = 7)
-  print(image)
-  dev.off()
-}
-
-setEPS()
-postscript(file = here(cellchat_images,"cellchat_bubbleplot_interactions.eps"))
-png(filename = here(cellchat_images,"cellchat_bubbleplot_interactions.png"), width = 28, height = 15, units = "cm", res = 1000)
-# Show all the significant interactions (L-R pairs) from some cell groups to other cell groups
-netVisual_bubble(
-  object = cellchat,
-  sources.use = NULL,
-  targets.use = NULL,
-  remove.isolate = TRUE,
-  signaling = NULL)
-dev.off()
 ```
 
 ```{r}
@@ -2994,5 +2978,12 @@ print(cellchat_dfs)
 #| label: save-cellchat-nets-dataframe
 #| eval: false
 
-save_data(cellchat_dfs, here(cellchat_images))
+# Save cellchat plots
+cellchat_images <- file.path(gl_img_dir, "CellChat", CellChatDB_suffix)
+save_data(plot_list_cellchat, cellchat_images)
+# Save cell types circleplots
+cellchat_cell_types_output_dir <- file.path(cellchat_images, "Cell_types")
+save_data(plot_list_cellchat_cell_types, cellchat_cell_types_output_dir)
+# Save dataframes
+save_data(cellchat_dfs, cellchat_images)
 ```
