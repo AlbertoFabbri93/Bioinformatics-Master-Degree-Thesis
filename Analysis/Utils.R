@@ -1,12 +1,7 @@
-# Import environment variables as global variables
-objects_dir <- Sys.getenv("OBJECTS_DIR")
-images_dir <- Sys.getenv("IMAGES_DIR")
-images_ext <- Sys.getenv("IMAGES_EXT")
-
 ####### SAVE LIST OF ITEMS #######
 
 # This function saves a list of plots and data frames to a specified folder
-save_data <- function(data_list, folder_path, image_extension = ".png") {
+save_data <- function(data_list, folder_path, img_ext = gl_img_ext) {
   # Ensure the folder exists, if not, create it
   if (!dir.exists(folder_path)) {
     dir.create(folder_path, recursive = TRUE)
@@ -37,10 +32,11 @@ save_data <- function(data_list, folder_path, image_extension = ".png") {
   # Iterate over the flattened list of items and save each plot or data frame
   for (item_name in names(flat_items)) {
     # Construct the file path
-    if (inherits(flat_items[[item_name]], "ggplot") || inherits(flat_items[[item_name]], "trellis")) {
-      file_path <- file.path(folder_path, paste0(item_name, image_extension))
-      # Save the plot to the specified file path
-      ggsave(filename = file_path, plot = flat_items[[item_name]])
+    if (inherits(flat_items[[item_name]], "ggplot")) {
+      for (ext in img_ext) {
+        file_path <- file.path(folder_path, paste0(item_name, ext))
+        ggsave(filename = file_path, plot = flat_items[[item_name]])
+      }
     } else if (is.data.frame(flat_items[[item_name]])) {
       file_path <- file.path(folder_path, paste0(item_name, ".csv"))
       # Save the data frame as a csv to the specified file path

@@ -1,6 +1,2 @@
 # Use pak to install packages
 renv.config.pak.enabled = TRUE
-# These variables are declared here so it is possible to read, and therefore share, them between different R scripts or Quarto files
-OBJECTS_DIR="Analysis/Objects"
-IMAGES_DIR="Analysis/Images"
-IMAGES_EXT=".png"

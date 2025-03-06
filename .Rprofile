@@ -6,3 +6,9 @@ source("renv/activate.R")
 
 # Increase the maximum printed elements to a number > RNA + SystemControl
 options(max.print = 1500)
+
+## DECLARE GLOBAL VARIABLES
+# These variables are declared here so it is possible to read, and therefore share, them between different R scripts or Quarto files
+gl_obj_dir <- "Analysis/Objects"
+gl_img_dir <- "Analysis/Images"
+gl_img_ext <- c(".png")

@@ -129,13 +129,6 @@ source(here(source_files_dir, "Utils.R"))
 source(here(source_files_dir, "Plotting.R"))
 source(here(source_files_dir, "Color_palettes.R"))
 source(here(source_files_dir, "Reference_profiles.R"))
-
-## DECLARE GLOBAL VARIABLES
-# Import environment variables as global variables
-# Do not rename these variables as they are declared in Utils.R as well
-objects_dir <- Sys.getenv("OBJECTS_DIR")
-images_dir <- Sys.getenv("IMAGES_DIR")
-images_ext <- Sys.getenv("IMAGES_EXT")
 ```
 
 ## Tidy Seurat object
@@ -381,7 +374,7 @@ print(cell_sizes_info)
 #| eval: false
 
 # Save the filtered cells object
-save_data(cell_sizes_info, here(images_dir), images_ext)
+save_data(cell_sizes_info, here(images_dir))
 ```
 
 ### Cores table
@@ -577,7 +570,7 @@ print(c(TMA_info_to_display, TMA_info_to_save))
 #| echo: false
 #| eval: false
 
-save_data(TMA_info_to_save, here(images_dir, "TMA"), images_ext)
+save_data(TMA_info_to_save, here(images_dir, "TMA"))
 ```
 
 ## Quality assurance
