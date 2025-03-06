@@ -2653,7 +2653,7 @@ CellChatDB_suffix <- "all_protein_signalling"
 CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
 
 # Load cellchat object
-cellchat <- readRDS(path.file(gl_obj_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
+cellchat <- readRDS(file.path(gl_obj_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
 ```
 
 ```{r}
@@ -2843,7 +2843,7 @@ saveRDS(cellchat, file.path(gl_obj_dir, glue("cellchat_{CellChatDB_suffix}.rds")
 #| eval: false
 
 # CellChat images folder
-cellchat_images <- file.path(images_dir, "CellChat", CellChatDB_suffix)
+cellchat_images <- file.path(gl_img_dir, "CellChat", CellChatDB_suffix)
 # Check if the directory exists; if not, create it (including parent directories if needed)
 if (!dir.exists(here(cellchat_images))) {
   dir.create(here(cellchat_images), recursive = FALSE)
