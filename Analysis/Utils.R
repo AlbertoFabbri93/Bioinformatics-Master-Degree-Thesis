@@ -18,6 +18,7 @@ save_data <- function(data_list, folder_path, image_extension = ".png") {
     flat_list <- list()
     
     for (name in names(lst)) {
+      # "trellis" refers to a class of objects created by the lattice package
       if (inherits(lst[[name]], "ggplot") || inherits(lst[[name]], "trellis")) {
         flat_list[[name]] <- lst[[name]]
       } else if (is.data.frame(lst[[name]])) {
@@ -42,7 +43,7 @@ save_data <- function(data_list, folder_path, image_extension = ".png") {
       ggsave(filename = file_path, plot = flat_items[[item_name]])
     } else if (is.data.frame(flat_items[[item_name]])) {
       file_path <- file.path(folder_path, paste0(item_name, ".csv"))
-      # Save the data frame to the specified file path
+      # Save the data frame as a csv to the specified file path
       write.csv(flat_items[[item_name]], file_path, row.names = FALSE)
     }
   }
