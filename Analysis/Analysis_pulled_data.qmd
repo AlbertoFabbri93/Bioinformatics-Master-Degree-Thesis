@@ -126,6 +126,11 @@ source(file.path(gl_source_files_dir, "Utils.R"))
 source(file.path(gl_source_files_dir, "Plotting.R"))
 source(file.path(gl_source_files_dir, "Color_palettes.R"))
 source(file.path(gl_source_files_dir, "Reference_profiles.R"))
+
+# Create object folder if it does not exist
+if (!dir.exists(gl_obj_dir)) {
+  dir.create(gl_obj_dir)
+}
 ```
 
 ## Tidy Seurat object
@@ -146,7 +151,7 @@ breast_cancer_patients <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients.
 #| eval: false
 
 # Load the original Seurat object
-breast_cancer_patients_mixed_features <- readRDS(file.path(gl_obj_dir, "breast.cancer.patients.original.rds"))
+breast_cancer_patients_mixed_features <- readRDS(file.path(gl_root_dir, "Analysis", "breast.cancer.patients.original.rds"))
 
 tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
 
@@ -1177,9 +1182,10 @@ print(insitutype_data)
 #| eval: false
 
 # Save the Insitutype plots
-save_data(patients_ist_sct, file.path(gl_img_dir, "Insitutype"))
-save_data(patients_ist_rna, file.path(gl_img_dir, "Insitutype"))
-save_data(insitutype_data, file.path(gl_img_dir, "Insitutype"))
+dir_ist_plots <- file.path(gl_img_dir, "Insitutype")
+save_data(patients_ist_sct, dir_ist_plots)
+save_data(patients_ist_rna, dir_ist_plots)
+save_data(insitutype_data, dir_ist_plots)
 ```
 
 ```{r}
@@ -2352,7 +2358,7 @@ saveRDS(breast_cancer_patients_analyze, file.path(gl_obj_dir, "breast_cancer_pat
 #| label: spatial-niches-study-setup
 
 # Number of niches to plot
-niches_plot <- niches_nums[3]
+niches_plot <- niches_nums[2]
 # Metadata column with the niches to plot
 col_niches_plot <- glue("niches_{niches_plot}")
 
@@ -2648,9 +2654,14 @@ CellChatDB_cell_cell_contact <- subsetDB(CellChatDB, search = "Cell-Cell Contact
 # Subsets with non-contact interactions
 CellChatDB_secreted_signaling <- subsetDB(CellChatDB, search = "Secreted Signaling")
 CellChatDB_ecm_receptor <- subsetDB(CellChatDB, search = "ECM-Receptor")
-# Set the databased that should be used
-CellChatDB_suffix <- "all_protein_signalling"
+# Set the database that should be used
+cellchat_databases <- c("all_protein_signalling", "cell_cell_contact", "secreted_signaling", "ecm_receptor")
+CellChatDB_suffix <- cellchat_databases[1]
 CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
+```
+
+```{r}
+#| label: load-cellchat-object
 
 # Load cellchat object
 cellchat <- readRDS(file.path(gl_obj_dir, glue("cellchat_{CellChatDB_suffix}.rds")))
