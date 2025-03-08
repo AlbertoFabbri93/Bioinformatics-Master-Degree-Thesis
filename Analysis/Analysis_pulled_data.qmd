@@ -1540,10 +1540,10 @@ other_cells_plots_to_save <- list()
 # View UMAP with other cells at different clustering resolutions
 other_cells_different_resolutions <- DimPlot(
   breast_cancer_patients_other_cells,
-  reduction="umap",
-  ncol=2,
-  group.by=other_cells_cluster_seq_res,
-  label=TRUE,
+  reduction = "umap",
+  ncol = 2,
+  group.by = other_cells_cluster_seq_res,
+  label = TRUE,
   ) & 
   NoLegend() & 
   NoAxes() & 
