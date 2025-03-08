@@ -1205,7 +1205,7 @@ saveRDS(breast_cancer_patients_analyze, file.path(gl_obj_dir, "breast_cancer_pat
 Create two separate Seurat objects for tumor and normal cells using the Insitutype clusters
 
 ```{r}
-#| label: insitutype-add-metadata
+#| label: add-metadata-to-filt-cells
 #| eval: false
 
 # Add insitutype annotated clusters to filt cells object
@@ -1227,13 +1227,26 @@ breast_cancer_patients_filt_cells <- AddMetaData(
 ```
 
 ```{r}
-#| label: insitutype-split
+#| label: save-filt-cells-obj-with-metadata
 #| eval: false
+
+# Save the Seurat object filt cells with the Insitutype clusters
+saveRDS(breast_cancer_patients_filt_cells, file.path(gl_obj_dir, "breast_cancer_patients_filt_cells.rds"))
+```
+
+```{r}
+#| label: read-insitutype-annotation-col
 
 # Extract the Insitutype clusters metadata column
 ist_ann_column <- FetchData(
   object = breast_cancer_patients_filt_cells,
   vars = col_ist_ann)
+```
+
+```{r}
+#| label: insitutype-split
+#| eval: false
+
 # Create Seurat objects with the non-cancerous cells
 breast_cancer_patients_normal_cells <- 
   breast_cancer_patients_filt_cells[, which(x = ist_ann_column != "Other")]
