@@ -1444,6 +1444,235 @@ save_data(normal_cells_images, file.path(gl_img_dir, "Normal cells"))
 saveRDS(breast_cancer_patients_normal_cells, file.path(gl_obj_dir, "breast_cancer_patients_normal_cells.rds"))
 ```
 
+## Macrophages
+
+```{r}
+#| label: macrophage-cells-read-from-drive
+
+# Load macrophage cells object from memory
+breast_cancer_patients_macrophage_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_macrophage_cells.rds"))
+```
+
+```{r}
+#| label: macrophage-cells-compute
+#| eval: false
+
+breast_cancer_patients_macrophage_cells <- 
+  breast_cancer_patients_filt_cells[, which(x = ist_ann_column == "Macrophage")]
+```
+
+### Cluster
+
+```{r}
+#| label: macrophage-cells-metadata-columns
+
+# Name of the metadata column with the other clusters
+col_macrophage_cells_clust_res_prefix <- "macrophage_cells_clusters_res_"
+# Find clusters of macrophage cells
+# The default resolution is 1, increase it to get more clusters or decrease it to get fewer clusters
+# Try a range of resolutions
+macrophage_cells_seq_res <- seq(0.4, 1.0, by = 0.2)
+# Create custom cluster names based on the actual resolution values
+macrophage_cells_cluster_seq_res <-
+  glue::glue("{col_macrophage_cells_clust_res_prefix}{macrophage_cells_seq_res}")
+```
+
+```{r}
+#| label: macrophage-cells-compute
+#| eval: false
+
+# After subsetting a Seurat object it is good to normalize it again
+breast_cancer_patients_macrophage_cells <- SCTransform(
+  breast_cancer_patients_macrophage_cells,
+  return.only.var.genes = FALSE,
+  assay = "RNA",
+  new.assay.name = "SCT",
+  verbose = TRUE)
+
+# Run PCA
+breast_cancer_patients_macrophage_cells <- RunPCA(
+  breast_cancer_patients_macrophage_cells,
+  reduction.key = "PC_",
+  reduction.name = "pca",
+  seed.use = 33,
+  verbose = TRUE)
+# Generate variance elbow plots
+generate_variance_elbow_plots(breast_cancer_patients_macrophage_cells, "pca", 50)
+# Dimension to use for subsequent analysis, decided lokking at the elbow plot
+macrophage_cells_dims <- 1:29
+# Find neighbors of other cells
+# Number of PCA dimensions used in Seurat's FindNeighbors function
+#
+# Using MORE dimensions:
+# Captures more subtle biological variation
+# Includes more complex relationships between genes
+# May include more noise/technical artifacts
+# Computationally more intensive
+#
+# Using FEWER dimensions:
+# Focuses on major sources of variation
+# More robust to technical noise
+# May miss subtle biological signals
+# Computationally faster
+breast_cancer_patients_macrophage_cells <- FindNeighbors(
+  breast_cancer_patients_macrophage_cells,
+  reduction = "pca",
+  dims = macrophage_cells_dims,
+  verbose = TRUE)
+
+# Find clusters at different resolutions
+breast_cancer_patients_macrophage_cells <- FindClusters(
+  breast_cancer_patients_macrophage_cells,
+  resolution = macrophage_cells_seq_res,
+  cluster.name = macrophage_cells_cluster_seq_res,
+  random.seed = 5,
+  verbose = TRUE)
+
+# Run UMAP
+breast_cancer_patients_macrophage_cells <- RunUMAP(
+  breast_cancer_patients_macrophage_cells,
+  reduction = "pca",
+  reduction.key = "UMAP_",
+  reduction.name = "umap",
+  dims = macrophage_cells_dims,
+  verbose = TRUE,
+  seed.use = 42)
+```
+
+### Plot
+
+```{r}
+#| label: macrophage-cells-plot
+
+macrophage_cells_plots_to_save <- list()
+
+# View UMAP with other cells at different clustering resolutions
+macrophage_cells_different_resolutions <- DimPlot(
+  breast_cancer_patients_macrophage_cells,
+  reduction = "umap",
+  ncol = 2,
+  group.by = macrophage_cells_cluster_seq_res,
+  label = TRUE,
+  ) & 
+  NoLegend() & 
+  NoAxes() & 
+  theme(
+  plot.margin = unit(c(0, 0, 0, 0), "lines"),
+  plot.title = element_text(size = 12, face = "bold")
+  )
+macrophage_cells_plots_to_save[["macrophage_cells_different_resolutions"]] <- macrophage_cells_different_resolutions
+
+# View UMAP with other cells and patient clusters
+macrophage_cells_patient_id_plot <- DimPlot(
+  breast_cancer_patients_macrophage_cells,
+  reduction = "umap",
+  label = TRUE,
+  label.box = TRUE,
+  group.by = "Patient.ID",
+  cols = palette_patients) +
+  labs(title = "Patient ID clusters") &
+  NoLegend() &
+  NoAxes()
+macrophage_cells_plots_to_save[["macrophage_cells_patient_id_plot"]] <- macrophage_cells_patient_id_plot
+
+# Chosen resolution
+chosen_macrophage_cells_cluster_resolution <- 0.8
+# Chosen cluster
+col_macrophage_cells_chosen_cluster <- glue::glue("{col_macrophage_cells_clust_res_prefix}{chosen_macrophage_cells_cluster_resolution}")
+# Set identity to other clusters
+Idents(breast_cancer_patients_macrophage_cells) <- col_macrophage_cells_chosen_cluster
+
+# Generate DimPlot of chosen resolution
+macrophage_cells_chosen_resolution_plot <- DimPlot(
+  breast_cancer_patients_macrophage_cells,
+  reduction = "umap",
+  group.by = col_macrophage_cells_chosen_cluster,
+  label = TRUE) +
+  labs(title = "Macrophage Clusters") &
+  NoLegend() &
+  NoAxes()
+# Print DimPlots side by side
+macrophage_cells_clusters_plus_patient_clusters <-
+  macrophage_cells_patient_id_plot + macrophage_cells_chosen_resolution_plot
+macrophage_cells_plots_to_save[["macrophage_cells_clusters_plus_patient_clusters"]] <-
+  macrophage_cells_clusters_plus_patient_clusters
+
+# Other cells cluster tibble column name
+stat_col_macrophage_cells_clusters <- "Macrophage clusters"
+# Calculate statistics for the other cells clusters
+macrophage_cells_cluster_statistics <- breast_cancer_patients_macrophage_cells@meta.data %>%
+  dplyr::rename(!!sym(stat_col_macrophage_cells_clusters) := !!sym(col_macrophage_cells_chosen_cluster)) %>%
+  # Group by patient and cluster, then calculate percentage
+  group_by(Patient.ID, !!sym(stat_col_macrophage_cells_clusters)) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  group_by(Patient.ID) %>%
+  mutate(Percentage = Count / sum(Count) * 100) %>%
+  ungroup() %>%
+  # Ensure Patient.ID is a factor
+  mutate(Patient.ID = as.factor(Patient.ID))
+
+# Print tibble with the number of cells in each cluster per patient
+macrophage_cells_count_clust_patient <- 
+  macrophage_cells_cluster_statistics %>%
+    # Specify id_cols so the Count column is dropped
+    pivot_wider(
+      names_from = Patient.ID,
+      values_from = Count,
+      id_cols = !!sym(stat_col_macrophage_cells_clusters)
+  ) %>%
+  # Replace NA values with 0 so that the total cells per cluster can be calculated
+  mutate(across(2:8, ~replace_na(.x, 0))) %>%
+  group_by(!!sym(stat_col_macrophage_cells_clusters)) %>%
+  mutate(`Tot. clust. cells` = sum(across(where(is.numeric)))) %>%
+  ungroup() %>%
+  # Sort according to the Tumor cluster column
+  arrange(!!sym(stat_col_macrophage_cells_clusters))
+macrophage_cells_plots_to_save[["macrophage_cells_count_clust_patient"]] <-
+  macrophage_cells_count_clust_patient
+
+# Plot the distribution of other cell clusters by patient
+macrophage_cells_cluster_distribution_plot <- macrophage_cells_cluster_statistics %>%
+  # Plot the data
+  ggplot(aes(x = Count, y = !!sym(stat_col_macrophage_cells_clusters))) +
+  geom_rect(data = unique(macrophage_cells_cluster_statistics["Macrophage clusters"]),
+            aes(ymin = as.numeric(`Macrophage clusters`) - 0.4,
+                ymax = as.numeric(`Macrophage clusters`) + 0.4,
+                xmin = -Inf,
+                xmax = Inf),
+            fill = "grey90", alpha = 0.3, inherit.aes = FALSE) +
+  # Add dots for each patient
+  geom_point(aes(color = Patient.ID), size = 3, alpha = 0.7, position = position_dodge(width = 0.7)) +
+  theme_minimal() +
+  labs(x = "Number of Cells", y = "Cluster", 
+       title = "Macrophage Clusters Distribution by Patient",
+       color = "Patient") +
+  theme(legend.position = "right") +
+  scale_color_brewer(palette = "Set1") +
+  guides(
+    color = guide_legend(order = 1),
+  )
+macrophage_cells_plots_to_save[["macrophage_cells_cluster_distribution_plot"]] <-
+  macrophage_cells_cluster_distribution_plot
+
+print(macrophage_cells_plots_to_save)
+```
+
+```{r}
+#| label: macrophage-cells-save-plots
+#| eval: false
+
+# Save the macrophage cells plots
+save_data(macrophage_cells_plots_to_save, file.path(gl_img_dir, "Macrophages"))
+```
+
+```{r}
+#| label: macrophage-cells-save-rds
+#| eval: false
+
+# Save the Seurat object
+saveRDS(breast_cancer_patients_macrophage_cells, file.path(gl_obj_dir, "breast_cancer_patients_macrophage_cells.rds"))
+```
+
 ## Other cells
 
 ### Cluster
@@ -2623,6 +2852,148 @@ core_stamp_distance_matrix[[stamp]] = computeCellDistance(
   tol = NULL)
 }
 
+for (dist_mat in names(core_stamp_distance_matrix)) {
+
+  dist <- core_stamp_distance_matrix[[dist_mat]]
+  dat <- as.data.frame(as.matrix(dist))
+  value <- stack(dat)$values
+  rnames <- rownames(dat)
+  namecol <- expand.grid(rnames, rnames)
+  colnames(namecol) <- c("cell1", "cell2")
+  res <- data.frame(namecol, value)
+
+  # return only lower triangular part of dist
+  res <- res[-which(upper.tri(as.matrix(dist), diag = T)), ]
+  
+  # Extract the metadata dataframe
+metadata <- breast_cancer_patients_analyze@meta.data
+
+# Retrieve the column containing cell phenotypes
+phenotype_column <- col_cell_tumor_cluster_subtype
+cell_to_phenotype <- metadata[[phenotype_column]]  # Extract the relevant column
+
+# Map cell names to phenotypes
+cell_to_phenotype_map <- setNames(cell_to_phenotype, rownames(metadata))
+
+# Add the col_cell_type and row_cell_type columns to `res`
+res$cell1_type <- cell_to_phenotype_map[res$cell1]
+res$cell2_type <- cell_to_phenotype_map[res$cell2]
+
+  return(res)
+}
+
+# Extract the metadata dataframe
+metadata <- breast_cancer_patients_analyze@meta.data
+
+# Retrieve the column containing cell phenotypes
+phenotype_column <- col_ist_merge_type
+cell_to_phenotype <- metadata[[phenotype_column]]  # Extract the relevant column
+
+# Map cell names to phenotypes
+cell_to_phenotype_map <- setNames(cell_to_phenotype, rownames(metadata))
+
+# Initialize a list to store results
+result_list <- list()
+
+# Loop through each distance matrix
+for (dist_mat in names(core_stamp_distance_matrix)) {
+  
+  # Access the current distance matrix
+  dist <- core_stamp_distance_matrix[[dist_mat]]
+  
+  # Convert to data frame
+  dat <- as.data.frame(as.matrix(dist))
+  value <- stack(dat)$values
+  rnames <- rownames(dat)
+  namecol <- expand.grid(rnames, rnames)
+  colnames(namecol) <- c("cell1", "cell2")
+  res <- data.frame(namecol, value)
+  
+  # Return only lower triangular part of the distance matrix
+  res <- res[-which(upper.tri(as.matrix(dist), diag = TRUE)), ]
+  
+  # Add the cell type information
+  res$cell1_type <- cell_to_phenotype_map[res$cell1]
+  res$cell2_type <- cell_to_phenotype_map[res$cell2]
+  
+  # Store the result in the list
+  result_list[[dist_mat]] <- res
+}
+
+# Combine all results into a single data frame (optional)
+final_result <- do.call(rbind, result_list)
+
+
+
+# Extract the cell types for the subgroups from the palette
+all_cell_types <- c(
+  # Brain cells
+  "Inhibitory neuron A", "Inhibitory neuron B", "Inhibitory neuron C", 
+  "L2/3 neuron", "L4 neuron", "L6 neuron", 
+  "Oligodendrocyte-like", "Oligodendrocyte precursor cell", "Oligodendrocyte",
+  "Microglia A", "Microglia B", 
+  "Astrocyte A", "Astrocyte B",
+  
+  # Stromal cells
+  "Endothelial", "Fibroblast",
+  
+  # Myeloids
+  "Dendritic cell", "Macrophage", "Mast cell", "Monocyte", 
+  "Neutrophil", "Plasmacytoid dendritic cell",
+  
+  # Lymphocytes
+  "B cell", "NK cell", "Plasma", "Plasmablast", 
+  "T cell CD4", "T cell CD8", "T cell regulatory"
+)
+
+# Filter the distance data for pairs involving subgroup cells and tumor cells
+filtered_distances <- final_result[
+  (final_result$cell1_type %in% all_cell_types & final_result$cell2_type == "Tumor") |
+  (final_result$cell2_type %in% all_cell_types & final_result$cell1_type == "Tumor"), 
+]
+
+filtered_distances <- filtered_distances %>%
+  mutate(
+    cell1 = as.character(cell1),
+    cell2 = as.character(cell2),
+    # Create temporary columns to hold swapped values
+    new_cell1 = ifelse(cell1_type == "Tumor", cell2, cell1),
+    new_cell2 = ifelse(cell1_type == "Tumor", cell1, cell2),
+    new_cell1_type = ifelse(cell1_type == "Tumor", cell2_type, cell1_type),
+    new_cell2_type = ifelse(cell1_type == "Tumor", cell1_type, cell2_type)
+  ) %>%
+  # Assign swapped values back to the original columns
+  mutate(
+    cell1 = new_cell1,
+    cell2 = new_cell2,
+    cell1_type = new_cell1_type,
+    cell2_type = new_cell2_type
+  ) %>%
+  # Remove the temporary columns
+  dplyr::select(-new_cell1, -new_cell2, -new_cell1_type, -new_cell2_type)
+
+# Find the minimum distance for each cell in the subgroup
+closest_distances <- filtered_distances %>%
+  group_by(cell1) %>%
+  dplyr::filter(value == min(value)) %>%
+  ungroup()  # Ungroup the data after filtering
+
+# Print the results
+print(closest_distances)
+
+ggplot(closest_distances, aes(x = cell1_type, y = value)) +
+  geom_point(aes(color = cell1_type), position = position_jitter(width = 0.2, height = 0), size = 1) +  # Add jitter to avoid overlapping points
+  stat_summary(aes(group = cell1_type), fun = mean, geom = "point", color = "red", size = 3) +  # Add points for the average value
+  labs(
+    title = "Distance from the Closest Tumor Cell by Cell Type",
+    x = "Cell Type",
+    y = "Distance from closest tumor cell (μm)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels for readability
+        legend.position = "none") +  # Remove the legend
+    scale_color_manual(values = palette_cell_types) # Use the custom color palette
+
 # Initialize list to store results
 core_stamp_min_max_dist <- list(global = list(max = -Inf, min = Inf))
 # Loop through each stamp to compute min and max distances
@@ -2671,7 +3042,7 @@ CellChatDB_secreted_signaling <- subsetDB(CellChatDB, search = "Secreted Signali
 CellChatDB_ecm_receptor <- subsetDB(CellChatDB, search = "ECM-Receptor")
 # Set the database that should be used
 cellchat_databases <- c("all_protein_signalling", "cell_cell_contact", "secreted_signaling", "ecm_receptor")
-CellChatDB_suffix <- cellchat_databases[1]
+CellChatDB_suffix <- cellchat_databases[4]
 CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
 ```
 
