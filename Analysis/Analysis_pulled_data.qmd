@@ -1450,9 +1450,9 @@ col_other_cells_clust_res_prefix <- "other_cells_clusters_res_"
 # Find clusters of other cells
 # The default resolution is 1, increase it to get more clusters or decrease it to get fewer clusters
 # Try a range of resolutions
-seq_res <- seq(0.1, 0.4, by = 0.1)
+other_cells_seq_res <- seq(0.1, 0.4, by = 0.1)
 # Create custom cluster names based on the actual resolution values
-other_cells_cluster_seq_res <- glue::glue("{col_other_cells_clust_res_prefix}{seq_res}")
+other_cells_cluster_seq_res <- glue::glue("{col_other_cells_clust_res_prefix}{other_cells_seq_res}")
 ```
 
 ```{r}
@@ -1501,7 +1501,7 @@ breast_cancer_patients_other_cells <- FindNeighbors(
 # Find clusters at different resolutions
 breast_cancer_patients_other_cells <- FindClusters(
   breast_cancer_patients_other_cells,
-  resolution = seq_res,
+  resolution = other_cells_seq_res,
   cluster.name = other_cells_cluster_seq_res,
   random.seed = 5,
   verbose = TRUE)
