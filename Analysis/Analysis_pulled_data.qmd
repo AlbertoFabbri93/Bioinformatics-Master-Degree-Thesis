@@ -1673,6 +1673,81 @@ save_data(macrophage_cells_plots_to_save, file.path(gl_img_dir, "Macrophages"))
 saveRDS(breast_cancer_patients_macrophage_cells, file.path(gl_obj_dir, "breast_cancer_patients_macrophage_cells.rds"))
 ```
 
+### Markers
+
+```{r}
+#| label: macrophage-cells-markers-read-from-drive
+
+# Load other cells object from memory
+macrophage_cells_markers_data <- readRDS(file.path(gl_obj_dir, "macrophage_cells_markers_data.rds"))
+```
+
+```{r}
+#| label: macrophage-cells-markers-computation
+#| eval: false
+
+# Find all markers of the macrophage clusters
+# GSEA needs both positive and negative markers
+macrophage_cells_markers_data <- FindAllMarkers(
+  breast_cancer_patients_macrophage_cells,
+  test.use = "wilcox",
+  assay = "SCT",
+  only.pos = FALSE,
+  random.seed = 5,
+  verbose = TRUE)
+```
+
+```{r}
+#| label: macrophage-cells-markers-save
+#| eval: false
+
+# Save the data
+saveRDS(macrophage_cells_markers_data, file.path(gl_obj_dir, "macrophage_cells_markers_data.rds"))
+```
+
+```{r}
+#| label: macrophage-cells-markers-plots
+
+# List with data to save
+macrophage_cells_markers_to_print <- list()
+
+# Filter markers to get the most significant up-regulated ones per cluster
+most_significant_macrophage_cells_markers <- macrophage_cells_markers_data %>%
+  group_by(cluster) %>%
+  dplyr::filter(avg_log2FC > 1 & p_val_adj < 0.05) %>%
+  slice_head(n = 10) %>%
+  ungroup()
+macrophage_cells_markers_to_print[["most_significant_mscrophage_cells_markers"]] <- most_significant_macrophage_cells_markers
+
+macrophage_cells_clust_diff_expr_genes_heatmap <- DoHeatmap(
+    breast_cancer_patients_macrophage_cells,
+    features = most_significant_macrophage_cells_markers$gene,
+    assay = "SCT",
+    label = TRUE,
+    size = 2
+    #group.colors = color_lookup_table,
+   ) + theme(
+     axis.text.y = element_text(size = 5),
+   ) + labs(
+     title = paste("Macrophage cells clusters"),
+     subtitle = "Top 10 Differentially Expressed Genes per Cluster"
+   )
+macrophage_cells_markers_to_print[["macrophage_clust_diff_expr_genes_heatmap"]] <-
+  macrophage_cells_clust_diff_expr_genes_heatmap
+
+print(macrophage_cells_markers_to_print)
+```
+
+```{r}
+#| label: macrophage-cells-markers-save
+#| eval: false
+
+# Other cells markers folder
+macrophage_cells_markers_dir <- file.path(gl_img_dir, "Macrophage cells markers")
+# Save the data
+save_data(macrophage_cells_markers_to_print, macrophage_cells_markers_dir)
+```
+
 ## Other cells
 
 ### Cluster
