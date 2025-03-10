@@ -1562,7 +1562,13 @@ macrophage_cells_different_resolutions <- DimPlot(
   )
 macrophage_cells_plots_to_save[["macrophage_cells_different_resolutions"]] <- macrophage_cells_different_resolutions
 
-# View UMAP with other cells and patient clusters
+# View how resolution affects the number of clusters
+macrophage_cells_clustree <- clustree(
+  breast_cancer_patients_macrophage_cells@meta.data,
+  prefix = col_macrophage_cells_clust_res_prefix)
+macrophage_cells_plots_to_save[["macrophage_cells_clustree"]] <- macrophage_cells_clustree
+
+# View UMAP with macrophages and patient clusters
 macrophage_cells_patient_id_plot <- DimPlot(
   breast_cancer_patients_macrophage_cells,
   reduction = "umap",
