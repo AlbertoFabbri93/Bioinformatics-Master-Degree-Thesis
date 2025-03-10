@@ -41,21 +41,21 @@ save_data <- function(data_list, folder_path, img_ext = gl_img_ext) {
     # Save ggplot objects using ggsave
     if (inherits(flat_items[[item_name]], "ggplot")) {
       for (ext in img_ext) {
-        file_path <- file.path(folder_path, paste0(item_name, ext))
+        file_path <- file.path(folder_path, paste0(item_name, ".", ext))
         ggsave(filename = file_path, plot = flat_items[[item_name]])
       }
       
     # Save trellis and base R (recordedplot) objects
     } else if (inherits(flat_items[[item_name]], "trellis") || inherits(flat_items[[item_name]], "recordedplot")) {
       for (ext in img_ext) {
-        file_path <- file.path(folder_path, paste0(item_name, ext))
+        file_path <- file.path(folder_path, paste0(item_name, ".", ext))
         
         # Open the appropriate graphics device based on the file extension
-        if (ext == ".png") png(file_path, width = 1000, height = 1000)
-        else if (ext == ".pdf") pdf(file_path)
-        else if (ext == ".jpeg" || ext == ".jpg") jpeg(file_path)
-        else if (ext == ".tiff") tiff(file_path)
-        else if (ext == ".eps") postscript(file_path)
+        if (ext == "png") png(file_path, width = 800, height = 800)
+        else if (ext == "pdf") pdf(file_path)
+        else if (ext == "jpeg" || ext == "jpg") jpeg(file_path)
+        else if (ext == "tiff") tiff(file_path)
+        else if (ext == "eps") postscript(file_path)
         
         # Replay the base R or trellis plot to save it
         replayPlot(flat_items[[item_name]])
