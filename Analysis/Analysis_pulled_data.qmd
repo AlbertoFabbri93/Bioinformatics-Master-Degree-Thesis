@@ -1662,7 +1662,7 @@ print(macrophage_cells_plots_to_save)
 #| eval: false
 
 # Save the macrophage cells plots
-save_data(macrophage_cells_plots_to_save, file.path(gl_img_dir, "Macrophages"))
+save_data(macrophage_cells_plots_to_save, file.path(gl_img_dir, "Macrophages clusters"))
 ```
 
 ```{r}
@@ -1686,15 +1686,24 @@ macrophage_cells_markers_data <- readRDS(file.path(gl_obj_dir, "macrophage_cells
 #| label: macrophage-cells-markers-computation
 #| eval: false
 
-# Find all markers of the macrophage clusters
-# GSEA needs both positive and negative markers
-macrophage_cells_markers_data <- FindAllMarkers(
-  breast_cancer_patients_macrophage_cells,
-  test.use = "wilcox",
-  assay = "SCT",
-  only.pos = FALSE,
-  random.seed = 5,
-  verbose = TRUE)
+# Initialize a list to store marker results for each resolution
+macrophage_cells_markers_list <- list()
+
+# Loop over each resolution's cluster metadata column
+for (res in macrophage_cells_cluster_seq_res) {
+  # Use the group.by parameter to specify the clustering metadata column
+  markers <- FindAllMarkers(
+    breast_cancer_patients_macrophage_cells,
+    group.by = res,
+    test.use = "wilcox",
+    assay = "SCT",
+    only.pos = FALSE,
+    random.seed = 5,
+    verbose = TRUE)
+  
+  # Save the markers for the current resolution in the list
+  macrophage_cells_markers_list[[res]] <- markers
+}
 ```
 
 ```{r}
@@ -1711,29 +1720,45 @@ saveRDS(macrophage_cells_markers_data, file.path(gl_obj_dir, "macrophage_cells_m
 # List with data to save
 macrophage_cells_markers_to_print <- list()
 
-# Filter markers to get the most significant up-regulated ones per cluster
-most_significant_macrophage_cells_markers <- macrophage_cells_markers_data %>%
-  group_by(cluster) %>%
-  dplyr::filter(avg_log2FC > 1 & p_val_adj < 0.05) %>%
-  slice_head(n = 10) %>%
-  ungroup()
-macrophage_cells_markers_to_print[["most_significant_mscrophage_cells_markers"]] <- most_significant_macrophage_cells_markers
-
-macrophage_cells_clust_diff_expr_genes_heatmap <- DoHeatmap(
+# Loop over each resolution in the list of marker results
+for (res in names(macrophage_cells_markers_list)) {
+  
+  # Print the current resolution being analyzed
+  print(paste("Processing resolution:", res))
+  
+  # Get marker data for the current resolution
+  markers_df <- macrophage_cells_markers_list[[res]]
+  
+  # Filter markers to get the most significant up-regulated ones per cluster
+  most_significant_markers <- markers_df %>%
+    group_by(cluster) %>%
+    dplyr::filter(avg_log2FC > 1 & p_val_adj < 0.05) %>%
+    slice_head(n = 10) %>%
+    ungroup()
+  
+  # Save the filtered markers for this resolution in the output list
+  key_markers <- paste0(res, "_most_significant_markers")
+  macrophage_cells_markers_to_print[[key_markers]] <- most_significant_markers
+  
+  # Create a heatmap using the genes from the filtered markers
+  heatmap_plot <- DoHeatmap(
     breast_cancer_patients_macrophage_cells,
-    features = most_significant_macrophage_cells_markers$gene,
+    features = most_significant_markers$gene,
+    group.by = res,
     assay = "SCT",
     label = TRUE,
-    size = 2
-    #group.colors = color_lookup_table,
-   ) + theme(
-     axis.text.y = element_text(size = 5),
-   ) + labs(
-     title = paste("Macrophage cells clusters"),
-     subtitle = "Top 10 Differentially Expressed Genes per Cluster"
-   )
-macrophage_cells_markers_to_print[["macrophage_clust_diff_expr_genes_heatmap"]] <-
-  macrophage_cells_clust_diff_expr_genes_heatmap
+    size = 2,
+  ) + theme(
+    axis.text.y = element_text(size = 5)
+  ) + labs(
+    title = paste("Macrophage cells clusters - Resolution:", res),
+    subtitle = "Top 10 Differentially Expressed Genes per Cluster"
+  )
+  
+  # Save the heatmap for this resolution in the output list
+  key_heatmap <- paste0(res, "_heatmap")
+  macrophage_cells_markers_to_print[[key_heatmap]] <- heatmap_plot
+}
 
 print(macrophage_cells_markers_to_print)
 ```
@@ -1743,7 +1768,7 @@ print(macrophage_cells_markers_to_print)
 #| eval: false
 
 # Other cells markers folder
-macrophage_cells_markers_dir <- file.path(gl_img_dir, "Macrophage cells markers")
+macrophage_cells_markers_dir <- file.path(gl_img_dir, "Macrophages markers")
 # Save the data
 save_data(macrophage_cells_markers_to_print, macrophage_cells_markers_dir)
 ```
