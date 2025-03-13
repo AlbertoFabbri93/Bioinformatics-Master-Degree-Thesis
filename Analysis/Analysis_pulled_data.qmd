@@ -2167,7 +2167,7 @@ palette_expression_level = circlize::colorRamp2(
   c("#FF00FF", "#000000", "#FFFF00"))
 
 # Create the heatmap with ComplexHeatmap
-ht = Heatmap(
+other_cells_clust_diff_expr_genes_complex_heatmap <- Heatmap(
   matrix = expr_matrix,
   row_order = features,
   name = "expression",
@@ -2209,7 +2209,7 @@ ht = Heatmap(
   use_raster = FALSE
 )
 # Put the legends on the right in a single column
-draw(ht, merge_legend = TRUE)
+draw(other_cells_clust_diff_expr_genes_complex_heatmap, merge_legend = TRUE)
 ```
 
 ```{r}
@@ -2259,9 +2259,9 @@ png(paste(other_cells_markers_dir, "other_cells_complex_heatmap.png", sep="/"),
     height = 20,
     units = "cm",
     res = 1000)
-draw(ht, merge_legend = TRUE)
-# Save image
+draw(other_cells_clust_diff_expr_genes_complex_heatmap, merge_legend = TRUE)
 dev.off()
+# Save image
 save_data(main_markers_list, other_cells_markers_dir)
 ```
 
