@@ -1,3 +1,7 @@
+### LIBRARIES
+# Simplify saving the plots generated in base R
+library("R.devices")
+
 ####### SAVE LIST OF ITEMS #######
 
 # This function saves a list of plots and data frames to a specified folder
@@ -8,69 +12,102 @@ save_data <- function(data_list, folder_path, img_ext = gl_img_ext) {
     dir.create(folder_path, recursive = TRUE)
   }
   
-  # Helper function to flatten the list and collect plots and data frames
-  # Images are also lists so simply unflattening the list does not work
-  flatten_list <- function(lst) {
-    flat_list <- list()
-    
-    for (name in names(lst)) {
-      # "trellis" refers to a class of objects created by the lattice package
-      # Check if the element is a ggplot, trellis, or recordedplot (base R plot)
-      if (inherits(lst[[name]], "ggplot") || inherits(lst[[name]], "trellis") || inherits(lst[[name]], "recordedplot")) {
-        flat_list[[name]] <- lst[[name]]
-      }
-      # Check if the element is a data frame
-      else if (is.data.frame(lst[[name]])) {
-        flat_list[[name]] <- lst[[name]]
-      }
-      # If the element is a nested list, recursively flatten it
-      else if (is.list(lst[[name]])) {
-        flat_list <- c(flat_list, flatten_list(lst[[name]]))
-      }
-    }
-    
-    return(flat_list)
-  }
-  
-  # Flatten the plots list
+  # Flatten the plot/dataframe object list
   flat_items <- flatten_list(data_list)
   
-  # Iterate over the flattened list of items and save each plot or data frame
+  # Iterate over the object list and save each one
   for (item_name in names(flat_items)) {
+    item <- flat_items[[item_name]]
     
-    # Save ggplot objects using ggsave
-    if (inherits(flat_items[[item_name]], "ggplot")) {
-      for (ext in img_ext) {
-        file_path <- file.path(folder_path, paste0(item_name, ".", ext))
-        ggsave(filename = file_path, plot = flat_items[[item_name]])
-      }
-      
-    # Save trellis and base R (recordedplot) objects
-    } else if (inherits(flat_items[[item_name]], "trellis") || inherits(flat_items[[item_name]], "recordedplot")) {
-      for (ext in img_ext) {
-        file_path <- file.path(folder_path, paste0(item_name, ".", ext))
-        
-        # Open the appropriate graphics device based on the file extension
-        if (ext == "png") png(file_path, width = 800, height = 800)
-        else if (ext == "pdf") pdf(file_path)
-        else if (ext == "jpeg" || ext == "jpg") jpeg(file_path)
-        else if (ext == "tiff") tiff(file_path)
-        else if (ext == "eps") postscript(file_path)
-        
-        # Replay the base R or trellis plot to save it
-        replayPlot(flat_items[[item_name]])
-        
-        # Close the graphics device
-        dev.off()
-      }
-      
     # Save data frames as CSV files
-    } else if (is.data.frame(flat_items[[item_name]])) {
+    if (is.data.frame(item)) {
+      
       file_path <- file.path(folder_path, paste0(item_name, ".csv"))
-      # Save the data frame as a csv to the specified file path
-      write.csv(flat_items[[item_name]], file_path, row.names = FALSE)
+      write.csv(item, file_path, row.names = FALSE)
+      
+    }
+    # Handle plot objects (ggplot, trellis, or recordedplot)
+    else if (inherits(item, "ggplot") || inherits(item, "trellis") || inherits(item, "recordedplot")) {
+      
+      # Check if custom dimensions are set as attributes on the plot object
+      width <- attr(item, "width")
+      height <- attr(item, "height")
+      units <- attr(item, "units")
+      dpi <- attr(item, "dpi")
+      
+      # Saving ggplot objects
+      if (inherits(item, "ggplot")) {
+        
+        # Use ggsave() default values if no custom dimensions are provided
+        width <- if (!is.null(width)) width else NA
+        height <- if (!is.null(height)) height else NA
+        units <- if (!is.null(units)) units else "px"
+        dpi <- if (!is.null(dpi)) dpi else 300
+        
+        # Save the image in all the desired formats using a loop
+        for (ext in img_ext) {
+          file_path <- file.path(folder_path, paste0(item_name, ".", ext))
+          ggsave(
+            filename = file_path,
+            plot = item,
+            width = width,
+            height = height,
+            units = units,
+            dpi = dpi)
+        }
+      }
+      # Saving trellis and recordedplot objects
+      else {
+        
+        # For trellis and recordedplot objects, use defaults if custom dimensions are not provided
+        units <- if (!is.null(units)) units else "px"
+        dpi <- if (!is.null(dpi)) dpi else 72
+        width <- if (!is.null(width)) width else 480
+        height <- if (!is.null(height)) height else 480
+        
+        # Save the image in all the desired formats using the R.devices package
+        devEval(
+          type = img_ext,
+          path = folder_path,
+          name = item_name,
+          width = width,
+          height = height,
+          units = units,
+          res = dpi,
+          expr = { replayPlot(item) }
+        )
+      }
     }
   }
+}
+
+####### FLATTEN NESTED PLOT/DATAFRAME LIST #######
+
+# Function to flatten a list of nested plots and data frames
+# Images are also lists so simply unflattening the list does not work
+flatten_list <- function(obj_list) {
+  
+  # Initialize an empty list to store the plot/dataframe objects
+  flat_list <- list()
+  
+  # Iterate over the elements of the input list
+  for (obj_name in names(obj_list)) {
+    # "trellis" refers to a class of objects created by the lattice package
+    # If the element is a ggplot, trellis, or recordedplot (base R plot) object, add it to the returned list
+    if (inherits(obj_list[[obj_name]], "ggplot") || inherits(obj_list[[obj_name]], "trellis") || inherits(obj_list[[obj_name]], "recordedplot")) {
+      flat_list[[obj_name]] <- obj_list[[obj_name]]
+    }
+    # If the element is a data frame, add it to the returned list
+    else if (is.data.frame(obj_list[[obj_name]])) {
+      flat_list[[obj_name]] <- obj_list[[obj_name]]
+    }
+    # If the element is a nested list, recursively flatten it
+    else if (is.list(obj_list[[obj_name]])) {
+      flat_list <- c(flat_list, flatten_list(obj_list[[obj_name]]))
+    }
+  }
+  # Return a list of plot/dataframe objects
+  return(flat_list)
 }
 
 ####### PRINT A VECTOR COLOR PALETTE #######
