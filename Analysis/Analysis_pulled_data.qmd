@@ -1685,7 +1685,7 @@ saveRDS(breast_cancer_patients_macrophage_cells, file.path(gl_obj_dir, "breast_c
 #| label: macrophage-cells-markers-read-from-drive
 
 # Load other cells object from memory
-macrophage_cells_markers_data <- readRDS(file.path(gl_obj_dir, "macrophage_cells_markers_data.rds"))
+macrophage_cells_markers_list <- readRDS(file.path(gl_obj_dir, "macrophage_cells_markers_list.rds"))
 ```
 
 ```{r}
@@ -1717,7 +1717,7 @@ for (res in macrophage_cells_cluster_seq_res) {
 #| eval: false
 
 # Save the data
-saveRDS(macrophage_cells_markers_data, file.path(gl_obj_dir, "macrophage_cells_markers_data.rds"))
+saveRDS(macrophage_cells_markers_list, file.path(gl_obj_dir, "macrophage_cells_markers_list.rds"))
 ```
 
 ```{r}
