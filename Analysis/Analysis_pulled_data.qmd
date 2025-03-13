@@ -3342,11 +3342,14 @@ saveRDS(cellchat, file.path(gl_obj_dir, glue("cellchat_{CellChatDB_suffix}.rds")
 ### Plot
 
 ```{r}
-#| label: cellchat-plots
-#| eval: false
+#| label: cellchat-palette
 
 # Create a palette with only the idents used by cellchat otherwise it throws an error
 palette_cellchat <- palette_all_cells_types[levels(cellchat@idents)]
+```
+
+```{r}
+#| label: cellchat-plots-all-cells
 
 # Create a list to store plots
 plot_list_cellchat <- list()
@@ -3415,12 +3418,11 @@ netVisual_bubble(
   remove.isolate = TRUE,
   signaling = NULL)
 plot_list_cellchat[["cellchat_bubbleplot_interactions"]] <- recordPlot()
-
-# pathways.show <- c("COLLAGEN") 
-# netVisual_aggregate(cellchat, signaling = pathways.show, layout = "spatial")
 ```
 
 ```{r}
+#| label: cellchat-plots-cell-groups
+
 # Examine the signaling sent from each cell group
 # Set the parameter edge.weight.max so that edge weights are comparable between differet networks
 group_size <- as.numeric(table(cellchat@idents))
