@@ -757,43 +757,6 @@ breast_cancer_patients_analyze@meta.data %<>%
   )
 ```
 
-### Info
-
-```{r}
-#| label: insitutype-info
-
-ist_info <- list()
-
-# Create a tibble with cell count and percentage of every cluster
-ist_summary_cell_types_count <- breast_cancer_patients_analyze@meta.data %>%
-  count(.data[[col_ist_ann]], name = "cell_count") %>%
-  mutate(percentage = round((cell_count / sum(cell_count)) * 100, 3)) %>%
-  dplyr::rename(cluster = .data[[col_ist_ann]]) %>%
-  as_tibble()
-ist_info[["ist_summary_cell_types_count"]] <- ist_summary_cell_types_count
-
-# Create a table with the cell count and percentage divided by patient
-ist_summary_cell_types_count_per_patient <- breast_cancer_patients_analyze@meta.data %>%
-  count(!!sym(col_ist_ann), Patient.ID) %>%
-  group_by(Patient.ID) %>%
-  mutate(percentage = round(n / sum(n) * 100, 4)) %>%
-  arrange(Patient.ID, !!sym(col_ist_ann)) %>%
-  dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
-  as_tibble()
-ist_info[["ist_summary_cell_types_count_per_patient"]] <- ist_summary_cell_types_count_per_patient
-
-for (table in ist_info) {
-  print(datatable(table))
-}
-```
-
-```{r}
-#| echo: false
-
-# Save the Insitutype plots
-save_data(ist_info, dir_ist_plots)
-```
-
 ### Add cell groups
 
 ```{r}
@@ -866,6 +829,63 @@ breast_cancer_patients_analyze@meta.data %<>%
       cell_groups_vector[.data[[col_ist_ann]]]
     )
   )
+```
+
+### Info
+
+```{r}
+#| label: insitutype-info
+
+ist_info <- list()
+
+# CELL TYPES
+# Create a tibble with cell count and percentage of every cluster
+ist_summary_cell_types_count <- breast_cancer_patients_analyze@meta.data %>%
+  count(.data[[col_ist_ann]], name = "cell_count") %>%
+  mutate(percentage = round((cell_count / sum(cell_count)) * 100, 3)) %>%
+  dplyr::rename(cell_type = .data[[col_ist_ann]]) %>%
+  as_tibble()
+ist_info[["ist_summary_cell_types_count"]] <- ist_summary_cell_types_count
+
+# Create a table with the cell count and percentage divided by patient
+ist_summary_cell_types_count_per_patient <- breast_cancer_patients_analyze@meta.data %>%
+  count(!!sym(col_ist_ann), Patient.ID) %>%
+  group_by(Patient.ID) %>%
+  mutate(percentage = round(n / sum(n) * 100, 4)) %>%
+  arrange(Patient.ID, !!sym(col_ist_ann)) %>%
+  dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
+  as_tibble()
+ist_info[["ist_summary_cell_types_count_per_patient"]] <- ist_summary_cell_types_count_per_patient
+
+# CELL GROUPS
+# Create a tibble with cell count and percentage of every group
+ist_summary_cell_groups_count <- breast_cancer_patients_analyze@meta.data %>%
+  count(.data[[col_cell_group]], name = "cell_count") %>%
+  mutate(percentage = round((cell_count / sum(cell_count)) * 100, 3)) %>%
+  dplyr::rename(cell_group = .data[[col_cell_group]]) %>%
+  as_tibble()
+ist_info[["ist_summary_cell_groups_count"]] <- ist_summary_cell_groups_count
+
+# Create a table with the cell count and percentage divided by patient
+ist_summary_cell_groups_count_per_patient <- breast_cancer_patients_analyze@meta.data %>%
+  count(!!sym(col_cell_group), Patient.ID) %>%
+  group_by(Patient.ID) %>%
+  mutate(percentage = round(n / sum(n) * 100, 4)) %>%
+  arrange(Patient.ID, !!sym(col_cell_group)) %>%
+  dplyr::rename(cell_group = !!sym(col_cell_group)) %>%
+  as_tibble()
+ist_info[["ist_summary_cell_groups_count_per_patient"]] <- ist_summary_cell_groups_count_per_patient
+
+for (table in ist_info) {
+  print(datatable(table))
+}
+```
+
+```{r}
+#| echo: false
+
+# Save the Insitutype plots
+save_data(ist_info, dir_ist_plots)
 ```
 
 ### SCTransform
