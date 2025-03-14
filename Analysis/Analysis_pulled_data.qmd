@@ -589,7 +589,7 @@ if (mt_gene_count > 0) {
 }
 ```
 
-## Insitutype Clustering
+## Cell typing
 
 The clustering performed by Insitutype  uses the raw counts, therefore it is useless to use the integrated data because Seurat does not provide an adjusted count matrix.
 
@@ -605,7 +605,7 @@ col_ist_ann <- "patients_ist_semisup_clusters_ann"
 dir_ist_plots <- file.path(gl_img_dir, "Insitutype")
 ```
 
-### Compute
+### Insitutype Clustering
 
 ```{r}
 #| label: insitutype-read-from-drive
@@ -794,7 +794,7 @@ for (table in ist_info) {
 save_data(ist_info, dir_ist_plots)
 ```
 
-### Cell groups
+### Add cell groups
 
 ```{r}
 #| label: cell-groups-metadata-columns
