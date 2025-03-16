@@ -3136,7 +3136,7 @@ for (stamp in names(core_stamp_distance_matrix)) {
 }
 ```
 
-### Infer cell-cell communication
+### Cell-cell communication
 
 ```{r}
 #| label: load-cellchat
