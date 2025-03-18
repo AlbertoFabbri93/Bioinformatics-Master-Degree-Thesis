@@ -3373,6 +3373,8 @@ saveRDS(cellchat, file.path(gl_obj_dir, glue("cellchat_{cellchat_datatype}_{Cell
 
 # Create a palette with only the idents used by cellchat otherwise it throws an error
 palette_cellchat <- palette_all_cells_types[levels(cellchat@idents)]
+# Interactions used
+cellchat_interactions <- gsub("_", " ", CellChatDB_suffix)
 ```
 
 ```{r}
@@ -3391,7 +3393,7 @@ netVisual_circle(
   vertex.weight = rowSums(cellchat@net$count),
   weight.scale = TRUE,
   label.edge= FALSE,
-  title.name = "Number of interactions",
+  title.name = glue("Number of interactions\n{cellchat_interactions}"),
   margin = 0.2,
   vertex.label.cex = 0.8,
   color.use = palette_cellchat)
@@ -3402,6 +3404,7 @@ netVisual_heatmap(
   measure = "count",
   # Darker color for interactions close to 0
   color.heatmap = c("#f0f8ff", "#2166ac"),
+  title.name = glue("Number of interactions\n{cellchat_interactions}"),
   font.size = 7,
   color.use = palette_cellchat)
 plot_list_cellchat[["cellchat_heatmap_count"]] <- recordPlot()
@@ -3414,13 +3417,14 @@ netVisual_circle(
   vertex.weight = rowSums(cellchat@net$weight),
   weight.scale = TRUE,
   label.edge= FALSE,
-  title.name = "Interaction weights/strength",
+  title.name = glue("Interaction strength\n{cellchat_interactions}"),
   color.use = palette_cellchat)
 plot_list_cellchat[["cellchat_circleplot_weight"]] <- recordPlot()
 # Heatmap
 netVisual_heatmap(
   object = cellchat,
   measure = "weight",
+  title.name = glue("Interaction strength\n{cellchat_interactions}"),
   font.size = 7,
   color.use = palette_cellchat)
 plot_list_cellchat[["cellchat_heatmap_weight"]] <- recordPlot()
@@ -3429,13 +3433,16 @@ plot_list_cellchat[["cellchat_heatmap_weight"]] <- recordPlot()
 pathways_with_significant_signaling <- cellchat@netP$pathways
 print(pathways_with_significant_signaling)
 
+# List to save pathways plots
+plot_list_cellchat_pathways <- list()
 # Visualize the computed centrality scores using heatmap, allowing ready identification of major signaling roles of cell groups
 for (pathway in pathways_with_significant_signaling) {
   par(mfrow = c(1, 1), xpd = TRUE)
   image <- netAnalysis_signalingRole_network(cellchat, signaling = pathway, width = 12, height = 2.5, font.size = 7)
   print(image)
-  plot_list_cellchat[[glue("Signaling_pathway_network_{pathway}")]] <- recordPlot()
+  plot_list_cellchat_pathways[[glue("Signaling_pathway_network_{pathway}")]] <- recordPlot()
 }
+plot_list_cellchat <- c(plot_list_cellchat, plot_list_cellchat_pathways)
 
 # Show all the significant interactions (L-R pairs) from some cell groups to other cell groups
 netVisual_bubble(
@@ -3451,13 +3458,15 @@ plot_list_cellchat[["cellchat_bubbleplot_interactions"]] <- recordPlot()
 #| label: cellchat-plots-cell-groups
 
 # Examine the signaling sent from each cell group
-# Set the parameter edge.weight.max so that edge weights are comparable between differet networks
+# Set the parameter edge.weight.max so that edge weights are comparable between different networks
 group_size <- as.numeric(table(cellchat@idents))
 cellchat_weight_mat <- cellchat@net$weight
 # Create a list to store plots
 plot_list_cellchat_cell_types <- list()
 
 for (i in 1:nrow(cellchat_weight_mat)) {
+  # Cell type being analyzed
+  cellchat_cell_group <- rownames(cellchat_weight_mat)[i]
   # Create new matrix with the same dimensions and names as the original, but all elements are initialized to 0
   cellchat_type_weight_mat <- matrix(
     0,
@@ -3476,7 +3485,7 @@ for (i in 1:nrow(cellchat_weight_mat)) {
     # Set the maximum edge weight (thickness) to the largest value in the original matrix
     edge.weight.max = max(cellchat_weight_mat),
     # Add a title to the plot using the name of the i-th row of matrix
-    title.name = "Interaction weights/strength",
+    title.name = glue("Interaction strength\n{cellchat_interactions}\n{cellchat_cell_group}"),
     color.use = palette_cellchat)
   print(cellchat_cell_type_circleplot)
   plot_list_cellchat_cell_types[[glue("Cellchat_circleplot_{gsub(' ', '_', rownames(cellchat_weight_mat)[i])}")]] <- recordPlot()
