@@ -110,6 +110,32 @@ flatten_list <- function(obj_list) {
   return(flat_list)
 }
 
+####### SET PLOT ATTRIBUTES #######
+
+# Function to set attributes of a list of plots
+# This function works in conjuction with save_data to save plots with custom dimensions defined in their attibutes
+set_plot_attributes <- function(list_name, attr_list, plot_names = names(list_name)) {
+  
+  # Check if all plot names are valid
+  invalid_plots <- dplyr::setdiff(plot_names, names(list_name))
+  if (length(invalid_plots) > 0) {
+    stop("Invalid plot name(s): ", paste(invalid_plots, collapse = ", "))
+  }
+  
+  # Loop over every plot defined in plot_names
+  # If plot_names is not defined, apply the attributes to all plots in the list
+  for (plot_name in plot_names) {
+    # Apply all the defined attributes
+    for (attr_name in names(attr_list)) {
+      attr(list_name[[plot_name]], attr_name) <- attr_list[[attr_name]]
+    }
+  }
+  
+  # Return the update list of plots
+  # The original list should be overwritten with the updated one
+  return(list_name)
+}
+
 ####### PRINT A VECTOR COLOR PALETTE #######
 
 print_palette <- function(colors, height = 3, width = 0.5) {
