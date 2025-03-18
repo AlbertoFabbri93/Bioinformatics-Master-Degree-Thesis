@@ -3146,7 +3146,8 @@ for (stamp in names(core_stamp_distance_matrix)) {
 #| label: load-cellchat
 
 # Set if using only the RNA data or the spatial data as well
-cellchat_datatype = "RNA"
+cellchat_datatypes = c("RNA", "spatial")
+cellchat_datatype = cellchat_datatypes[2]
 
 # SET THE DATABASE TO BE USED
 
