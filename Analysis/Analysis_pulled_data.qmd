@@ -2156,6 +2156,9 @@ print(other_cells_markers_to_print)
 ```{r}
 #| label: other-cells-markers-complex-heatmap
 
+# Info to save
+other_cells_complex_heatmap_list <- list()
+
 # Unique is used to eliminate duplicated genes, this is done automatically by Seurat DoHeatmap
 features <- unique(most_significant_other_cells_markers$gene)
 
@@ -2230,6 +2233,8 @@ other_cells_clust_diff_expr_genes_complex_heatmap <- Heatmap(
 )
 # Put the legends on the right in a single column
 draw(other_cells_clust_diff_expr_genes_complex_heatmap, merge_legend = TRUE)
+
+other_cells_complex_heatmap_list[["other_cells_clust_diff_expr_genes_complex_heatmap"]] <- recordPlot()
 ```
 
 ```{r}
@@ -2271,17 +2276,16 @@ print(main_markers_list)
 
 # Other cells markers folder
 other_cells_markers_dir <- file.path(gl_img_dir, "Other cells markers")
-# Save the data
+# Save the markers
 save_data(other_cells_markers_to_print, other_cells_markers_dir)
+
+# Define and set complex heatmap attributes
+complex_heatmap_attrs <- list(width = 15, height = 20, units = "cm", dpi = 1000)
+other_cells_complex_heatmap_list <- set_plot_attributes(other_cells_complex_heatmap_list, complex_heatmap_attrs)
 # Save ComplexHeatmap
-png(paste(other_cells_markers_dir, "other_cells_complex_heatmap.png", sep="/"),
-    width = 15,
-    height = 20,
-    units = "cm",
-    res = 1000)
-draw(other_cells_clust_diff_expr_genes_complex_heatmap, merge_legend = TRUE)
-dev.off()
-# Save image
+save_data(other_cells_complex_heatmap_list, other_cells_markers_dir)
+
+# Save markers
 save_data(main_markers_list, other_cells_markers_dir)
 ```
 
