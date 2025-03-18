@@ -3510,12 +3510,66 @@ print(cellchat_dfs)
 #| label: save-cellchat-nets-dataframe
 #| eval: false
 
-# Save cellchat plots
+# Define the saving attributes for the various cellchat plots
+cellchat_heatmap_attrs <- list(
+  width = 15,
+  height = 14,
+  units = "cm",
+  dpi = 1000
+)
+cellchat_circleplot_attrs <- list(
+  width = 15,
+  height = 19,
+  units = "cm",
+  dpi = 1000
+)
+cellchat_pathway_network_attrs <- list(
+  width = 15,
+  height = 8,
+  units = "cm",
+  dpi = 1000
+)
+cellchat_bubbleplot_attrs <- list(
+  width = 28,
+  height = 15,
+  units = "cm",
+  dpi = 1000
+)
+
+# Set the attributes for the main cellchat list
 cellchat_images <- file.path(gl_img_dir, "CellChat", cellchat_datatype, CellChatDB_suffix)
+plot_list_cellchat <- set_plot_attributes(
+  plot_list_cellchat,
+  cellchat_heatmap_attrs,
+  c("cellchat_heatmap_count", "cellchat_heatmap_weight")
+)
+plot_list_cellchat <- set_plot_attributes(
+  plot_list_cellchat,
+  cellchat_circleplot_attrs,
+  c("cellchat_circleplot_count", "cellchat_circleplot_weight")
+)
+plot_list_cellchat <- set_plot_attributes(
+  plot_list_cellchat,
+  cellchat_pathway_network_attrs,
+  names(plot_list_cellchat_pathways)
+)
+plot_list_cellchat <- set_plot_attributes(
+  plot_list_cellchat,
+  cellchat_bubbleplot_attrs,
+  "cellchat_bubbleplot_interactions"
+)
+# Save the plots in the main cellchat list
 save_data(plot_list_cellchat, cellchat_images)
-# Save cell types circleplots
+
+# Set attributes for the cell types circleplots
 cellchat_cell_types_output_dir <- file.path(cellchat_images, "Cell_types")
+plot_list_cellchat_cell_types <- set_plot_attributes(
+  plot_list_cellchat_cell_types,
+  cellchat_circleplot_attrs
+)
+# Save cell types circleplots
 save_data(plot_list_cellchat_cell_types, cellchat_cell_types_output_dir)
+
 # Save dataframes
 save_data(cellchat_dfs, cellchat_images)
 ```
