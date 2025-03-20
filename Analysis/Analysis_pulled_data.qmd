@@ -1744,7 +1744,9 @@ saveRDS(macrophage_cells_markers_list, file.path(gl_obj_dir, "macrophage_cells_m
 #| label: macrophage-cells-markers-plots
 
 # List with data to save
-macrophage_cells_markers_to_print <- list()
+macrophage_cells_markers_to_save <- list()
+# List with complex heatmaps
+macrophage_cells_complex_heatmaps <- list()
 
 # Loop over each resolution in the list of marker results
 for (res in names(macrophage_cells_markers_list)) {
@@ -1752,24 +1754,29 @@ for (res in names(macrophage_cells_markers_list)) {
   # Print the current resolution being analyzed
   print(paste("Processing resolution:", res))
   
+  # Heatmaps title
+  macrophage_cells_heatmap_title = paste("Macrophage cells clusters - Resolution:", res)
+  
   # Get marker data for the current resolution
-  markers_df <- macrophage_cells_markers_list[[res]]
+  macrophage_cells_markers_df <- macrophage_cells_markers_list[[res]]
   
   # Filter markers to get the most significant up-regulated ones per cluster
-  most_significant_markers <- markers_df %>%
+  most_significant_macrophage_cells_markers <- macrophage_cells_markers_df %>%
     group_by(cluster) %>%
     dplyr::filter(avg_log2FC > 1 & p_val_adj < 0.05) %>%
     slice_head(n = 10) %>%
     ungroup()
+  print(most_significant_macrophage_cells_markers)
   
   # Save the filtered markers for this resolution in the output list
   key_markers <- paste0(res, "_most_significant_markers")
-  macrophage_cells_markers_to_print[[key_markers]] <- most_significant_markers
+  macrophage_cells_markers_to_save[[key_markers]] <- most_significant_macrophage_cells_markers
   
+  ### SEURAT HEATMAP
   # Create a heatmap using the genes from the filtered markers
-  heatmap_plot <- DoHeatmap(
+  macrophage_heatmap_plot <- DoHeatmap(
     breast_cancer_patients_macrophage_cells,
-    features = most_significant_markers$gene,
+    features = most_significant_macrophage_cells_markers$gene,
     group.by = res,
     assay = "SCT",
     label = TRUE,
@@ -1777,16 +1784,109 @@ for (res in names(macrophage_cells_markers_list)) {
   ) + theme(
     axis.text.y = element_text(size = 5)
   ) + labs(
-    title = paste("Macrophage cells clusters - Resolution:", res),
+    title = macrophage_cells_heatmap_title,
     subtitle = "Top 10 Differentially Expressed Genes per Cluster"
   )
+  print(macrophage_heatmap_plot)
   
   # Save the heatmap for this resolution in the output list
-  key_heatmap <- paste0(res, "_heatmap")
-  macrophage_cells_markers_to_print[[key_heatmap]] <- heatmap_plot
-}
+  macrophage_key_heatmap <- paste0(res, "_heatmap")
+  macrophage_cells_markers_to_save[[macrophage_key_heatmap]] <- macrophage_heatmap_plot
+  
+  ### COMPLEX HEATMAP
+  # Unique is used to eliminate duplicated genes, this is done automatically by Seurat DoHeatmap
+  unique_macrophage_cells_markers <- unique(most_significant_macrophage_cells_markers$gene)
 
-print(macrophage_cells_markers_to_print)
+  # Extract the expression data for the selected genes from the scaled layer
+  macrophage_cells_expr_matrix <- as.matrix(
+    GetAssayData(
+      breast_cancer_patients_macrophage_cells, 
+      layer = "scale.data", 
+      assay = "SCT"
+    )[
+      unique_macrophage_cells_markers,
+    ]
+  )
+
+  # Prepare cell type annotations
+  macrophage_cells_clusters <-
+    setNames(
+      factor(
+        as.vector(
+          breast_cancer_patients_macrophage_cells@meta.data[[res]]
+        )
+      ),
+      rownames(breast_cancer_patients_macrophage_cells@meta.data))
+
+  # Create vector with unique and sorted cell types
+  unique_macrophage_cell_types <- sort(unique(macrophage_cells_clusters))
+  
+  # Create color palette for cell types
+  macrophage_cell_type_colors <- setNames(
+    gg_color_hue(length(unique_macrophage_cell_types)),
+    unique_macrophage_cell_types
+  )
+
+  # Recreate the Seurat expression scale
+  palette_macrophage_expression_level = circlize::colorRamp2(c(
+    min(macrophage_cells_expr_matrix),
+    median(macrophage_cells_expr_matrix),
+    min(2.5, max(macrophage_cells_expr_matrix))),
+    c("#FF00FF", "#000000", "#FFFF00"))
+
+  # Create the heatmap with ComplexHeatmap
+  macrophage_cells_clust_diff_expr_genes_complex_heatmap <- Heatmap(
+    matrix = macrophage_cells_expr_matrix,
+    row_order = unique_macrophage_cells_markers,
+    name = "expression",
+    column_split = factor(macrophage_cells_clusters, levels = unique_macrophage_cell_types),
+    # Do not cluster rows or columns otherwise row_order/column_order are ignored
+    cluster_rows = FALSE,
+    cluster_columns = FALSE,
+    column_title_rot = 0,
+    show_column_names = FALSE,
+    show_column_dend = FALSE,
+    show_row_names = TRUE,
+    show_row_dend = FALSE,
+    cluster_column_slices = TRUE,
+    column_gap = unit(0.5, "mm"),
+    row_names_gp = gpar(fontsize = 5),
+    # The column title can be either a title for all the columns or a vector with a name for every column
+    column_title = unique_macrophage_cell_types,
+    column_title_gp = gpar(fontsize = 7),
+    # Add the annotation bars on top
+    top_annotation = HeatmapAnnotation(
+      # Give a name to the annotation, not used on the actual plot
+      name = "Clusters",
+      # Annotate the columns
+      which = "column",
+      # First annotation - clusters
+      cluster = macrophage_cells_clusters,
+      # Second annotation - patients
+      patient = breast_cancer_patients_macrophage_cells@meta.data$Patient.ID,
+      # Color palettes
+      col = list(cluster = cell_type_colors, patient = palette_patients),
+      show_legend = c(FALSE, TRUE),
+      gap = unit(1, "mm"),
+      simple_anno_size = unit(2, "mm"),
+      annotation_name_gp = gpar(fontsize = 6)
+    ),
+    # Color scale for expression
+    col = palette_macrophage_expression_level,
+    # Otherwise you get random vertical white lines where there should not be any
+    use_raster = FALSE
+  )
+  # Put the legends on the right in a single column
+  draw(
+    object = macrophage_cells_clust_diff_expr_genes_complex_heatmap,
+    merge_legend = TRUE,
+    column_title = macrophage_cells_heatmap_title)
+  
+  # Save the heatmap for this resolution in the output list
+  macrophage_key_complex_heatmap <- paste0(res, "_complex_heatmap")
+  macrophage_cells_complex_heatmaps[[macrophage_key_complex_heatmap]] <- recordPlot()
+  macrophage_cells_markers_to_save <- c(macrophage_cells_markers_to_save, macrophage_cells_complex_heatmaps)
+}
 ```
 
 ```{r}
@@ -1795,8 +1895,14 @@ print(macrophage_cells_markers_to_print)
 
 # Other cells markers folder
 macrophage_cells_markers_dir <- file.path(gl_img_dir, "Macrophages markers")
+# Define and set complex heatmap attributes
+macrophage_cells_complex_heatmap_attrs <- list(width = 18, height = 13, units = "cm", dpi = 600)
+macrophage_cells_markers_to_save <- set_plot_attributes(
+  list_name = macrophage_cells_markers_to_save,
+  attr_list = macrophage_cells_complex_heatmap_attrs,
+  plot_names = names(macrophage_cells_complex_heatmaps))
 # Save the data
-save_data(macrophage_cells_markers_to_print, macrophage_cells_markers_dir)
+save_data(macrophage_cells_markers_to_save, macrophage_cells_markers_dir)
 ```
 
 ## Other cells
