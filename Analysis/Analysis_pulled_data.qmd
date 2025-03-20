@@ -2238,33 +2238,64 @@ other_cells_complex_heatmap_list[["other_cells_clust_diff_expr_genes_complex_hea
 ```
 
 ```{r}
-#| label: other-cells-main-markers
+#| label: other-cells-featureplot-markers
 
 # Info to print
 main_markers_list <- list()
 
 # Create vector with the main marker from every cluster
-main_markers_vector <- most_significant_other_cells_markers %>%
+other_cells_clusters_main_markers <- most_significant_other_cells_markers %>%
   group_by(cluster) %>%
   dplyr::slice(1) %>%
   ungroup() %>%
   pull(gene)
 
 # Create a feature plot for each marker
-main_markers_feature_plot <- FeaturePlot(
+other_cells_main_markers_feature_plot <- FeaturePlot(
   object = breast_cancer_patients_other_cells,
-  features = main_markers_vector,
+  features = other_cells_clusters_main_markers,
   reduction = "umap"
   ) & 
   NoLegend() &
   NoAxes()
 
 # Create a subtitle for every plot in the patchwork with the number of the cluster
-for (i in 1:length(main_markers_vector)) {
-  main_markers_feature_plot[[i]] <- main_markers_feature_plot[[i]] + labs(subtitle = glue("cluster {i-1}"))
+for (i in 1:length(other_cells_clusters_main_markers)) {
+  other_cells_main_markers_feature_plot[[i]] <- 
+    other_cells_main_markers_feature_plot[[i]] + labs(subtitle = glue("cluster {i-1}"))
 }
 
-main_markers_list[["main_markers_feature_plot"]] <- main_markers_feature_plot
+main_markers_list[["other_cells_main_markers_feature_plot"]] <- other_cells_main_markers_feature_plot
+
+# Select custom markers
+other_cells_clusters_custom_markers <- c(
+  "MMP7",
+  "LYZ",
+  "APOD",
+  "AGR2",
+  "IFI6",
+  "ERBB2",
+  "LTF",
+  "APOE",
+  "EGFR",
+  "IGFBP7")
+
+# Create a feature plot for each marker
+other_cells_custom_markers_feature_plot <- FeaturePlot(
+  object = breast_cancer_patients_other_cells,
+  features = other_cells_clusters_custom_markers,
+  reduction = "umap"
+  ) & 
+  NoLegend() &
+  NoAxes()
+
+# Create a subtitle for every plot in the patchwork with the number of the cluster
+for (i in 1:length(other_cells_clusters_custom_markers)) {
+  other_cells_custom_markers_feature_plot[[i]] <-
+    other_cells_custom_markers_feature_plot[[i]] + labs(subtitle = glue("cluster {i-1}"))
+}
+
+main_markers_list[["other_cells_custom_markers_feature_plot"]] <- other_cells_custom_markers_feature_plot
 
 # Print the info
 print(main_markers_list)
