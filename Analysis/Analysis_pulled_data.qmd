@@ -2163,7 +2163,7 @@ other_cells_complex_heatmap_list <- list()
 features <- unique(most_significant_other_cells_markers$gene)
 
 # Extract the expression data for the selected genes from the scaled layer
-expr_matrix <- as.matrix(
+other_cells_expr_matrix <- as.matrix(
   GetAssayData(
     breast_cancer_patients_other_cells, 
     layer = "scale.data", 
@@ -2174,9 +2174,9 @@ expr_matrix <- as.matrix(
 )
 
 # Prepare cell type annotations
-cell_types <- Idents(breast_cancer_patients_other_cells)
+other_cells_clusters <- Idents(breast_cancer_patients_other_cells)
 # Create vector with unique and sorted cell types
-unique_cell_types <- sort(unique(cell_types))
+unique_cell_types <- sort(unique(other_cells_clusters))
 
 # Create color palette for cell types
 cell_type_colors <- setNames(
@@ -2186,15 +2186,15 @@ cell_type_colors <- setNames(
 
 # Recreate the Seurat expression scale
 palette_expression_level = circlize::colorRamp2(
-  c(min(expr_matrix), median(expr_matrix), min(2.5, max(expr_matrix))),
+  c(min(other_cells_expr_matrix), median(other_cells_expr_matrix), min(2.5, max(other_cells_expr_matrix))),
   c("#FF00FF", "#000000", "#FFFF00"))
 
 # Create the heatmap with ComplexHeatmap
 other_cells_clust_diff_expr_genes_complex_heatmap <- Heatmap(
-  matrix = expr_matrix,
+  matrix = other_cells_expr_matrix,
   row_order = features,
   name = "expression",
-  column_split = factor(cell_types, levels = unique_cell_types),
+  column_split = factor(other_cells_clusters, levels = unique_cell_types),
   # Do not cluster rows or columns otherwise row_order/column_order are ignored
   cluster_rows = FALSE,
   cluster_columns = FALSE,
@@ -2216,7 +2216,7 @@ other_cells_clust_diff_expr_genes_complex_heatmap <- Heatmap(
     # Annotate the columns
     which = "column",
     # First annotation - clusters
-    cluster = cell_types,
+    cluster = other_cells_clusters,
     # Second annotation - patients
     patient = breast_cancer_patients_other_cells@meta.data$Patient.ID,
     # Color palettes
