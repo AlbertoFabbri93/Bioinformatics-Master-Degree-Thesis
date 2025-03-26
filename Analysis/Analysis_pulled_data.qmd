@@ -1602,7 +1602,7 @@ macrophage_cells_patient_id_plot <- DimPlot(
 macrophage_cells_plots_to_save[["macrophage_cells_patient_id_plot"]] <- macrophage_cells_patient_id_plot
 
 # Chosen resolution
-chosen_macrophage_cells_cluster_resolution <- 0.8
+chosen_macrophage_cells_cluster_resolution <- 1
 # Chosen cluster
 col_macrophage_cells_chosen_cluster <- glue::glue("{col_macrophage_cells_clust_res_prefix}{chosen_macrophage_cells_cluster_resolution}")
 # Set identity to other clusters
