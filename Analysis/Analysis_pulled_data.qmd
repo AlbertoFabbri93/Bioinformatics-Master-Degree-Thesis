@@ -1617,6 +1617,8 @@ macrophage_cells_chosen_resolution_plot <- DimPlot(
   labs(title = "Macrophage Clusters") &
   NoLegend() &
   NoAxes()
+# Print DimPlot chosen resolution
+macrophage_cells_plots_to_save[["macrophage_cells_chosen_resolution_plot"]] <- macrophage_cells_chosen_resolution_plot
 # Print DimPlots side by side
 macrophage_cells_clusters_plus_patient_clusters <-
   macrophage_cells_patient_id_plot + macrophage_cells_chosen_resolution_plot
