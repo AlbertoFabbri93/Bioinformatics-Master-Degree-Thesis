@@ -1693,14 +1693,6 @@ print(macrophage_cells_plots_to_save)
 save_data(macrophage_cells_plots_to_save, file.path(gl_img_dir, "Macrophages clusters"))
 ```
 
-```{r}
-#| label: macrophage-cells-save-rds
-#| eval: false
-
-# Save the Seurat object
-saveRDS(breast_cancer_patients_macrophage_cells, file.path(gl_obj_dir, "breast_cancer_patients_macrophage_cells.rds"))
-```
-
 ### Markers
 
 ```{r}
@@ -1905,6 +1897,126 @@ macrophage_cells_markers_to_save <- set_plot_attributes(
   plot_names = names(macrophage_cells_complex_heatmaps))
 # Save the data
 save_data(macrophage_cells_markers_to_save, macrophage_cells_markers_dir)
+```
+
+### Pseudotime
+
+```{r}
+#| label: macrophage-cells-markers-load
+
+# Load other cells object from memory
+macrophage_cds <- readRDS(file.path(gl_obj_dir, "macrophage_cds.rds"))
+```
+
+```{r}
+#| label: macrophage-cells-pseudotime
+#| eval: false
+
+# Create a monocle3 object from Seurat
+macrophage_cds <- as.cell_data_set(breast_cancer_patients_macrophage_cells)
+
+### MANUALLY ASSIGN MONOCLE3 OBJECT METADATA FROM SEURAT OBJECT
+# Assign partitions manually, all the clusters should be part of the same partition
+# Create a vector with the same length as the number of cells and value 1 as the partition number
+macrophage_partition <- c(rep(1,length(macrophage_cds@colData@rownames)))
+# Assign cell names to the partition vector
+names(macrophage_partition) <- macrophage_cds@colData@rownames
+# Convert the partition vector to a factor
+macrophage_partition <- as.factor(macrophage_partition)
+# Assign the partition to the Monocle3 object
+macrophage_cds@clusters$UMAP$partitions <- macrophage_partition
+
+# Assign the cluster info from Seurat
+macrophage_cds@clusters$UMAP$clusters <- breast_cancer_patients_macrophage_cells@active.ident
+
+# Assign UMAP coordinate - cell embeddings from Seurat
+macrophage_cds@int_colData@listData$reducedDims$UMAP <- breast_cancer_patients_macrophage_cells@reductions$umap@cell.embeddings
+
+### RUN MONOCLE3 ANALYSIS
+# Learn trajectory graph
+macrophage_cds <- learn_graph(
+  cds = macrophage_cds,
+  use_partition = TRUE,
+  verbose = TRUE)
+# Order cells according to pseudotime
+macrophage_pseudotime_start_cluster <- 3
+macrophage_cds <- order_cells(
+  cds = macrophage_cds,
+  reduction_method = 'UMAP',
+  root_cells = colnames(macrophage_cds[,monocle3::clusters(macrophage_cds) == macrophage_pseudotime_start_cluster]))
+
+# Save pseudotime back to Seurat object
+breast_cancer_patients_macrophage_cells$pseudotime <- pseudotime(macrophage_cds)
+```
+
+```{r}
+#| label: macrophage-cells-pseudotime-save
+#| eval: false
+
+# Save the data
+saveRDS(macrophage_cds, file.path(gl_obj_dir, "macrophage_cds.rds"))
+```
+
+```{r}
+#| label: macrophage-cells-save-rds
+#| eval: false
+
+# Save the Seurat object
+saveRDS(breast_cancer_patients_macrophage_cells, file.path(gl_obj_dir, "breast_cancer_patients_macrophage_cells.rds"))
+```
+
+```{r}
+#| label: macrophage-cells-pseudotime-plot
+
+# List of images
+macrophage_cells_pseudotime_images <- list()
+
+# Same color palette as Seurat
+library(scales)
+palette_macrophage_cells <- hue_pal()(length(unique(colData(macrophage_cds)$ident)))
+# Plot the cell trajectory
+macrophages_cell_trajectory <- 
+  plot_cells(
+    cds = macrophage_cds,
+    color_cells_by = 'cluster',
+    cell_size = 1.5,
+    label_groups_by_cluster = FALSE,
+    label_branch_points = FALSE,
+    label_roots = FALSE,
+    label_leaves = FALSE,
+    group_label_size = 6,
+    cell_stroke = 0
+  ) +
+  scale_color_manual(
+    values = palette_macrophage_cells
+  ) +
+  theme_void() +
+  theme(legend.position = "none") +
+  labs(title = "Macrophages Trajectory Plot")
+macrophage_cells_pseudotime_images[["macrophages_cell_trajectory"]] <- macrophages_cell_trajectory
+# Plot pseudotime
+macrophages_pseudotime <- plot_cells(
+  cds = macrophage_cds,
+  color_cells_by = "pseudotime",
+  show_trajectory_graph = TRUE,
+  cell_size = 1,
+  cell_stroke = 0
+) +
+  theme_void() +
+  theme(legend.position = "none") +
+  labs(title = "Macrophages Pseudotime")
+macrophage_cells_pseudotime_images[["macrophages_pseudotime"]] <- macrophages_pseudotime
+
+# Print images
+print(macrophage_cells_pseudotime_images)
+```
+
+```{r}
+#| label: macrophage-cells-pseudotime-save-plots
+#| eval: false
+
+# Save the macrophage cells plots
+save_data(macrophage_cells_pseudotime_images, file.path(gl_img_dir, "Macrophages clusters"))
 ```
 
 ## Other cells
