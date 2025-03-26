@@ -608,7 +608,7 @@ dir_ist_plots <- file.path(gl_img_dir, "Insitutype")
 ### Insitutype Clustering
 
 ```{r}
-#| label: insitutype-read-from-drive
+#| label: insitutype-load
 
 # Read the Insitutype data from the drive
 breast_cancer_patients_analyze <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_analyze.rds"))
@@ -1280,7 +1280,7 @@ breast_cancer_patients_other_cells <-
 ### Compute
 
 ```{r}
-#| label: normal-cells-read-from-drive
+#| label: normal-cells-load
 
 # Load normal cells object from memory
 breast_cancer_patients_normal_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_normal_cells.rds"))
@@ -1467,7 +1467,7 @@ saveRDS(breast_cancer_patients_normal_cells, file.path(gl_obj_dir, "breast_cance
 ## Macrophages
 
 ```{r}
-#| label: macrophage-cells-read-from-drive
+#| label: macrophage-cells-load
 
 # Load macrophage cells object from memory
 breast_cancer_patients_macrophage_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_macrophage_cells.rds"))
@@ -1702,7 +1702,7 @@ saveRDS(breast_cancer_patients_macrophage_cells, file.path(gl_obj_dir, "breast_c
 ### Markers
 
 ```{r}
-#| label: macrophage-cells-markers-read-from-drive
+#| label: macrophage-cells-markers-load
 
 # Load other cells object from memory
 macrophage_cells_markers_list <- readRDS(file.path(gl_obj_dir, "macrophage_cells_markers_list.rds"))
@@ -1910,7 +1910,7 @@ save_data(macrophage_cells_markers_to_save, macrophage_cells_markers_dir)
 ### Cluster
 
 ```{r}
-#| label: other-cells-read-from-drive
+#| label: other-cells-load
 
 # Load other cells object from memory
 breast_cancer_patients_other_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_other_cells.rds"))
@@ -2197,7 +2197,7 @@ saveRDS(breast_cancer_patients_other_cells, file.path(gl_obj_dir, "breast_cancer
 ### Markers
 
 ```{r}
-#| label: other-cells-markers-read-from-drive
+#| label: other-cells-markers-load
 
 # Load other cells object from memory
 other_cells_markers_data <- readRDS(file.path(gl_obj_dir, "other_cells_markers_data.rds"))
