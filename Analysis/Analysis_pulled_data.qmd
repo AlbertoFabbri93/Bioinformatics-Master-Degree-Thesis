@@ -938,7 +938,7 @@ patients_ist_type_sct_plot <- DimPlot(
   group.by = col_ist_ann,
   reduction = "sct_umap_patients",
   cols = palette_cell_types) +
-  labs(title = "Insitutype clusters") +
+  labs(title = "All cell types") +
   guides(
     color = guide_legend(
       override.aes = list(size=2),
@@ -946,8 +946,10 @@ patients_ist_type_sct_plot <- DimPlot(
       keywidth = unit(0.5, "lines"),
       keyheight = unit(0.8, "lines"),
       spacing = unit(0.2, "lines"))
-  ) +
-  theme_classic(base_size = 9) &
+  )  +
+  theme(
+    legend.text = element_text(size = 8),
+  ) &
   NoAxes()
 patients_ist_sct[["patients_ist_type_sct_plot"]] <- patients_ist_type_sct_plot
 
@@ -957,7 +959,7 @@ patients_ist_group_sct_plot <- DimPlot(
   group.by = col_cell_group,
   reduction = "sct_umap_patients",
   cols = palette_cell_types) +
-  labs(title = "Insitutype cell groups") &
+  labs(title = "All cell groups") &
   NoAxes()
 patients_ist_sct[["patients_ist_group_sct_plot"]] <- patients_ist_group_sct_plot
 
@@ -1404,7 +1406,7 @@ normal_cells_patients_umap_plot <- DimPlot(
   reduction = "sct_umap_normal_cells",
   cols = palette_patients
   )  +
-  labs(title = "Normal cells") +
+  labs(title = "Non-malignant cells") +
   guides(
     color = guide_legend(
       title = "Patient",
@@ -1421,7 +1423,7 @@ normal_cells_type_umap_plot <- DimPlot(
   reduction = "sct_umap_normal_cells",
   cols = palette_cell_types
   )  +
-  labs(title = "Normal cells clusters") +
+  labs(title = "Non-malignant cell types") +
   guides(
     color = guide_legend(
       override.aes = list(size=2),
@@ -1430,7 +1432,9 @@ normal_cells_type_umap_plot <- DimPlot(
       keyheight = unit(0.8, "lines"),
       spacing = unit(0.2, "lines"))
   ) +
-  theme_classic(base_size = 9) &
+  theme(
+    legend.text = element_text(size = 8),
+  ) &
   NoAxes()
 normal_cells_images[["normal_cells_type_umap_plot"]] <- normal_cells_type_umap_plot
 
@@ -1441,7 +1445,7 @@ normal_cells_group_umap_plot <- DimPlot(
   reduction = "sct_umap_normal_cells",
   cols = palette_cell_types
   )  +
-  labs(title = "Normal cells groups") &
+  labs(title = "Non-malignant cell groups") &
   NoAxes()
 normal_cells_images[["normal_cells_group_umap_plot"]] <- normal_cells_group_umap_plot
 
@@ -2157,6 +2161,8 @@ other_cells_chosen_resolution_plot <- DimPlot(
   labs(title = "Other Cell Clusters") &
   NoLegend() &
   NoAxes()
+# Print DimPlot chosen resolution
+other_cells_plots_to_save[["other_cells_chosen_resolution_plot"]] <- other_cells_chosen_resolution_plot
 # Print DimPlots side by side
 other_cells_clusters_plus_patient_clusters <- other_cells_patient_id_plot + other_cells_chosen_resolution_plot
 other_cells_plots_to_save[["other_cells_clusters_plus_patient_clusters"]] <- other_cells_clusters_plus_patient_clusters
