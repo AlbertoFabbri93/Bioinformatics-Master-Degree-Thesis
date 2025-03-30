@@ -1697,6 +1697,47 @@ print(macrophage_cells_plots_to_save)
 save_data(macrophage_cells_plots_to_save, file.path(gl_img_dir, "Macrophages clusters"))
 ```
 
+### Info
+
+```{r}
+#| label: macrophage-cells-info
+
+# Create a list to store the information
+macrophages_info <- list()
+
+# Create a table with the cell count and percentage divided by patient
+macrophage_cells_count_per_patient <- breast_cancer_patients_macrophage_cells@meta.data %>%
+  dplyr::count(!!sym(col_ist_ann), Patient.ID) %>%
+  mutate(total_cells = sum(n)) %>%
+  group_by(Patient.ID) %>%
+  mutate(percentage = round(n / total_cells * 100, 2)) %>%
+  arrange(Patient.ID, !!sym(col_ist_ann)) %>%
+  dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
+  dplyr::select(-total_cells) %>%
+  as_tibble()
+macrophages_info[["macrophage_cells_count_per_patient"]] <- macrophage_cells_count_per_patient
+
+macrophage_cells_count_per_cluster <- breast_cancer_patients_macrophage_cells@meta.data %>%
+  dplyr::count(!!sym(col_ist_ann), !!sym(col_macrophage_cells_chosen_cluster)) %>%
+  mutate(total_cells = sum(n)) %>%
+  group_by(!!sym(col_macrophage_cells_chosen_cluster)) %>%
+  mutate(percentage = round(n / total_cells * 100, 2)) %>%
+  arrange(!!sym(col_macrophage_cells_chosen_cluster), !!sym(col_ist_ann)) %>%
+  dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
+  dplyr::select(-total_cells) %>%
+  as_tibble()
+macrophages_info[["macrophage_cells_count_per_cluster"]] <- macrophage_cells_count_per_cluster
+
+print(macrophages_info)
+```
+
+```{r}
+#| label: macrophage-cells-save-info
+
+# Save the macrophage cells info
+save_data(macrophages_info, file.path(gl_img_dir, "Macrophages clusters"))
+```
+
 ### Markers
 
 ```{r}
