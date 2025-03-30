@@ -309,6 +309,9 @@ generate_spatial_plots <- function(
     color_lookup_table <- generate_colors_lookup_table(patient_data, cluster_var)
   }
   
+  # Ensure cluster_name is a factor and sort its levels alphabetically
+  patient_data@meta.data[[cluster_var]] <- factor(patient_data@meta.data[[cluster_var]])
+  
   # Get a pointer to the spatial representation of the data
   patient_image <- Images(patient_data)[1]
   
