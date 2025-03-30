@@ -1202,6 +1202,22 @@ insitutype_data[["ist_ann_cluster_statistics"]] <- ist_ann_cluster_statistics
 print(insitutype_data)
 ```
 
+### Stamps
+
+```{r}
+#| label: -insistutype-spatial-clusters-plots
+
+# Create the plots with the cell types for every stamp
+ist_cell_types_stamps_plots <- generate_spatial_plots(
+  breast_cancer_patients_analyze,
+  cluster_var = col_ist_ann,
+  cluster_name = NULL,
+  legend_fill = "Cell types",
+  color_lookup_table = palette_cell_types)
+# Display the plots
+print(ist_cell_types_stamps_plots)
+```
+
 ```{r}
 #| label: insitutype-save-data
 #| eval: false
