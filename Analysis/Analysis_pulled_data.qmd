@@ -1921,7 +1921,7 @@ for (res in names(macrophage_cells_markers_list)) {
       # Second annotation - patients
       patient = breast_cancer_patients_macrophage_cells@meta.data$Patient.ID,
       # Color palettes
-      col = list(cluster = cell_type_colors, patient = palette_patients),
+      col = list(cluster = macrophage_cell_type_colors, patient = palette_patients),
       show_legend = c(FALSE, TRUE),
       gap = unit(1, "mm"),
       simple_anno_size = unit(2, "mm"),
