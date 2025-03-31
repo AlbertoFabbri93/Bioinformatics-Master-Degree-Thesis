@@ -1205,7 +1205,7 @@ print(insitutype_data)
 ### Stamps
 
 ```{r}
-#| label: -insistutype-spatial-clusters-plots
+#| label: insistutype-spatial-clusters-plots
 
 # Create the plots with the cell types for every stamp
 ist_cell_types_stamps_plots <- generate_spatial_plots(
@@ -1226,6 +1226,7 @@ print(ist_cell_types_stamps_plots)
 save_data(patients_ist_sct, dir_ist_plots)
 save_data(patients_ist_rna, dir_ist_plots)
 save_data(insitutype_data, dir_ist_plots)
+save_data(ist_cell_types_stamps_plots, file.path(dir_ist_plots, "Stamps"))
 ```
 
 ```{r}
