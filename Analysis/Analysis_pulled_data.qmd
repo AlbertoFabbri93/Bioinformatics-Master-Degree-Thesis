@@ -1492,6 +1492,8 @@ saveRDS(breast_cancer_patients_normal_cells, file.path(gl_obj_dir, "breast_cance
 
 # Load macrophage cells object from memory
 breast_cancer_patients_macrophage_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_macrophage_cells.rds"))
+# Macrophages main folder
+macrophage_dir <- file.path(gl_img_dir, "Macrophages")
 ```
 
 ```{r}
@@ -1706,14 +1708,6 @@ macrophage_cells_plots_to_save[["macrophage_cells_cluster_distribution_plot"]] <
 print(macrophage_cells_plots_to_save)
 ```
 
-```{r}
-#| label: macrophage-cells-save-plots
-#| eval: false
-
-# Save the macrophage cells plots
-save_data(macrophage_cells_plots_to_save, file.path(gl_img_dir, "Macrophages clusters"))
-```
-
 ### Info
 
 ```{r}
@@ -1749,10 +1743,11 @@ print(macrophages_info)
 ```
 
 ```{r}
-#| label: macrophage-cells-save-info
+#| label: macrophage-cells-save-clusters-data
+#| eval: false
 
 # Save the macrophage cells info
-save_data(macrophages_info, file.path(gl_img_dir, "Macrophages clusters"))
+save_data(c(macrophage_cells_plots_to_save, macrophages_info), file.path(macrophage_dir, "Clusters"))
 ```
 
 ### Markers
@@ -1950,7 +1945,7 @@ for (res in names(macrophage_cells_markers_list)) {
 #| eval: false
 
 # Other cells markers folder
-macrophage_cells_markers_dir <- file.path(gl_img_dir, "Macrophages markers")
+macrophage_cells_markers_dir <- file.path(macrophage_dir, "Markers")
 # Define and set complex heatmap attributes
 macrophage_cells_complex_heatmap_attrs <- list(width = 18, height = 13, units = "cm", dpi = 600)
 macrophage_cells_markers_to_save <- set_plot_attributes(
@@ -2078,7 +2073,7 @@ print(macrophage_cells_pseudotime_images)
 #| eval: false
 
 # Save the macrophage cells plots
-save_data(macrophage_cells_pseudotime_images, file.path(gl_img_dir, "Macrophages clusters"))
+save_data(macrophage_cells_pseudotime_images, file.path(macrophage_dir, "Pseudotime"))
 ```
 
 ## Other cells
