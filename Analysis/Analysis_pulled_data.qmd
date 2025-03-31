@@ -3771,6 +3771,7 @@ plot_list_cellchat <- c(plot_list_cellchat, plot_list_cellchat_pathways)
 # Show all the significant interactions (L-R pairs) from some cell groups to other cell groups
 netVisual_bubble(
   object = cellchat,
+  title.name = glue("Interaction strength\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
   sources.use = NULL,
   targets.use = NULL,
   remove.isolate = TRUE,
