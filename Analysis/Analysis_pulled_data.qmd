@@ -3462,7 +3462,10 @@ for (stamp in names(core_stamp_distance_matrix)) {
 
 # Set if using only the RNA data or the spatial data as well
 cellchat_datatypes = c("RNA", "spatial")
-cellchat_datatype = cellchat_datatypes[2]
+cellchat_datatype_subtitle <- c("RNA", "RNA + Spatial")
+# Set the datatype to be used
+cellchat_datatype_index <- 2
+cellchat_datatype = cellchat_datatypes[cellchat_datatype_index]
 
 # SET THE DATABASE TO BE USED
 
@@ -3491,7 +3494,10 @@ CellChatDB_secreted_signaling <- subsetDB(CellChatDB, search = "Secreted Signali
 CellChatDB_ecm_receptor <- subsetDB(CellChatDB, search = "ECM-Receptor")
 # Set the database that should be used
 cellchat_databases <- c("all_protein_signalling", "cell_cell_contact", "secreted_signaling", "ecm_receptor")
-CellChatDB_suffix <- cellchat_databases[1]
+cellchat_DB_subtitle <- c("All signaling", "Cell-cell contact", "Secreted signaling", "ECM receptors")
+# Set the database to be used
+cellchat_DB_index <- 1
+CellChatDB_suffix <- cellchat_databases[cellchat_DB_index]
 CellChatDB_used <- glue("CellChatDB_{CellChatDB_suffix}")
 ```
 
@@ -3690,7 +3696,9 @@ saveRDS(cellchat, file.path(gl_obj_dir, glue("cellchat_{cellchat_datatype}_{Cell
 # Create a palette with only the idents used by cellchat otherwise it throws an error
 palette_cellchat <- palette_all_cells_types[levels(cellchat@idents)]
 # Interactions used
-cellchat_interactions <- gsub("_", " ", CellChatDB_suffix)
+cellchat_interactions_name <- cellchat_DB_subtitle[cellchat_DB_index]
+# Datatype used
+cellchat_datatype_name <- cellchat_datatype_subtitle[cellchat_datatype_index]
 ```
 
 ```{r}
@@ -3709,7 +3717,7 @@ netVisual_circle(
   vertex.weight = rowSums(cellchat@net$count),
   weight.scale = TRUE,
   label.edge= FALSE,
-  title.name = glue("Number of interactions\n{cellchat_interactions}"),
+  title.name = glue("Number of interactions\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
   margin = 0.2,
   vertex.label.cex = 0.8,
   color.use = palette_cellchat)
@@ -3720,7 +3728,7 @@ netVisual_heatmap(
   measure = "count",
   # Darker color for interactions close to 0
   color.heatmap = c("#f0f8ff", "#2166ac"),
-  title.name = glue("Number of interactions\n{cellchat_interactions}"),
+  title.name = glue("Number of interactions\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
   font.size = 7,
   color.use = palette_cellchat)
 plot_list_cellchat[["cellchat_heatmap_count"]] <- recordPlot()
@@ -3733,14 +3741,14 @@ netVisual_circle(
   vertex.weight = rowSums(cellchat@net$weight),
   weight.scale = TRUE,
   label.edge= FALSE,
-  title.name = glue("Interaction strength\n{cellchat_interactions}"),
+  title.name = glue("Interaction strength\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
   color.use = palette_cellchat)
 plot_list_cellchat[["cellchat_circleplot_weight"]] <- recordPlot()
 # Heatmap
 netVisual_heatmap(
   object = cellchat,
   measure = "weight",
-  title.name = glue("Interaction strength\n{cellchat_interactions}"),
+  title.name = glue("Interaction strength\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
   font.size = 7,
   color.use = palette_cellchat)
 plot_list_cellchat[["cellchat_heatmap_weight"]] <- recordPlot()
@@ -3801,7 +3809,7 @@ for (i in 1:nrow(cellchat_weight_mat)) {
     # Set the maximum edge weight (thickness) to the largest value in the original matrix
     edge.weight.max = max(cellchat_weight_mat),
     # Add a title to the plot using the name of the i-th row of matrix
-    title.name = glue("Interaction strength\n{cellchat_interactions}\n{cellchat_cell_group}"),
+    title.name = glue("Interaction strength\n{cellchat_interactions_name}\n{cellchat_cell_group}"),
     color.use = palette_cellchat)
   print(cellchat_cell_type_circleplot)
   plot_list_cellchat_cell_types[[glue("Cellchat_circleplot_{gsub(' ', '_', rownames(cellchat_weight_mat)[i])}")]] <- recordPlot()
