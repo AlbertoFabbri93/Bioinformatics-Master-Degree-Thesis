@@ -3849,25 +3849,25 @@ cellchat_heatmap_attrs <- list(
   width = 15,
   height = 14,
   units = "cm",
-  dpi = 1000
+  dpi = 600
 )
 cellchat_circleplot_attrs <- list(
   width = 15,
   height = 19,
   units = "cm",
-  dpi = 1000
+  dpi = 600
 )
 cellchat_pathway_network_attrs <- list(
   width = 15,
   height = 8,
   units = "cm",
-  dpi = 1000
+  dpi = 600
 )
 cellchat_bubbleplot_attrs <- list(
   width = 28,
   height = 15,
   units = "cm",
-  dpi = 1000
+  dpi = 600
 )
 
 # Set the attributes for the main cellchat list
