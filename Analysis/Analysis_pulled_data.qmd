@@ -1619,7 +1619,12 @@ macrophage_cells_patient_id_plot <- DimPlot(
   label.box = TRUE,
   group.by = "Patient.ID",
   cols = palette_patients) +
-  labs(title = "Patient ID clusters") &
+  labs(
+    title = "Patient ID clusters",
+    subtitle = "Macrophages") +
+  theme(
+    plot.subtitle = element_text(hjust = 0.5)
+  ) &
   NoLegend() &
   NoAxes()
 macrophage_cells_plots_to_save[["macrophage_cells_patient_id_plot"]] <- macrophage_cells_patient_id_plot
@@ -2074,6 +2079,491 @@ print(macrophage_cells_pseudotime_images)
 
 # Save the macrophage cells plots
 save_data(macrophage_cells_pseudotime_images, file.path(macrophage_dir, "Pseudotime"))
+```
+
+## Fibroblast
+
+```{r}
+#| label: fibroblast-cells-load
+
+# Load fibroblast cells object from memory
+breast_cancer_patients_fibroblast_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_fibroblast_cells.rds"))
+# Fibroblast main folder
+fibroblast_dir <- file.path(gl_img_dir, "Fibroblasts")
+```
+
+```{r}
+#| label: fibroblast-cells-compute
+#| eval: false
+
+breast_cancer_patients_fibroblast_cells <- 
+  breast_cancer_patients_filt_cells[, which(x = ist_ann_column == "Fibroblast")]
+```
+
+### Cluster
+
+```{r}
+#| label: fibroblast-cells-metadata-columns
+
+# Name of the metadata column with the other clusters
+col_fibroblast_cells_clust_res_prefix <- "fibroblast_cells_clusters_res_"
+# Find clusters of fibroblast cells
+# The default resolution is 1, increase it to get more clusters or decrease it to get fewer clusters
+# Try a range of resolutions
+fibroblast_cells_seq_res <- seq(0.4, 0.7, by = 0.1)
+# Create custom cluster names based on the actual resolution values
+fibroblast_cells_cluster_seq_res <-
+  glue::glue("{col_fibroblast_cells_clust_res_prefix}{fibroblast_cells_seq_res}")
+```
+
+```{r}
+#| label: fibroblast-cells-compute
+#| eval: false
+
+# After subsetting a Seurat object it is good to normalize it again
+breast_cancer_patients_fibroblast_cells <- SCTransform(
+  breast_cancer_patients_fibroblast_cells,
+  return.only.var.genes = FALSE,
+  assay = "RNA",
+  new.assay.name = "SCT",
+  verbose = TRUE)
+
+# Run PCA
+breast_cancer_patients_fibroblast_cells <- RunPCA(
+  breast_cancer_patients_fibroblast_cells,
+  reduction.key = "PC_",
+  reduction.name = "pca",
+  seed.use = 33,
+  verbose = TRUE)
+# Generate variance elbow plots
+generate_variance_elbow_plots(breast_cancer_patients_fibroblast_cells, "pca", 50)
+# Dimension to use for subsequent analysis, decided lokking at the elbow plot
+fibroblast_cells_dims <- 1:29
+# Find neighbors of other cells
+# Number of PCA dimensions used in Seurat's FindNeighbors function
+#
+# Using MORE dimensions:
+# Captures more subtle biological variation
+# Includes more complex relationships between genes
+# May include more noise/technical artifacts
+# Computationally more intensive
+#
+# Using FEWER dimensions:
+# Focuses on major sources of variation
+# More robust to technical noise
+# May miss subtle biological signals
+# Computationally faster
+breast_cancer_patients_fibroblast_cells <- FindNeighbors(
+  breast_cancer_patients_fibroblast_cells,
+  reduction = "pca",
+  dims = fibroblast_cells_dims,
+  verbose = TRUE)
+
+# Find clusters at different resolutions
+breast_cancer_patients_fibroblast_cells <- FindClusters(
+  breast_cancer_patients_fibroblast_cells,
+  resolution = fibroblast_cells_seq_res,
+  cluster.name = fibroblast_cells_cluster_seq_res,
+  random.seed = 5,
+  verbose = TRUE)
+
+# Run UMAP
+breast_cancer_patients_fibroblast_cells <- RunUMAP(
+  breast_cancer_patients_fibroblast_cells,
+  reduction = "pca",
+  reduction.key = "UMAP_",
+  reduction.name = "umap",
+  dims = fibroblast_cells_dims,
+  verbose = TRUE,
+  seed.use = 42)
+```
+
+### Plot
+
+```{r}
+#| label: fibroblast-cells-plot
+
+fibroblast_cells_plots_to_save <- list()
+
+# View UMAP with other cells at different clustering resolutions
+fibroblast_cells_different_resolutions <- DimPlot(
+  breast_cancer_patients_fibroblast_cells,
+  reduction = "umap",
+  ncol = 2,
+  group.by = fibroblast_cells_cluster_seq_res,
+  label = TRUE,
+  ) & 
+  NoLegend() & 
+  NoAxes() & 
+  theme(
+    plot.margin = unit(c(0, 0, 0, 0), "lines"),
+    plot.title = element_text(size = 12, face = "bold")
+  )
+fibroblast_cells_plots_to_save[["fibroblast_cells_different_resolutions"]] <- fibroblast_cells_different_resolutions
+
+# View how resolution affects the number of clusters
+fibroblast_cells_clustree <- clustree(
+  breast_cancer_patients_fibroblast_cells@meta.data,
+  prefix = col_fibroblast_cells_clust_res_prefix)
+fibroblast_cells_plots_to_save[["fibroblast_cells_clustree"]] <- fibroblast_cells_clustree
+
+# View UMAP with fibroblasts and patient clusters
+fibroblast_cells_patient_id_plot <- DimPlot(
+  breast_cancer_patients_fibroblast_cells,
+  reduction = "umap",
+  label = TRUE,
+  label.box = TRUE,
+  group.by = "Patient.ID",
+  cols = palette_patients) +
+  labs(
+    title = "Patient ID clusters",
+    subtitle = "Fibroblasts") +
+  theme(
+    plot.subtitle = element_text(hjust = 0.5)
+  ) &
+  NoLegend() &
+  NoAxes()
+fibroblast_cells_plots_to_save[["fibroblast_cells_patient_id_plot"]] <- fibroblast_cells_patient_id_plot
+
+# Chosen resolution
+chosen_fibroblast_cells_cluster_resolution <- 1
+# Chosen cluster
+col_fibroblast_cells_chosen_cluster <- glue::glue("{col_fibroblast_cells_clust_res_prefix}{chosen_fibroblast_cells_cluster_resolution}")
+# Set identity to other clusters
+Idents(breast_cancer_patients_fibroblast_cells) <- col_fibroblast_cells_chosen_cluster
+
+# Generate DimPlot of chosen resolution
+fibroblast_cells_chosen_resolution_plot <- DimPlot(
+  breast_cancer_patients_fibroblast_cells,
+  reduction = "umap",
+  group.by = col_fibroblast_cells_chosen_cluster,
+  label = TRUE) +
+  labs(title = "Fibroblast Clusters") &
+  NoLegend() &
+  NoAxes()
+# Print DimPlot chosen resolution
+fibroblast_cells_plots_to_save[["fibroblast_cells_chosen_resolution_plot"]] <- fibroblast_cells_chosen_resolution_plot
+# Print DimPlots side by side
+fibroblast_cells_clusters_plus_patient_clusters <-
+  fibroblast_cells_patient_id_plot + fibroblast_cells_chosen_resolution_plot
+fibroblast_cells_plots_to_save[["fibroblast_cells_clusters_plus_patient_clusters"]] <-
+  fibroblast_cells_clusters_plus_patient_clusters
+
+# Other cells cluster tibble column name
+stat_col_fibroblast_cells_clusters <- "Fibroblast clusters"
+# Calculate statistics for the other cells clusters
+fibroblast_cells_cluster_statistics <- breast_cancer_patients_fibroblast_cells@meta.data %>%
+  dplyr::rename(!!sym(stat_col_fibroblast_cells_clusters) := !!sym(col_fibroblast_cells_chosen_cluster)) %>%
+  # Group by patient and cluster, then calculate percentage
+  group_by(Patient.ID, !!sym(stat_col_fibroblast_cells_clusters)) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  group_by(Patient.ID) %>%
+  mutate(Percentage = Count / sum(Count) * 100) %>%
+  ungroup() %>%
+  # Ensure Patient.ID is a factor
+  mutate(Patient.ID = as.factor(Patient.ID))
+
+# Print tibble with the number of cells in each cluster per patient
+fibroblast_cells_count_clust_patient <- 
+  fibroblast_cells_cluster_statistics %>%
+    # Specify id_cols so the Count column is dropped
+    pivot_wider(
+      names_from = Patient.ID,
+      values_from = Count,
+      id_cols = !!sym(stat_col_fibroblast_cells_clusters)
+  ) %>%
+  # Replace NA values with 0 so that the total cells per cluster can be calculated
+  mutate(across(2:8, ~replace_na(.x, 0))) %>%
+  group_by(!!sym(stat_col_fibroblast_cells_clusters)) %>%
+  mutate(`Tot. clust. cells` = sum(across(where(is.numeric)))) %>%
+  ungroup() %>%
+  # Sort according to the Tumor cluster column
+  arrange(!!sym(stat_col_fibroblast_cells_clusters))
+fibroblast_cells_plots_to_save[["fibroblast_cells_count_clust_patient"]] <-
+  fibroblast_cells_count_clust_patient
+
+# Plot the distribution of other cell clusters by patient
+fibroblast_cells_cluster_distribution_plot <- fibroblast_cells_cluster_statistics %>%
+  # Plot the data
+  ggplot(aes(x = Count, y = !!sym(stat_col_fibroblast_cells_clusters))) +
+  geom_rect(data = unique(fibroblast_cells_cluster_statistics["Fibroblast clusters"]),
+            aes(ymin = as.numeric(`Fibroblast clusters`) - 0.4,
+                ymax = as.numeric(`Fibroblast clusters`) + 0.4,
+                xmin = -Inf,
+                xmax = Inf),
+            fill = "grey90", alpha = 0.3, inherit.aes = FALSE) +
+  # Add dots for each patient
+  geom_point(aes(color = Patient.ID), size = 3, alpha = 0.7, position = position_dodge(width = 0.7)) +
+  theme_minimal() +
+  labs(x = "Number of Cells", y = "Cluster", 
+       title = "Fibroblast Clusters Distribution by Patient",
+       color = "Patient") +
+  theme(legend.position = "right") +
+  scale_color_brewer(palette = "Set1") +
+  guides(
+    color = guide_legend(order = 1),
+  )
+fibroblast_cells_plots_to_save[["fibroblast_cells_cluster_distribution_plot"]] <-
+  fibroblast_cells_cluster_distribution_plot
+
+print(fibroblast_cells_plots_to_save)
+```
+
+### Info
+
+```{r}
+#| label: fibroblast-cells-info
+
+# Create a list to store the information
+fibroblasts_info <- list()
+
+# Create a table with the cell count and percentage divided by patient
+fibroblast_cells_count_per_patient <- breast_cancer_patients_fibroblast_cells@meta.data %>%
+  dplyr::count(!!sym(col_ist_ann), Patient.ID) %>%
+  mutate(total_cells = sum(n)) %>%
+  group_by(Patient.ID) %>%
+  mutate(percentage = round(n / total_cells * 100, 2)) %>%
+  arrange(Patient.ID, !!sym(col_ist_ann)) %>%
+  dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
+  dplyr::select(-total_cells) %>%
+  as_tibble()
+fibroblasts_info[["fibroblast_cells_count_per_patient"]] <- fibroblast_cells_count_per_patient
+
+# Initialize a list to store marker results for each resolution
+fibroblast_cells_count_per_cluster_list <- list()
+
+for (res in fibroblast_cells_cluster_seq_res) {
+  fibroblast_cells_count_per_cluster <- breast_cancer_patients_fibroblast_cells@meta.data %>%
+    dplyr::count(!!sym(col_ist_ann), !!sym(res)) %>%
+    mutate(total_cells = sum(n)) %>%
+    group_by(!!sym(res)) %>%
+    mutate(percentage = round(n / total_cells * 100, 2)) %>%
+    arrange(!!sym(res), !!sym(col_ist_ann)) %>%
+    dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
+    dplyr::select(-total_cells) %>%
+    as_tibble()
+  
+  # Save the heatmap for this resolution in the output list
+  fibroblast_key_count_per_cluster <- paste0(res, "_count_per_cluster")
+  fibroblast_cells_count_per_cluster_list[[fibroblast_key_count_per_cluster]] <- fibroblast_cells_count_per_cluster
+}
+fibroblasts_info <- c(fibroblasts_info, fibroblast_cells_count_per_cluster_list)
+
+print(fibroblasts_info)
+```
+
+```{r}
+#| label: fibroblast-cells-save-clusters-data
+#| eval: false
+
+# Save the macrophage cells info
+save_data(c(fibroblast_cells_plots_to_save, fibroblasts_info), file.path(fibroblast_dir, "Clusters"))
+```
+
+### Markers
+
+```{r}
+#| label: fibroblast-cells-markers-load
+
+# Load other cells object from memory
+fibroblast_cells_markers_list <- readRDS(file.path(gl_obj_dir, "fibroblast_cells_markers_list.rds"))
+```
+
+```{r}
+#| label: fibroblast-cells-markers-computation
+#| eval: false
+
+# Initialize a list to store marker results for each resolution
+fibroblast_cells_markers_list <- list()
+
+# Loop over each resolution's cluster metadata column
+for (res in fibroblast_cells_cluster_seq_res) {
+  # Use the group.by parameter to specify the clustering metadata column
+  fibroblast_clust_res_markers <- FindAllMarkers(
+    breast_cancer_patients_fibroblast_cells,
+    group.by = res,
+    test.use = "wilcox",
+    assay = "SCT",
+    only.pos = FALSE,
+    random.seed = 5,
+    verbose = TRUE)
+  
+  # Save the markers for the current resolution in the list
+  fibroblast_cells_markers_list[[res]] <- fibroblast_clust_res_markers
+}
+```
+
+```{r}
+#| label: fibroblast-cells-markers-save
+#| eval: false
+
+# Save the data
+saveRDS(fibroblast_cells_markers_list, file.path(gl_obj_dir, "fibroblast_cells_markers_list.rds"))
+```
+
+```{r}
+#| label: fibroblast-cells-markers-plots
+
+# List with data to save
+fibroblast_cells_markers_to_save <- list()
+# List with complex heatmaps
+fibroblast_cells_complex_heatmaps <- list()
+
+# Loop over each resolution in the list of marker results
+for (res in names(fibroblast_cells_markers_list)) {
+  
+  # Print the current resolution being analyzed
+  print(paste("Processing resolution:", res))
+  
+  # Heatmaps title
+  fibroblast_cells_heatmap_title = paste("Macrophage cells clusters - Resolution:", res)
+  
+  # Get marker data for the current resolution
+  fibroblast_cells_markers_df <- fibroblast_cells_markers_list[[res]]
+  
+  # Filter markers to get the most significant up-regulated ones per cluster
+  most_significant_fibroblast_cells_markers <- fibroblast_cells_markers_df %>%
+    group_by(cluster) %>%
+    dplyr::filter(avg_log2FC > 1 & p_val_adj < 0.05) %>%
+    slice_head(n = 10) %>%
+    ungroup()
+  print(most_significant_fibroblast_cells_markers)
+  
+  # Save the filtered markers for this resolution in the output list
+  key_markers <- paste0(res, "_most_significant_markers")
+  fibroblast_cells_markers_to_save[[key_markers]] <- most_significant_fibroblast_cells_markers
+  
+  ### SEURAT HEATMAP
+  # Create a heatmap using the genes from the filtered markers
+  fibroblast_heatmap_plot <- DoHeatmap(
+    breast_cancer_patients_fibroblast_cells,
+    features = most_significant_fibroblast_cells_markers$gene,
+    group.by = res,
+    assay = "SCT",
+    label = TRUE,
+    size = 2,
+  ) + theme(
+    axis.text.y = element_text(size = 5)
+  ) + labs(
+    title = fibroblast_cells_heatmap_title,
+    subtitle = "Top 10 Differentially Expressed Genes per Cluster"
+  )
+  print(fibroblast_heatmap_plot)
+  
+  # Save the heatmap for this resolution in the output list
+  fibroblast_key_heatmap <- paste0(res, "_heatmap")
+  fibroblast_cells_markers_to_save[[fibroblast_key_heatmap]] <- fibroblast_heatmap_plot
+  
+  ### COMPLEX HEATMAP
+  # Unique is used to eliminate duplicated genes, this is done automatically by Seurat DoHeatmap
+  unique_fibroblast_cells_markers <- unique(most_significant_fibroblast_cells_markers$gene)
+
+  # Extract the expression data for the selected genes from the scaled layer
+  fibroblast_cells_expr_matrix <- as.matrix(
+    GetAssayData(
+      breast_cancer_patients_fibroblast_cells, 
+      layer = "scale.data", 
+      assay = "SCT"
+    )[
+      unique_fibroblast_cells_markers,
+    ]
+  )
+
+  # Prepare cell type annotations
+  fibroblast_cells_clusters <-
+    setNames(
+      factor(
+        as.vector(
+          breast_cancer_patients_fibroblast_cells@meta.data[[res]]
+        )
+      ),
+      rownames(breast_cancer_patients_fibroblast_cells@meta.data))
+
+  # Create vector with unique and sorted cell types
+  unique_fibroblast_cell_types <- sort(unique(fibroblast_cells_clusters))
+  
+  # Create color palette for cell types
+  fibroblast_cell_type_colors <- setNames(
+    gg_color_hue(length(unique_fibroblast_cell_types)),
+    unique_fibroblast_cell_types
+  )
+
+  # Recreate the Seurat expression scale
+  palette_fibroblast_expression_level = circlize::colorRamp2(c(
+    min(fibroblast_cells_expr_matrix),
+    median(fibroblast_cells_expr_matrix),
+    min(2.5, max(fibroblast_cells_expr_matrix))),
+    c("#FF00FF", "#000000", "#FFFF00"))
+
+  # Create the heatmap with ComplexHeatmap
+  fibroblast_cells_clust_diff_expr_genes_complex_heatmap <- Heatmap(
+    matrix = fibroblast_cells_expr_matrix,
+    row_order = unique_fibroblast_cells_markers,
+    name = "expression",
+    column_split = factor(fibroblast_cells_clusters, levels = unique_fibroblast_cell_types),
+    # Do not cluster rows or columns otherwise row_order/column_order are ignored
+    cluster_rows = FALSE,
+    cluster_columns = FALSE,
+    column_title_rot = 0,
+    show_column_names = FALSE,
+    show_column_dend = FALSE,
+    show_row_names = TRUE,
+    show_row_dend = FALSE,
+    cluster_column_slices = TRUE,
+    column_gap = unit(0.5, "mm"),
+    row_names_gp = gpar(fontsize = 5),
+    # The column title can be either a title for all the columns or a vector with a name for every column
+    column_title = unique_fibroblast_cell_types,
+    column_title_gp = gpar(fontsize = 7),
+    # Add the annotation bars on top
+    top_annotation = HeatmapAnnotation(
+      # Give a name to the annotation, not used on the actual plot
+      name = "Clusters",
+      # Annotate the columns
+      which = "column",
+      # First annotation - clusters
+      cluster = fibroblast_cells_clusters,
+      # Second annotation - patients
+      patient = breast_cancer_patients_fibroblast_cells@meta.data$Patient.ID,
+      # Color palettes
+      col = list(cluster = fibroblast_cell_type_colors, patient = palette_patients),
+      show_legend = c(FALSE, TRUE),
+      gap = unit(1, "mm"),
+      simple_anno_size = unit(2, "mm"),
+      annotation_name_gp = gpar(fontsize = 6)
+    ),
+    # Color scale for expression
+    col = palette_fibroblast_expression_level,
+    # Otherwise you get random vertical white lines where there should not be any
+    use_raster = FALSE
+  )
+  # Put the legends on the right in a single column
+  draw(
+    object = fibroblast_cells_clust_diff_expr_genes_complex_heatmap,
+    merge_legend = TRUE,
+    column_title = fibroblast_cells_heatmap_title)
+  
+  # Save the heatmap for this resolution in the output list
+  fibroblast_key_complex_heatmap <- paste0(res, "_complex_heatmap")
+  fibroblast_cells_complex_heatmaps[[fibroblast_key_complex_heatmap]] <- recordPlot()
+  fibroblast_cells_markers_to_save <- c(fibroblast_cells_markers_to_save, fibroblast_cells_complex_heatmaps)
+}
+```
+
+```{r}
+#| label: fibroblast-cells-markers-save
+#| eval: false
+
+# Other cells markers folder
+fibroblast_cells_markers_dir <- file.path(fibroblast_dir, "Markers")
+# Define and set complex heatmap attributes
+fibroblast_cells_complex_heatmap_attrs <- list(width = 18, height = 13, units = "cm", dpi = 600)
+fibroblast_cells_markers_to_save <- set_plot_attributes(
+  list_name = fibroblast_cells_markers_to_save,
+  attr_list = fibroblast_cells_complex_heatmap_attrs,
+  plot_names = names(fibroblast_cells_complex_heatmaps))
+# Save the data
+save_data(fibroblast_cells_markers_to_save, fibroblast_cells_markers_dir)
 ```
 
 ## Other cells
