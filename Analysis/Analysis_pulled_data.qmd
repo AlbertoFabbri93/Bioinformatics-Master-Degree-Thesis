@@ -2306,6 +2306,36 @@ fibroblast_cells_cluster_distribution_plot <- fibroblast_cells_cluster_statistic
 fibroblast_cells_plots_to_save[["fibroblast_cells_cluster_distribution_plot"]] <-
   fibroblast_cells_cluster_distribution_plot
 
+fibroblast_cells_feature_plots <- FeaturePlot(
+  object = breast_cancer_patients_fibroblast_cells,
+  reduction = "umap",
+  features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
+  max.cutoff = "q95",
+  min.cutoff = 0,
+  label = TRUE,
+  combine = FALSE)
+fibroblast_cells_feature_plots <- lapply(
+  fibroblast_cells_feature_plots,
+  function(x) x & NoLegend() & NoAxes() & labs(subtitle = "Fibroblasts"))
+names(fibroblast_cells_feature_plots) <- glue('fibroblast_cells_feature_plot_{c("PanCK", "CD45", "CD68")}')
+fibroblast_cells_plots_to_save <- c(fibroblast_cells_plots_to_save, fibroblast_cells_feature_plots)
+
+# Violin plot with the expression of panCK, CD45 and CD68 for each Insitutype clusters
+fibroblast_cells_clust_protein_expr <- VlnPlot(
+  breast_cancer_patients_fibroblast_cells,
+  assay = "SCT",
+  layer = "data",
+  features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
+  pt.size = 0,
+  group.by = col_fibroblast_cells_chosen_cluster,
+  combine = FALSE
+)
+fibroblast_cells_clust_protein_expr <- lapply(
+  fibroblast_cells_clust_protein_expr,
+  function(x) x & NoLegend() & labs(subtitle = "Fibroblast Clusters"))
+names(fibroblast_cells_clust_protein_expr) <- glue('Fibroblast_cells_{c("PanCK", "CD45", "CD68")}')
+fibroblast_cells_plots_to_save <- c(fibroblast_cells_plots_to_save, fibroblast_cells_clust_protein_expr)
+
 print(fibroblast_cells_plots_to_save)
 ```
 
