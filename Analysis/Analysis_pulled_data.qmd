@@ -1042,6 +1042,20 @@ feature_plot_feat_count_sct <- FeaturePlot(
 # Save the plot
 patients_ist_sct[["Feature_plot_features_count_sct"]] <- feature_plot_feat_count_sct
 
+# Plot UMAPs with proteins expression
+proteins_feature_plots_sct <- FeaturePlot(
+  object = breast_cancer_patients_analyze,
+  reduction = "sct_umap_patients",
+  features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
+  max.cutoff = "q95",
+  min.cutoff = 0,
+  combine = FALSE)
+proteins_feature_plots_sct <- lapply(
+  proteins_feature_plots_sct,
+  function(x) x & NoLegend() & NoAxes() & labs(subtitle = "All cells"))
+names(proteins_feature_plots_sct) <- glue('proteins_feature_plots_sct_{c("PanCK", "CD45", "CD68")}')
+patients_ist_sct <- c(patients_ist_sct, proteins_feature_plots_sct)
+
 # Print
 print(patients_ist_sct)
 ```
@@ -2306,6 +2320,7 @@ fibroblast_cells_cluster_distribution_plot <- fibroblast_cells_cluster_statistic
 fibroblast_cells_plots_to_save[["fibroblast_cells_cluster_distribution_plot"]] <-
   fibroblast_cells_cluster_distribution_plot
 
+# Plot UMAPs with proteins expression
 fibroblast_cells_feature_plots <- FeaturePlot(
   object = breast_cancer_patients_fibroblast_cells,
   reduction = "umap",
