@@ -2446,7 +2446,7 @@ for (res in names(fibroblast_cells_markers_list)) {
   print(paste("Processing resolution:", res))
   
   # Heatmaps title
-  fibroblast_cells_heatmap_title = paste("Macrophage cells clusters - Resolution:", res)
+  fibroblast_cells_heatmap_title = paste("Fibroblast cells clusters - Resolution:", res)
   
   # Get marker data for the current resolution
   fibroblast_cells_markers_df <- fibroblast_cells_markers_list[[res]]
