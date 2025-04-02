@@ -1822,13 +1822,15 @@ macrophage_cells_patient_id_plot <- DimPlot(
   reduction = "umap",
   label = TRUE,
   label.box = TRUE,
+  label.size = 5,
   group.by = "Patient.ID",
   cols = palette_patients) +
   labs(
     title = "Patient ID clusters",
     subtitle = "Macrophages") +
   theme(
-    plot.subtitle = element_text(hjust = 0.5)
+    plot.title = element_text(size = 20),
+    plot.subtitle = element_text(size = 16, hjust = 0.5)
   ) &
   NoLegend() &
   NoAxes()
@@ -1846,17 +1848,19 @@ macrophage_cells_chosen_resolution_plot <- DimPlot(
   breast_cancer_patients_macrophage_cells,
   reduction = "umap",
   group.by = col_macrophage_cells_chosen_cluster,
-  label = TRUE) +
-  labs(title = "Macrophage Clusters") &
+  label = TRUE,
+  label.box = TRUE,
+  label.size = 5) +
+  labs(
+    title = "Macrophage clusters"
+  ) + 
+  theme(
+    plot.title = element_text(size = 20),
+  ) &
   NoLegend() &
   NoAxes()
 # Print DimPlot chosen resolution
 macrophage_cells_plots_to_save[["macrophage_cells_chosen_resolution_plot"]] <- macrophage_cells_chosen_resolution_plot
-# Print DimPlots side by side
-macrophage_cells_clusters_plus_patient_clusters <-
-  macrophage_cells_patient_id_plot + macrophage_cells_chosen_resolution_plot
-macrophage_cells_plots_to_save[["macrophage_cells_clusters_plus_patient_clusters"]] <-
-  macrophage_cells_clusters_plus_patient_clusters
 
 # Other cells cluster tibble column name
 stat_col_macrophage_cells_clusters <- "Macrophage clusters"
