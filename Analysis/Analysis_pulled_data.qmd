@@ -2566,38 +2566,41 @@ print(fibroblast_cells_plots_to_save)
 # Create a list to store the information
 fibroblasts_info <- list()
 
+# Total number of fibroblast cells
+count_total_fibroblast = nrow(breast_cancer_patients_fibroblast_cells@meta.data)
+
 # Create a table with the cell count and percentage divided by patient
 fibroblast_cells_count_per_patient <- breast_cancer_patients_fibroblast_cells@meta.data %>%
   dplyr::count(!!sym(col_ist_ann), Patient.ID) %>%
-  mutate(total_cells = sum(n)) %>%
   group_by(Patient.ID) %>%
-  mutate(percentage = round(n / total_cells * 100, 2)) %>%
+  mutate(percentage = round(n / count_total_fibroblast * 100, 2)) %>%
   arrange(Patient.ID, !!sym(col_ist_ann)) %>%
   dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
-  dplyr::select(-total_cells) %>%
   as_tibble()
 fibroblasts_info[["fibroblast_cells_count_per_patient"]] <- fibroblast_cells_count_per_patient
 
 # Initialize a list to store marker results for each resolution
 fibroblast_cells_count_per_cluster_list <- list()
-
+# Loop over each resolution's cluster metadata column
 for (res in fibroblast_cells_cluster_seq_res) {
   fibroblast_cells_count_per_cluster <- breast_cancer_patients_fibroblast_cells@meta.data %>%
     dplyr::count(!!sym(col_ist_ann), !!sym(res)) %>%
-    mutate(total_cells = sum(n)) %>%
     group_by(!!sym(res)) %>%
-    mutate(percentage = round(n / total_cells * 100, 2)) %>%
+    mutate(percentage = round(n / count_total_fibroblast * 100, 2)) %>%
     arrange(!!sym(res), !!sym(col_ist_ann)) %>%
     dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
-    dplyr::select(-total_cells) %>%
     as_tibble()
   
   # Save the heatmap for this resolution in the output list
   fibroblast_key_count_per_cluster <- paste0(res, "_count_per_cluster")
   fibroblast_cells_count_per_cluster_list[[fibroblast_key_count_per_cluster]] <- fibroblast_cells_count_per_cluster
 }
+# Merge the two dataframe lists
 fibroblasts_info <- c(fibroblasts_info, fibroblast_cells_count_per_cluster_list)
 
+# Print total cells to console
+print(glue("Total fibroblast cells: {count_total_fibroblast}"))
+# Print dataframes
 print(fibroblasts_info)
 ```
 
