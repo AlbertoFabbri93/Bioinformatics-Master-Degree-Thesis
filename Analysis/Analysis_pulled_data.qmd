@@ -1310,6 +1310,12 @@ breast_cancer_patients_other_cells <-
 
 ## Normal cells
 
+```{r}
+#| label: normal-cells-load-metadata
+
+normal_cells_dir <- file.path(gl_img_dir, "Normal cells")
+```
+
 ### Compute
 
 ```{r}
@@ -1488,7 +1494,7 @@ print(normal_cells_images)
 #| eval: false
 
 # Save the normal cells plots
-save_data(normal_cells_images, file.path(gl_img_dir, "Normal cells"))
+save_data(normal_cells_images, normal_cells_dir)
 ```
 
 ```{r}
@@ -1497,6 +1503,150 @@ save_data(normal_cells_images, file.path(gl_img_dir, "Normal cells"))
 
 # Save the Seurat object
 saveRDS(breast_cancer_patients_normal_cells, file.path(gl_obj_dir, "breast_cancer_patients_normal_cells.rds"))
+```
+
+### Markers
+
+```{r}
+#| label: normal-cells-markers-load
+
+# Load normal cells object from memory
+normal_cells_markers_data <- readRDS(file.path(gl_obj_dir, "normal_cells_markers_data.rds"))
+```
+
+```{r}
+#| label: normal-cells-markers-computation
+#| eval: false
+
+# List to save and print
+normal_cells_markers_to_print <- list()
+
+# Set identity to the clusters whose markers we want to find
+Idents(breast_cancer_patients_normal_cells) <- col_ist_ann
+
+# Find all markers of the normal clusters
+normal_cells_markers_data <- FindAllMarkers(
+  breast_cancer_patients_normal_cells,
+  test.use = "wilcox",
+  assay = "SCT",
+  only.pos = FALSE,
+  random.seed = 5,
+  verbose = TRUE)
+
+# Filter markers to get the most significant up-regulated ones per cluster
+most_significant_normal_cells_markers <- normal_cells_markers_data %>%
+  group_by(cluster) %>%
+  dplyr::filter(avg_log2FC > 1 & p_val_adj < 0.05) %>%
+  slice_head(n = 10) %>%
+  ungroup()
+normal_cells_markers_to_print[["most_significant_normal_cells_markers"]] <- most_significant_normal_cells_markers
+
+# Print
+print(normal_cells_markers_to_print)
+```
+
+```{r}
+#| label: normal-cells-markers-save
+#| eval: false
+
+# Save the data
+saveRDS(normal_cells_markers_data, file.path(gl_obj_dir, "normal_cells_markers_data.rds"))
+save_data(normal_cells_markers_to_print, normal_cells_dir)
+```
+
+```{r}
+#| label: normal-cells-markers-complex-heatmap
+
+# Info to save
+normal_cells_complex_heatmap_list <- list()
+
+# Unique is used to eliminate duplicated genes, this is done automatically by Seurat DoHeatmap
+features <- unique(most_significant_normal_cells_markers$gene)
+
+# Extract the expression data for the selected genes from the scaled layer
+normal_cells_expr_matrix <- as.matrix(
+  GetAssayData(
+    breast_cancer_patients_normal_cells, 
+    layer = "scale.data", 
+    assay = "SCT"
+  )[
+    features,
+  ]
+)
+
+# Prepare cell type annotations
+normal_cells_clusters <- Idents(breast_cancer_patients_normal_cells)
+# Create vector with unique and sorted cell types
+unique_cell_types <- sort(unique(normal_cells_clusters))
+
+# Create color palette for cell types
+cell_type_colors <- setNames(
+  gg_color_hue(length(unique_cell_types)),
+  unique_cell_types
+)
+
+# Recreate the Seurat expression scale
+palette_expression_level = circlize::colorRamp2(
+  c(min(normal_cells_expr_matrix), median(normal_cells_expr_matrix), min(2.5, max(normal_cells_expr_matrix))),
+  c("#FF00FF", "#000000", "#FFFF00"))
+
+# Create the heatmap with ComplexHeatmap
+normal_cells_clust_diff_expr_genes_complex_heatmap <- Heatmap(
+  matrix = normal_cells_expr_matrix,
+  row_order = features,
+  name = "expression",
+  column_split = factor(normal_cells_clusters, levels = unique_cell_types),
+  # Do not cluster rows or columns otherwise row_order/column_order are ignored
+  cluster_rows = FALSE,
+  cluster_columns = FALSE,
+  column_title_rot = 0,
+  show_column_names = FALSE,
+  show_column_dend = FALSE,
+  show_row_names = TRUE,
+  show_row_dend = FALSE,
+  cluster_column_slices = TRUE,
+  column_gap = unit(0.5, "mm"),
+  row_names_gp = gpar(fontsize = 5),
+  # The column title can be either a title for all the columns or a vector with a name for every column
+  column_title = unique_cell_types,
+  column_title_gp = gpar(fontsize = 7),
+  # Add the annotation bars on top
+  top_annotation = HeatmapAnnotation(
+    # Give a name to the annotation, not used on the actual plot
+    name = "Clusters",
+    # Annotate the columns
+    which = "column",
+    # First annotation - clusters
+    cluster = normal_cells_clusters,
+    # Second annotation - patients
+    patient = breast_cancer_patients_normal_cells@meta.data$Patient.ID,
+    # Color palettes
+    col = list(cluster = cell_type_colors, patient = palette_patients),
+    show_legend = c(FALSE, TRUE),
+    gap = unit(1, "mm"),
+    simple_anno_size = unit(2, "mm"),
+    annotation_name_gp = gpar(fontsize = 6)
+  ),
+  # Color scale for expression
+  col = palette_expression_level,
+  # Otherwise you get random vertical white lines where there should not be any
+  use_raster = FALSE
+)
+# Put the legends on the right in a single column
+draw(normal_cells_clust_diff_expr_genes_complex_heatmap, merge_legend = TRUE)
+
+normal_cells_complex_heatmap_list[["normal_cells_clust_diff_expr_genes_complex_heatmap"]] <- recordPlot()
+```
+
+```{r}
+#| label: normal-cells-markers-save
+#| eval: false
+
+# Define and set complex heatmap attributes
+complex_heatmap_attrs <- list(width = 15, height = 20, units = "cm", dpi = 1000)
+normal_cells_complex_heatmap_list <- set_plot_attributes(normal_cells_complex_heatmap_list, complex_heatmap_attrs)
+# Save ComplexHeatmap
+save_data(normal_cells_complex_heatmap_list, normal_cells_dir)
 ```
 
 ## Macrophages
@@ -1523,7 +1673,7 @@ breast_cancer_patients_macrophage_cells <-
 ```{r}
 #| label: macrophage-cells-metadata-columns
 
-# Name of the metadata column with the other clusters
+# Name of the metadata column with the macrophage clusters
 col_macrophage_cells_clust_res_prefix <- "macrophage_cells_clusters_res_"
 # Find clusters of macrophage cells
 # The default resolution is 1, increase it to get more clusters or decrease it to get fewer clusters
