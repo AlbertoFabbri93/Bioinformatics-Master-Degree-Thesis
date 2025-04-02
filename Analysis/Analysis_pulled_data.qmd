@@ -948,7 +948,8 @@ patients_ist_type_sct_plot <- DimPlot(
       spacing = unit(0.2, "lines"))
   )  +
   theme(
-    legend.text = element_text(size = 8),
+    plot.title = element_text(size = 20),
+    legend.text = element_text(size = 12),
   ) &
   NoAxes()
 patients_ist_sct[["patients_ist_type_sct_plot"]] <- patients_ist_type_sct_plot
@@ -959,7 +960,13 @@ patients_ist_group_sct_plot <- DimPlot(
   group.by = col_cell_group,
   reduction = "sct_umap_patients",
   cols = palette_cell_types) +
-  labs(title = "All cell groups") &
+  labs(
+    title = "All cell groups"
+  ) +
+  theme(
+    plot.title = element_text(size = 20),
+    legend.text = element_text(size = 12),
+  ) &
   NoAxes()
 patients_ist_sct[["patients_ist_group_sct_plot"]] <- patients_ist_group_sct_plot
 
@@ -969,12 +976,18 @@ patients_sct_plot <- DimPlot(
   group.by = "Patient.ID",
   reduction = "sct_umap_patients",
   cols = palette_patients) +
-  labs(title = "All cells") +
+  labs(
+    title = "All cells"
+  ) +
   guides(
     color = guide_legend(
       override.aes = list(size=2),
       title = "Patient"
     )
+  ) +
+  theme(
+    plot.title = element_text(size = 20),
+    legend.text = element_text(size = 12),
   ) &
   NoAxes()
 patients_ist_sct[["patients_sct_plot"]] <- patients_sct_plot
