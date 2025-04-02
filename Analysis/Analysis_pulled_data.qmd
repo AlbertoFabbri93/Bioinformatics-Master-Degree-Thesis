@@ -1486,6 +1486,47 @@ normal_cells_group_umap_plot <- DimPlot(
   NoAxes()
 normal_cells_images[["normal_cells_group_umap_plot"]] <- normal_cells_group_umap_plot
 
+# Select custom markers
+normal_cells_clusters_custom_markers <- c(
+  #Astrocytes = "GFAP",
+  `B cell`= "IGKC",
+  `Dendritic cell` = "CD74",
+  `Endothelial cell` = "COL4A1",
+  `Fibroblast` = "FN1",
+  `Macrophage` = "CD68",
+  # `Microglia` = "ERBB2",
+  # `Monocyte` = "LTF",
+  # `Neutrophil` = "APOE",
+  # `NK cells` = "EGFR",
+  `Oligodendrocytes` = "PTGDS"
+  # `Plasma` = "JCHAIN",
+  # `Plasmacytoid DC` = "",
+  # `T cell CD8` = "CD8A",
+  # `T cell regulatory` = "FOXP3"
+  )
+
+# Create a feature plot for each marker
+normal_cells_custom_markers_feature_plot <- FeaturePlot(
+  object = breast_cancer_patients_normal_cells,
+  features = normal_cells_clusters_custom_markers,
+  reduction = "sct_umap_normal_cells",
+  ncol = 3
+  ) & 
+  NoLegend() &
+  NoAxes()
+
+# Create a subtitle for every plot in the patchwork with the number of the cluster
+for (i in seq_along(normal_cells_clusters_custom_markers)) {
+  norm_mark <- names(normal_cells_clusters_custom_markers)[i]
+  normal_cells_custom_markers_feature_plot[[i]] <-
+    normal_cells_custom_markers_feature_plot[[i]] +
+    labs(subtitle = norm_mark) +
+    theme(
+      plot.subtitle = element_text(size = 14, hjust = 0.5)
+    )
+}
+normal_cells_images[["normal_cells_custom_markers_feature_plot"]] <- normal_cells_custom_markers_feature_plot
+
 print(normal_cells_images)
 ```
 
