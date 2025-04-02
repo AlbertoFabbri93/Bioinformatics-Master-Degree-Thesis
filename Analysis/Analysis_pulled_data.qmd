@@ -2427,13 +2427,15 @@ fibroblast_cells_patient_id_plot <- DimPlot(
   reduction = "umap",
   label = TRUE,
   label.box = TRUE,
+  label.size = 5,
   group.by = "Patient.ID",
   cols = palette_patients) +
   labs(
     title = "Patient ID clusters",
     subtitle = "Fibroblasts") +
   theme(
-    plot.subtitle = element_text(hjust = 0.5)
+    plot.title = element_text(size = 20),
+    plot.subtitle = element_text(size = 16, hjust = 0.5)
   ) &
   NoLegend() &
   NoAxes()
@@ -2451,17 +2453,19 @@ fibroblast_cells_chosen_resolution_plot <- DimPlot(
   breast_cancer_patients_fibroblast_cells,
   reduction = "umap",
   group.by = col_fibroblast_cells_chosen_cluster,
-  label = TRUE) +
-  labs(title = "Fibroblast Clusters") &
+  label = TRUE,
+  label.box = TRUE,
+  label.size = 5) +
+  labs(
+    title = "Fibroblast Clusters"
+  ) +
+  theme(
+    plot.title = element_text(size = 20),
+  ) &
   NoLegend() &
   NoAxes()
 # Print DimPlot chosen resolution
 fibroblast_cells_plots_to_save[["fibroblast_cells_chosen_resolution_plot"]] <- fibroblast_cells_chosen_resolution_plot
-# Print DimPlots side by side
-fibroblast_cells_clusters_plus_patient_clusters <-
-  fibroblast_cells_patient_id_plot + fibroblast_cells_chosen_resolution_plot
-fibroblast_cells_plots_to_save[["fibroblast_cells_clusters_plus_patient_clusters"]] <-
-  fibroblast_cells_clusters_plus_patient_clusters
 
 # Other cells cluster tibble column name
 stat_col_fibroblast_cells_clusters <- "Fibroblast clusters"
@@ -2655,16 +2659,21 @@ fibroblast_cells_markers_to_save <- list()
 fibroblast_cells_complex_heatmaps <- list()
 
 # Loop over each resolution in the list of marker results
-for (res in names(fibroblast_cells_markers_list)) {
+for (i in seq_along(fibroblast_cells_markers_list)) {
+  
+  # Get the resolution string
+  res_str <- names(fibroblast_cells_markers_list)[i]
+  # Get only the resolution number
+  res_val <- fibroblast_cells_seq_res[i]
   
   # Print the current resolution being analyzed
-  print(paste("Processing resolution:", res))
+  print(paste("Processing resolution:", res_val))
   
   # Heatmaps title
-  fibroblast_cells_heatmap_title = paste("Fibroblast cells clusters - Resolution:", res)
+  fibroblast_cells_heatmap_title = paste("Fibroblast cells clusters - Resolution:", res_val)
   
   # Get marker data for the current resolution
-  fibroblast_cells_markers_df <- fibroblast_cells_markers_list[[res]]
+  fibroblast_cells_markers_df <- fibroblast_cells_markers_list[[res_str]]
   
   # Filter markers to get the most significant up-regulated ones per cluster
   most_significant_fibroblast_cells_markers <- fibroblast_cells_markers_df %>%
@@ -2675,7 +2684,7 @@ for (res in names(fibroblast_cells_markers_list)) {
   print(most_significant_fibroblast_cells_markers)
   
   # Save the filtered markers for this resolution in the output list
-  key_markers <- paste0(res, "_most_significant_markers")
+  key_markers <- paste0(res_str, "_most_significant_markers")
   fibroblast_cells_markers_to_save[[key_markers]] <- most_significant_fibroblast_cells_markers
   
   ### SEURAT HEATMAP
@@ -2683,7 +2692,7 @@ for (res in names(fibroblast_cells_markers_list)) {
   fibroblast_heatmap_plot <- DoHeatmap(
     breast_cancer_patients_fibroblast_cells,
     features = most_significant_fibroblast_cells_markers$gene,
-    group.by = res,
+    group.by = res_str,
     assay = "SCT",
     label = TRUE,
     size = 2,
@@ -2696,7 +2705,7 @@ for (res in names(fibroblast_cells_markers_list)) {
   print(fibroblast_heatmap_plot)
   
   # Save the heatmap for this resolution in the output list
-  fibroblast_key_heatmap <- paste0(res, "_heatmap")
+  fibroblast_key_heatmap <- paste0(res_str, "_heatmap")
   fibroblast_cells_markers_to_save[[fibroblast_key_heatmap]] <- fibroblast_heatmap_plot
   
   ### COMPLEX HEATMAP
@@ -2719,7 +2728,7 @@ for (res in names(fibroblast_cells_markers_list)) {
     setNames(
       factor(
         as.vector(
-          breast_cancer_patients_fibroblast_cells@meta.data[[res]]
+          breast_cancer_patients_fibroblast_cells@meta.data[[res_str]]
         )
       ),
       rownames(breast_cancer_patients_fibroblast_cells@meta.data))
@@ -2789,7 +2798,7 @@ for (res in names(fibroblast_cells_markers_list)) {
     column_title = fibroblast_cells_heatmap_title)
   
   # Save the heatmap for this resolution in the output list
-  fibroblast_key_complex_heatmap <- paste0(res, "_complex_heatmap")
+  fibroblast_key_complex_heatmap <- paste0(res_str, "_complex_heatmap")
   fibroblast_cells_complex_heatmaps[[fibroblast_key_complex_heatmap]] <- recordPlot()
   fibroblast_cells_markers_to_save <- c(fibroblast_cells_markers_to_save, fibroblast_cells_complex_heatmaps)
 }
