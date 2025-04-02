@@ -2014,16 +2014,21 @@ macrophage_cells_markers_to_save <- list()
 macrophage_cells_complex_heatmaps <- list()
 
 # Loop over each resolution in the list of marker results
-for (res in names(macrophage_cells_markers_list)) {
+for (i in seq_along(macrophage_cells_markers_list)) {
+  
+  # Get the resolution string
+  res_str <- names(macrophage_cells_markers_list)[i]
+  # Get only the resolution number
+  res_val <- macrophage_cells_seq_res[i]
   
   # Print the current resolution being analyzed
-  print(paste("Processing resolution:", res))
+  print(paste("Processing resolution:", res_val))
   
   # Heatmaps title
-  macrophage_cells_heatmap_title = paste("Macrophage cells clusters - Resolution:", res)
+  macrophage_cells_heatmap_title = paste("Macrophage cells clusters - Resolution:", res_val)
   
   # Get marker data for the current resolution
-  macrophage_cells_markers_df <- macrophage_cells_markers_list[[res]]
+  macrophage_cells_markers_df <- macrophage_cells_markers_list[[res_str]]
   
   # Filter markers to get the most significant up-regulated ones per cluster
   most_significant_macrophage_cells_markers <- macrophage_cells_markers_df %>%
@@ -2034,7 +2039,7 @@ for (res in names(macrophage_cells_markers_list)) {
   print(most_significant_macrophage_cells_markers)
   
   # Save the filtered markers for this resolution in the output list
-  key_markers <- paste0(res, "_most_significant_markers")
+  key_markers <- paste0(res_str, "_most_significant_markers")
   macrophage_cells_markers_to_save[[key_markers]] <- most_significant_macrophage_cells_markers
   
   ### SEURAT HEATMAP
@@ -2042,7 +2047,7 @@ for (res in names(macrophage_cells_markers_list)) {
   macrophage_heatmap_plot <- DoHeatmap(
     breast_cancer_patients_macrophage_cells,
     features = most_significant_macrophage_cells_markers$gene,
-    group.by = res,
+    group.by = res_str,
     assay = "SCT",
     label = TRUE,
     size = 2,
@@ -2055,7 +2060,7 @@ for (res in names(macrophage_cells_markers_list)) {
   print(macrophage_heatmap_plot)
   
   # Save the heatmap for this resolution in the output list
-  macrophage_key_heatmap <- paste0(res, "_heatmap")
+  macrophage_key_heatmap <- paste0(res_str, "_heatmap")
   macrophage_cells_markers_to_save[[macrophage_key_heatmap]] <- macrophage_heatmap_plot
   
   ### COMPLEX HEATMAP
@@ -2078,7 +2083,7 @@ for (res in names(macrophage_cells_markers_list)) {
     setNames(
       factor(
         as.vector(
-          breast_cancer_patients_macrophage_cells@meta.data[[res]]
+          breast_cancer_patients_macrophage_cells@meta.data[[res_str]]
         )
       ),
       rownames(breast_cancer_patients_macrophage_cells@meta.data))
@@ -2148,7 +2153,7 @@ for (res in names(macrophage_cells_markers_list)) {
     column_title = macrophage_cells_heatmap_title)
   
   # Save the heatmap for this resolution in the output list
-  macrophage_key_complex_heatmap <- paste0(res, "_complex_heatmap")
+  macrophage_key_complex_heatmap <- paste0(res_str, "_complex_heatmap")
   macrophage_cells_complex_heatmaps[[macrophage_key_complex_heatmap]] <- recordPlot()
   macrophage_cells_markers_to_save <- c(macrophage_cells_markers_to_save, macrophage_cells_complex_heatmaps)
 }
