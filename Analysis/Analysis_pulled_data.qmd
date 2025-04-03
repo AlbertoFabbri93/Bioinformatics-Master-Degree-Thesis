@@ -3029,13 +3029,14 @@ other_cells_chosen_resolution_plot <- DimPlot(
 other_cells_plots_to_save[["other_cells_chosen_resolution_plot"]] <- other_cells_chosen_resolution_plot
 
 # Generate FeaturePlot of other clusters
+other_cells_features_umap <- c("Mean.PanCK", "Mean.CD45", "Mean.CD68", "CD63")
 # max.cutoff q95 is set so any values above the 95th percentile will be set to the 95th percentile value,
 # this helps prevent extreme outliers from dominating the color scale
 # min.cutoff 0 is set so any positive value will be highlighted
 other_cells_feature_plots <- FeaturePlot(
   object = breast_cancer_patients_other_cells,
   reduction = "umap",
-  features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
+  features = other_cells_features_umap,
   max.cutoff = "q95",
   min.cutoff = 0,
   label = TRUE,
@@ -3053,7 +3054,7 @@ other_cells_feature_plots <- lapply(
     plot.subtitle = element_text(size = 16, hjust = 0.5)
   )
 )
-names(other_cells_feature_plots) <- glue('other_cells_feature_plot_{c("PanCK", "CD45", "CD68")}')
+names(other_cells_feature_plots) <- glue('other_cells_feature_plot_{other_cells_features_umap}')
 other_cells_plots_to_save <- c(other_cells_plots_to_save, other_cells_feature_plots)
 
 # Other cells cluster tibble column name
