@@ -3676,6 +3676,8 @@ for (cluster in names(GSEA_to_plot)) {
   GSEAlabels <- labs(
     title = paste("Significant Pathways in Tumor Cluster", cluster), 
     subtitle = "by Gene Set Enrichment Analysis",
+    x = "Gene Ratio",
+    y = "Biological Pathway",
     caption = paste0("Based on ", num_upreg_genes, " up-regulated genes and ", num_downreg_genes, " down-regulated genes.")
   )
   # Prepare plot aesthetics
@@ -3683,11 +3685,11 @@ for (cluster in names(GSEA_to_plot)) {
     plot.title = element_text(hjust = 0.5, size = 20),
     plot.subtitle = element_text(hjust = 0.5, size = 15),
     axis.text.x = element_text(angle = 0, size = 10),
-    axis.text.y = element_text(angle = 0, size = 6)
+    axis.text.y = element_text(angle = 0, size = 9)
   ) 
   # Make the GSEA plot
   GSEADotPlot <- dotplot(gsea_simplified, showCategory = 25) +
-    GSEAlabels + labs(x = "Gene Ratio", y = "Biological Pathway") +
+    GSEAlabels +
     GSEAtheme
   
   # Save the plot and tibble
