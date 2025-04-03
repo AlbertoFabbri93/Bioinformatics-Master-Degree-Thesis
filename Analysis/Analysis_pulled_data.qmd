@@ -1065,7 +1065,17 @@ proteins_feature_plots_sct <- FeaturePlot(
   combine = FALSE)
 proteins_feature_plots_sct <- lapply(
   proteins_feature_plots_sct,
-  function(x) x & NoLegend() & NoAxes() & labs(subtitle = "All cells"))
+  function(x) x &
+  NoLegend() &
+  NoAxes() & 
+  labs(
+    subtitle = "All cells"
+  ) &
+  theme(
+    plot.title = element_text(size = 20),
+    plot.subtitle = element_text(size = 16, hjust = 0.5),
+  )
+)
 names(proteins_feature_plots_sct) <- glue('proteins_feature_plots_sct_{c("PanCK", "CD45", "CD68")}')
 patients_ist_sct <- c(patients_ist_sct, proteins_feature_plots_sct)
 
