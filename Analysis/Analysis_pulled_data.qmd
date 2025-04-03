@@ -2994,7 +2994,12 @@ other_cells_patient_id_plot <- DimPlot(
   label.box=TRUE,
   group.by = "Patient.ID",
   cols = palette_patients) +
-  labs(title = "Patient ID clusters") &
+  labs(
+    title = "Patient ID clusters"
+  ) + 
+  theme(
+    plot.title = element_text(size = 20),
+  ) &
   NoLegend() &
   NoAxes()
 other_cells_plots_to_save[["other_cells_patient_id_plot"]] <- other_cells_patient_id_plot
@@ -3012,29 +3017,44 @@ other_cells_chosen_resolution_plot <- DimPlot(
   reduction = "umap",
   group.by = col_other_cells_chosen_cluster,
   label = TRUE) +
-  labs(title = "Other Cell Clusters") &
+  labs(
+    title = "Malignant Cell Clusters"
+  ) +
+  theme(
+    plot.title = element_text(size = 20),
+  ) &
   NoLegend() &
   NoAxes()
 # Print DimPlot chosen resolution
 other_cells_plots_to_save[["other_cells_chosen_resolution_plot"]] <- other_cells_chosen_resolution_plot
-# Print DimPlots side by side
-other_cells_clusters_plus_patient_clusters <- other_cells_patient_id_plot + other_cells_chosen_resolution_plot
-other_cells_plots_to_save[["other_cells_clusters_plus_patient_clusters"]] <- other_cells_clusters_plus_patient_clusters
 
 # Generate FeaturePlot of other clusters
 # max.cutoff q95 is set so any values above the 95th percentile will be set to the 95th percentile value,
 # this helps prevent extreme outliers from dominating the color scale
 # min.cutoff 0 is set so any positive value will be highlighted
-other_cells_feature_plot <- (FeaturePlot(
+other_cells_feature_plots <- FeaturePlot(
   object = breast_cancer_patients_other_cells,
   reduction = "umap",
   features = c("Mean.PanCK", "Mean.CD45", "Mean.CD68"),
   max.cutoff = "q95",
   min.cutoff = 0,
-  label = TRUE) &
-  NoAxes()) +
-  plot_annotation(title = "Other Cells")
-other_cells_plots_to_save[["other_cells_feature_plot"]] <- other_cells_feature_plot
+  label = TRUE,
+  combine = FALSE)
+other_cells_feature_plots <- lapply(
+  other_cells_feature_plots,
+  function(x) x &
+  NoLegend() &
+  NoAxes() &
+  labs(
+    subtitle = "Malignant cells"
+  ) &
+  theme(
+    plot.title = element_text(size = 20),
+    plot.subtitle = element_text(size = 16, hjust = 0.5)
+  )
+)
+names(other_cells_feature_plots) <- glue('other_cells_feature_plot_{c("PanCK", "CD45", "CD68")}')
+other_cells_plots_to_save <- c(other_cells_plots_to_save, other_cells_feature_plots)
 
 # Other cells cluster tibble column name
 stat_col_other_cells_clusters <- "Other cell clusters"
