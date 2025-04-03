@@ -2873,6 +2873,12 @@ save_data(fibroblast_cells_markers_to_save, fibroblast_cells_markers_dir)
 
 ## Other cells
 
+```{r}
+#| label: other-cells-load-metadata
+
+other_cells_dir <- file.path(gl_img_dir, "Other cells")
+```
+
 ### Cluster
 
 ```{r}
@@ -3151,7 +3157,7 @@ print(other_cells_plots_to_save)
 #| eval: false
 
 # Save the other cells plots
-save_data(other_cells_plots_to_save, file.path(gl_img_dir, "Other cells clusters"))
+save_data(other_cells_plots_to_save, file.path(other_cells_dir, "Clusters"))
 ```
 
 ```{r}
@@ -3193,7 +3199,6 @@ other_cells_markers_data <- FindAllMarkers(
 # Save the data
 saveRDS(other_cells_markers_data, file.path(gl_obj_dir, "other_cells_markers_data.rds"))
 ```
-
 
 ```{r}
 #| label: other-cells-markers-plots
@@ -3380,7 +3385,7 @@ print(main_markers_list)
 #| eval: false
 
 # Other cells markers folder
-other_cells_markers_dir <- file.path(gl_img_dir, "Other cells markers")
+other_cells_markers_dir <- file.path(other_cells_dir, "Markers")
 # Save the markers
 save_data(other_cells_markers_to_print, other_cells_markers_dir)
 
