@@ -2573,7 +2573,17 @@ fibroblast_cells_feature_plots <- FeaturePlot(
   combine = FALSE)
 fibroblast_cells_feature_plots <- lapply(
   fibroblast_cells_feature_plots,
-  function(x) x & NoLegend() & NoAxes() & labs(subtitle = "Fibroblasts"))
+  function(x) x &
+  NoLegend() &
+  NoAxes() &
+  labs(
+    subtitle = "Fibroblasts"
+  ) &
+  theme(
+    plot.title = element_text(size = 20),
+    plot.subtitle = element_text(size = 16, hjust = 0.5)
+  )
+)
 names(fibroblast_cells_feature_plots) <- glue('fibroblast_cells_feature_plot_{c("PanCK", "CD45", "CD68")}')
 fibroblast_cells_plots_to_save <- c(fibroblast_cells_plots_to_save, fibroblast_cells_feature_plots)
 
