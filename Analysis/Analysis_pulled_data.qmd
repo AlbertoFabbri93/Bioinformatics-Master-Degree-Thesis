@@ -3083,7 +3083,7 @@ other_cells_cluster_distribution_plot <- other_cells_cluster_statistics %>%
        title = "Other Cell Clusters Distribution by Patient",
        color = "Patient") +
   theme(legend.position = "right") +
-  scale_color_brewer(palette = "Set1") +
+  scale_color_manual(values = palette_patients) +
   guides(
     color = guide_legend(order = 1),
   )
