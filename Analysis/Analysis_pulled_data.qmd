@@ -1597,9 +1597,6 @@ normal_cells_markers_data <- readRDS(file.path(gl_obj_dir, "normal_cells_markers
 #| label: normal-cells-markers-computation
 #| eval: false
 
-# List to save and print
-normal_cells_markers_to_print <- list()
-
 # Set identity to the clusters whose markers we want to find
 Idents(breast_cancer_patients_normal_cells) <- col_ist_ann
 
@@ -1611,6 +1608,13 @@ normal_cells_markers_data <- FindAllMarkers(
   only.pos = FALSE,
   random.seed = 5,
   verbose = TRUE)
+```
+
+```{r}
+#| label: normal-cells-markers-plot
+
+# List to save and print
+normal_cells_markers_to_print <- list()
 
 # Filter markers to get the most significant up-regulated ones per cluster
 most_significant_normal_cells_markers <- normal_cells_markers_data %>%
@@ -2650,6 +2654,14 @@ fibroblasts_info <- c(fibroblasts_info, fibroblast_cells_count_per_cluster_list)
 print(glue("Total fibroblast cells: {count_total_fibroblast}"))
 # Print dataframes
 print(fibroblasts_info)
+```
+
+```{r}
+#| label: fibroblast-cells-save-rds
+#| eval: false
+
+# Save the Seurat object
+saveRDS(breast_cancer_patients_fibroblast_cells, file.path(gl_obj_dir, "breast_cancer_patients_fibroblast_cells.rds"))
 ```
 
 ```{r}
@@ -3766,7 +3778,7 @@ breast_cancer_patients_analyze@meta.data %<>%
 
 # Create a tibble with cell count and percentage of every cluster
 cell_types_count <- breast_cancer_patients_analyze@meta.data %>%
-  count(.data[[col_cell_tumor_cluster_subtype]], name = "cell_count") %>%
+  dplyr::count(.data[[col_cell_tumor_cluster_subtype]], name = "cell_count") %>%
   mutate(percentage = round((cell_count / sum(cell_count)) * 100, 3)) %>%
   dplyr::rename(cluster = .data[[col_cell_tumor_cluster_subtype]]) %>%
   as_tibble()
