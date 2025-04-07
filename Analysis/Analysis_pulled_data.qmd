@@ -1458,6 +1458,12 @@ normal_cells_cluster_distribution_dotplot <- normal_cells_cluster_statistics %>%
     color = guide_legend(order = 1),
     shape = guide_legend(order = 2, title = "Statistics"),
     linetype = guide_legend(order = 3, title = "Statistics")
+  ) +
+  theme(
+    plot.title = element_text(size = 20, hjust = 0.5),
+    plot.title.position = "plot",
+    # Change style of facets
+    strip.text = element_text(size = 14),
   )
 normal_cells_images[["normal_cells_cluster_distribution_dotplot"]] <- normal_cells_cluster_distribution_dotplot
 
