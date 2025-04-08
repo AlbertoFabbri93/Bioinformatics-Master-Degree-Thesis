@@ -211,6 +211,9 @@ tidy_seurat_object_assay <- function(seurat_object_mixed_features, assay_name) {
   
   # Rename one metadata column
   colnames(filtered_metadata)[which(colnames(filtered_metadata) == "cell_id")] <- "full_cell_ID"
+  
+  # Make Patient ID a factor
+  filtered_metadata$Patient.ID <- as.factor(filtered_metadata$Patient.ID)
 
   # Copy the metadata from the original Seurat object
   seurat_object_cleaned_features <- AddMetaData(object = seurat_object_cleaned_features, metadata = filtered_metadata)
