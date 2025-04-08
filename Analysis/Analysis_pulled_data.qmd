@@ -1392,81 +1392,150 @@ breast_cancer_patients_normal_cells <- RunUMAP(
 # Create empty list to store normal cells images
 normal_cells_images <- list()
 
-# Calculate the statistics for the normal cells
-# The percentage is calculated per patient meaning that the different cell types of every patient add up to 100%
-# The mean and standard deviation are calculated from the percentages of each cell type
-normal_cells_cluster_statistics <- breast_cancer_patients_normal_cells@meta.data %>%
+# Calculate the percentage of cell type per patient.
+# The different cell types of every patient add up to 100%
+normal_cells_percentages_per_patient <- breast_cancer_patients_normal_cells@meta.data %>%
   # Group by patient and cluster, then calculate percentage
-  group_by(Patient.ID, !!sym(col_ist_ann), !!sym(col_cell_group)) %>%
-  summarise(count = n(), .groups = "drop") %>%
+  # Cells are also grouped by cell group in order to retain that column
+  group_by(Patient.ID, `Cell type` = !!sym(col_ist_ann), `Cell group` = !!sym(col_cell_group)) %>%
+  summarise(`Cell count` = n(), .groups = "drop") %>%
   group_by(Patient.ID) %>%
-  mutate(Percentage = count / sum(count) * 100) %>%
-  ungroup() %>%
-  # Ensure Patient.ID is a factor
-  mutate(Patient.ID = as.factor(Patient.ID)) %>%
-  # Calculate mean and sd for each cluster
-  group_by(!!sym(col_ist_ann)) %>%
-  mutate(
-    MeanPercentage = mean(Percentage),
-    SDPercentage = sd(Percentage)
-  ) %>%
+  mutate(`Within-patient %` = `Cell count` / sum(`Cell count`) * 100) %>%
   ungroup()
-normal_cells_images[["normal_cells_cluster_statistics"]] <- normal_cells_cluster_statistics
+normal_cells_images[["normal_cells_percentages_per_patient"]] <- normal_cells_percentages_per_patient
+
+# Calculate the mean and standard deviation from the percentages of each cell type
+normal_cells_percentages_per_patient_statistics <- normal_cells_percentages_per_patient %>%
+  # Calculate total number of cells, mean and sd for each cell type
+  group_by(`Cell type`, `Cell group`) %>%
+  summarize(
+    `Tot cell count` = sum(`Cell count`),
+    `Mean within-patient %` = mean(`Within-patient %`),
+    `SD within-patient %` = sd(`Within-patient %`)
+  )
+normal_cells_images[["normal_cells_percentages_per_patient_statistics"]] <- normal_cells_percentages_per_patient_statistics
 
 # Plot the percentages of the various types of cells (except cancer cells)
-normal_cells_cluster_distribution_barplot <- normal_cells_cluster_statistics %>%
+normal_cells_cluster_distribution_barplot <- normal_cells_percentages_per_patient %>%
   # Plot the data in a grouped barplot
-  ggplot(aes(x = !!sym(col_ist_ann), y = Percentage, fill = Patient.ID)) +
-  geom_bar(stat = "identity", position = position_dodge2(preserve = "single", padding = 0), width = .8) +
-  facet_grid(cols = ggplot2::vars(!!sym(col_cell_group)), scales = "free_x", space = "free") +
+  ggplot(
+    aes(
+      x = `Cell type`,
+      y = `Within-patient %`,
+      fill = Patient.ID,
+    )
+  ) +
+  geom_bar(
+    stat = "identity",
+    position = position_dodge2(preserve = "single", padding = 0),
+    width = 0.8,
+  ) +
+  facet_grid(
+    cols = ggplot2::vars(`Cell group`),
+    scales = "free_x",
+    space = "free",
+  ) +
+  labs(
+    x = NULL, 
+    y = "Within-patient % of non-malignant cells", 
+    title = "Normal Cells Types Distribution by Patient",
+    fill = "Patient",
+  ) +
   theme_minimal() +
-  labs(x = NULL, 
-       y = "Percentage of Cells", 
-       title = "Normal Cells Types Distribution by Patient",
-       fill = "Patient") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        panel.spacing = unit(0.8, "lines")) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.spacing = unit(0.8, "lines")
+  ) +
   scale_fill_manual(values = palette_patients)
 normal_cells_images[["normal_cells_cluster_distribution_barplot"]] <- normal_cells_cluster_distribution_barplot
 
 # Plot the distribution of normal cell clusters by patient
-normal_cells_cluster_distribution_dotplot <- normal_cells_cluster_statistics %>%
+normal_cells_cluster_distribution_dotplot <- normal_cells_percentages_per_patient %>%
   # Plot the data
-  ggplot(aes(x = Percentage, y = !!sym(col_ist_ann))) +
-  # Add dots for each patient
-  geom_point(aes(color = Patient.ID), size = 3, alpha = 0.7) +
-  # Add mean percentage point
-  stat_summary(aes(shape = "Mean"), fun = mean, geom = "point", size = 5, color = "black", alpha = 0.7) +
-  # Add standard deviation error bars
-  geom_errorbarh(aes(xmin = MeanPercentage - SDPercentage, 
-                     xmax = MeanPercentage + SDPercentage, 
-                     y = !!sym(col_ist_ann),
-                     linetype = "Standard Deviation"), 
-                 color = "black", alpha = 0.7, height = 0.5, linewidth = 0.2) +
-  theme_minimal() +
+  ggplot(
+    aes(
+      x = `Within-patient %`,
+      y = `Cell type`,
+    )
+  ) +
   ggforce::facet_col(
-    facets = col_cell_group,
+    facets = ggplot2::vars(`Cell group`),
     scales = "free_y",
     space = "free",
     drop = TRUE,
-    strip.position = "top"
+    strip.position = "top",
   ) +
-  labs(x = "Percentage of Cells", y = NULL,
-       title = "Non-malignant cells type distribution by patient",
-       color = "Patient") +
-  scale_color_manual(values = palette_patients) +
-  scale_shape_manual(values = c("Mean" = 18), labels = c("Mean")) +
-  scale_linetype_manual(values = c("Standard Deviation" = "solid"), labels = c("Standard Deviation")) +
+  # Add dots for each patient
+  geom_point(
+    aes(
+      color = Patient.ID),
+    size = 3,
+    alpha = 0.7,
+  ) +
+  # Add mean percentage point
+  geom_point(
+    aes(
+      x = `Mean within-patient %`,
+      shape = "Mean",
+    ),
+    data = normal_cells_percentages_per_patient_statistics,
+    size = 3,
+    color = "black",
+    alpha = 0.8,
+  ) +
+  # Add standard deviation error bars
+  geom_errorbarh(
+    aes(
+      xmin = `Mean within-patient %` - `SD within-patient %`, 
+      xmax = `Mean within-patient %` + `SD within-patient %`, 
+      y = `Cell type`,
+      linetype = "Standard Deviation"
+    ), 
+    inherit.aes=FALSE,
+    color = "black",
+    alpha = 0.9,
+    height = 0.5,
+    linewidth = 0.4,
+    data = normal_cells_percentages_per_patient_statistics,
+  ) +
+  labs(
+    x = "Within-patient % of non-malignant cells",
+    y = NULL,
+    title = "Non-malignant cells type distribution by patient",
+    color = "Patient",
+  ) +
+  scale_color_manual(
+    values = palette_patients,
+  ) +
+  scale_shape_manual(
+    values = c("Mean" = 18),
+    labels = c("Mean"),
+  ) +
+  scale_linetype_manual(
+    values = c("Standard Deviation" = "solid"),
+    labels = c("Standard Deviation"),
+  ) +
   guides(
     color = guide_legend(order = 1),
-    shape = guide_legend(order = 2, title = "Statistics"),
-    linetype = guide_legend(order = 3, title = "Statistics")
+    shape = guide_legend(
+      order = 2,
+      title = "Statistics",
+      title.theme = element_text(margin = margin(t = 10, b = 6)),
+    ),
+    linetype = guide_legend(
+      order = 3,
+      theme = theme(legend.title=element_blank()),
+    )
   ) +
+  theme_minimal() +
   theme(
     plot.title = element_text(size = 20, hjust = 0.5),
+    # Title plot is centered over the entire plot
     plot.title.position = "plot",
     # Change style of facets
     strip.text = element_text(size = 14),
+    legend.spacing=unit(0, "npc"),
+    legend.margin=margin(t=0, b=0)
   )
 normal_cells_images[["normal_cells_cluster_distribution_dotplot"]] <- normal_cells_cluster_distribution_dotplot
 
