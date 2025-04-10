@@ -4174,6 +4174,42 @@ niches_patient_dotplot <- niches_patient_counts %>%
 # Add to list
 niches_patient_data[["niches_patient_dotplot"]] <- niches_patient_dotplot
 
+niches_filtered <- niches_patient_counts %>%
+  dplyr::filter(!!sym(col_niches_plot) %in% c("1", "8"))
+
+# Create bar chart
+niches_filtered_bar_plot <- niches_filtered %>%
+  ggplot(
+    aes(
+      x = Patient.ID,
+      y = percentage,
+      fill = !!sym(col_niches_plot)
+    )
+  ) +
+  # Add bars with position_dodge to group them by patient
+  geom_bar(
+    stat = "identity", 
+    position = position_dodge(width = 0.7),
+    width = 0.6
+  ) +
+  # Keep your existing styling
+  labs(
+    title = "Distribution of niches 1 and 8 across patients",
+    x = "Patient",
+    y = "Percentage (%)"
+  ) +
+  guides(fill = guide_legend(title = "Niche")) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(hjust = 1),
+    plot.title = element_text(size = 20, hjust = 0.5),
+    axis.text = element_text(size = 10),
+    axis.title = element_text(size = 12),
+  ) +
+  # Keep only the colors for niches 1 and 8 from your palette
+  scale_fill_manual(values = niches_color_palette[c("1", "8")])
+niches_patient_data[["niches_filtered_bar_plot"]] <- niches_filtered_bar_plot
+
 # Print the list
 print(niches_patient_data)
 ```
