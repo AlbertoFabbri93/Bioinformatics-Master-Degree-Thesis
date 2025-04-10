@@ -4134,20 +4134,42 @@ niches_patient_counts <- breast_cancer_patients_analyze@meta.data %>%
 niches_patient_data[["niches_patient_counts"]] <- niches_patient_counts
 
 # Create the bar plot
-niches_patient_dotplot <- ggplot(niches_patient_counts,
-                                 aes(x = Patient.ID, y = percentage, color = !!sym(col_niches_plot))) +
-  geom_rect(data = unique(niches_patient_counts["Patient.ID"]),
-            aes(xmin = as.numeric(Patient.ID) - 0.4,
-                xmax = as.numeric(Patient.ID) + 0.4,
-                ymin = -Inf, ymax = Inf),
-            fill = "grey90", alpha = 0.3, inherit.aes = FALSE) +
-  geom_point(size = 3, position = position_dodge(width = 0.7)) +
-  labs(title = paste("Niches distribution across patients"),
-       x = "Patient",
-       y = "Percentage (%)") +
+niches_patient_dotplot <- niches_patient_counts %>%
+  ggplot(
+    aes(
+      x = Patient.ID,
+      y = percentage,
+      color = !!sym(col_niches_plot)
+    )
+  ) +
+  geom_rect(
+    data = unique(niches_patient_counts["Patient.ID"]),
+    aes(
+      xmin = as.numeric(Patient.ID) - 0.4,
+      xmax = as.numeric(Patient.ID) + 0.4,
+      ymin = -Inf,
+      ymax = Inf),
+    fill = "grey90",
+    alpha = 0.3,
+    inherit.aes = FALSE
+  ) +
+  geom_point(
+    size = 5,
+    position = position_dodge(width = 0.8)
+  ) +
+  labs(
+    title = paste("Niches distribution across patients"),
+    x = "Patient",
+    y = "Percentage (%)"
+  ) +
   guides(color = guide_legend(title = "Niche")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(hjust = 1)) +
+  theme(
+    axis.text.x = element_text(hjust = 1),
+    plot.title = element_text(size = 20, hjust = 0.5),
+    axis.text = element_text(size = 10),
+    axis.title = element_text(size = 12),
+  ) +
   scale_color_manual(values = niches_color_palette)
 # Add to list
 niches_patient_data[["niches_patient_dotplot"]] <- niches_patient_dotplot
