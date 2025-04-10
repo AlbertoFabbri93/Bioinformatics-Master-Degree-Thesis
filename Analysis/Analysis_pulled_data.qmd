@@ -3479,13 +3479,13 @@ other_cells_clusters_custom_markers <- c(
   "MMP7",
   "LYZ",
   "APOD",
-  "AGR2",
+  "S100A6",
   "IFI6",
   "ERBB2",
   "LTF",
   "APOE",
   "EGFR",
-  "IGFBP7")
+  "COL4A1")
 
 # Create a feature plot for each marker
 other_cells_custom_markers_feature_plot <- FeaturePlot(
