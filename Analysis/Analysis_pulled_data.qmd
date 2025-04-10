@@ -89,6 +89,8 @@ library("abind")
 library("Matrix")
 # Analysis of cell-cell communication
 library("CellChat")
+# Conversion between Seurat and CellChat objects
+library("SeuratWrappers")
 
 ## PLOTTING
 # Used to annotate images with multiple plots
