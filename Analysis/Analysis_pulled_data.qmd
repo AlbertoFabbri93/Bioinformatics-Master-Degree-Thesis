@@ -3918,7 +3918,7 @@ save_data(cell_types_stamps_plots, file.path(gl_img_dir, "Stamps_with_clusters")
 
 ## Spatial niches
 
-### Build niches
+### Compute
 
 ```{r}
 #| label: build-niches-params
@@ -3966,7 +3966,7 @@ for (num in niches_nums) {
 saveRDS(breast_cancer_patients_analyze, file.path(gl_obj_dir, "breast_cancer_patients_analyze.rds"))
 ```
 
-### Setup spatial niches study
+### Metadata
 
 ```{r}
 #| label: spatial-niches-study-setup
@@ -3985,7 +3985,7 @@ niches_color_palette <- generate_colors_lookup_table(
   color_palette = brewer.pal(12, name = "Set3"))
 ```
 
-### Spatial plots of niches
+### Spatial plots
 
 ```{r}
 #| label: spatial-niches-plots
@@ -4008,7 +4008,7 @@ print(niches_stamps_plots)
 save_data(niches_stamps_plots, file.path(gl_img_dir, glue("Stamps_with_{niches_plot}_niches")))
 ```
 
-### Statistics about niches
+### Statistics
 
 ```{r}
 #| label: niches-statistics-calc
