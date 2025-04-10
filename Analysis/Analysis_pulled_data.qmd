@@ -1324,18 +1324,6 @@ ist_ann_column <- FetchData(
   vars = col_ist_ann)
 ```
 
-```{r}
-#| label: insitutype-split
-#| eval: false
-
-# Create Seurat objects with the non-cancerous cells
-breast_cancer_patients_normal_cells <- 
-  breast_cancer_patients_filt_cells[, which(x = ist_ann_column != "Other")]
-# Create Seurat objects with the cancerous cells
-breast_cancer_patients_other_cells <-
-  breast_cancer_patients_filt_cells[, which(x = ist_ann_column == "Other")]
-```
-
 ## Normal cells
 
 ```{r}
@@ -1351,6 +1339,15 @@ normal_cells_dir <- file.path(gl_img_dir, "Normal cells")
 
 # Load normal cells object from memory
 breast_cancer_patients_normal_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_normal_cells.rds"))
+```
+
+```{r}
+#| label: normal-cells-create-object
+#| eval: false
+
+# Create Seurat objects with the non-cancerous cells
+breast_cancer_patients_normal_cells <- 
+  breast_cancer_patients_filt_cells[, which(x = ist_ann_column != "Other")]
 ```
 
 ```{r}
@@ -2987,6 +2984,15 @@ other_cells_dir <- file.path(gl_img_dir, "Other cells")
 
 # Load other cells object from memory
 breast_cancer_patients_other_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_other_cells.rds"))
+```
+
+```{r}
+#| label: other-cells-create-object
+#| eval: false
+
+# Create Seurat objects with the cancerous cells
+breast_cancer_patients_other_cells <-
+  breast_cancer_patients_filt_cells[, which(x = ist_ann_column == "Other")]
 ```
 
 ```{r}
