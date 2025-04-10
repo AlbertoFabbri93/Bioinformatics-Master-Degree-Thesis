@@ -2422,12 +2422,19 @@ save_data(macrophage_cells_pseudotime_images, file.path(macrophage_dir, "Pseudot
 ## Fibroblast
 
 ```{r}
+#| label: fibroblast-cells-metadata
+
+# Fibroblast main folder
+fibroblast_dir <- file.path(gl_img_dir, "Fibroblasts")
+```
+
+### Compute
+
+```{r}
 #| label: fibroblast-cells-load
 
 # Load fibroblast cells object from memory
 breast_cancer_patients_fibroblast_cells <- readRDS(file.path(gl_obj_dir, "breast_cancer_patients_fibroblast_cells.rds"))
-# Fibroblast main folder
-fibroblast_dir <- file.path(gl_img_dir, "Fibroblasts")
 ```
 
 ```{r}
