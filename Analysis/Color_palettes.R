@@ -73,6 +73,7 @@ palette_cell_types <- c(
   
   # Other cells
     "Tumor" = "#C0C0C0",
+    "Malignant cell" = "#C5C5C5",
     "Unknown" = "#f5ee59",
     "Other" = "#B0B0B0"
 )
