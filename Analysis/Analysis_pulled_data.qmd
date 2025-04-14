@@ -4150,7 +4150,7 @@ niches_patient_dotplot <- niches_patient_counts %>%
       ymin = -Inf,
       ymax = Inf),
     fill = "grey90",
-    alpha = 0.3,
+    alpha = 0.25,
     inherit.aes = FALSE
   ) +
   geom_point(
