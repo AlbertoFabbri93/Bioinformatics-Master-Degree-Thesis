@@ -1468,7 +1468,7 @@ normal_cells_cluster_distribution_dotplot <- normal_cells_percentages_per_patien
   geom_point(
     aes(
       color = Patient.ID),
-    size = 3,
+    size = 4,
     alpha = 0.7,
   ) +
   # Add mean percentage point
@@ -1533,6 +1533,7 @@ normal_cells_cluster_distribution_dotplot <- normal_cells_percentages_per_patien
     plot.title.position = "plot",
     # Change style of facets
     strip.text = element_text(size = 14),
+    axis.text.y = element_text(size = 11),
     legend.spacing=unit(0, "npc"),
     legend.margin=margin(t=0, b=0)
   )
@@ -1651,6 +1652,19 @@ print(normal_cells_images)
 #| label: normal-cells-save-plots
 #| eval: false
 
+
+normal_cells_distribution_dotplot_attr <- list(
+  width = 25,
+  height = 20,
+  units = "cm",
+  dpi = 600
+)
+
+normal_cells_images <- set_plot_attributes(
+  normal_cells_images,
+  normal_cells_distribution_dotplot_attr,
+  c("normal_cells_cluster_distribution_dotplot")
+)
 # Save the normal cells plots
 save_data(normal_cells_images, normal_cells_dir)
 ```
