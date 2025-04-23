@@ -1669,6 +1669,56 @@ normal_cells_images <- set_plot_attributes(
 save_data(normal_cells_images, normal_cells_dir)
 ```
 
+### Info
+
+```{r}
+#| label: insitutype-info
+
+normal_cells_info <- list()
+
+# CELL TYPES
+# Create a tibble with cell count and percentage of every cluster
+summary_normal_cells_types_count <- breast_cancer_patients_normal_cells@meta.data %>%
+  dplyr::count(.data[[col_ist_ann]], name = "cell_count") %>%
+  mutate(percentage = round((cell_count / sum(cell_count)) * 100, 3)) %>%
+  dplyr::rename(cell_type = .data[[col_ist_ann]]) %>%
+  as_tibble()
+normal_cells_info[["summary_normal_cells_types_count"]] <- summary_normal_cells_types_count
+
+# Create a table with the cell count and percentage divided by patient
+summary_normal_cells_types_count_per_patient <- breast_cancer_patients_normal_cells@meta.data %>%
+  dplyr::count(!!sym(col_ist_ann), Patient.ID) %>%
+  group_by(Patient.ID) %>%
+  mutate(percentage = round(n / sum(n) * 100, 4)) %>%
+  arrange(Patient.ID, !!sym(col_ist_ann)) %>%
+  dplyr::rename(cell_type = !!sym(col_ist_ann)) %>%
+  as_tibble()
+normal_cells_info[["summary_normal_cells_types_count_per_patient"]] <- summary_normal_cells_types_count_per_patient
+
+# CELL GROUPS
+# Create a tibble with cell count and percentage of every group
+summary_normal_cells_groups_count <- breast_cancer_patients_normal_cells@meta.data %>%
+  dplyr::count(.data[[col_cell_group]], name = "cell_count") %>%
+  mutate(percentage = round((cell_count / sum(cell_count)) * 100, 3)) %>%
+  dplyr::rename(cell_group = .data[[col_cell_group]]) %>%
+  as_tibble()
+normal_cells_info[["summary_normal_cells_groups_count"]] <- summary_normal_cells_groups_count
+
+# Create a table with the cell count and percentage divided by patient
+summary_normal_cells_groups_count_per_patient <- breast_cancer_patients_normal_cells@meta.data %>%
+  dplyr::count(!!sym(col_cell_group), Patient.ID) %>%
+  group_by(Patient.ID) %>%
+  mutate(percentage = round(n / sum(n) * 100, 4)) %>%
+  arrange(Patient.ID, !!sym(col_cell_group)) %>%
+  dplyr::rename(cell_group = !!sym(col_cell_group)) %>%
+  as_tibble()
+normal_cells_info[["summary_normal_cells_groups_count_per_patient"]] <- summary_normal_cells_groups_count_per_patient
+
+for (table in normal_cells_info) {
+  print(datatable(table))
+}
+```
+
 ```{r}
 #| label: normal-cells-save-rds
 #| eval: false
