@@ -4025,8 +4025,8 @@ save_data(cell_types_stamps_plots, file.path(gl_img_dir, "Stamps_with_clusters")
 #| label: build-niches-params
 
 # To build the niche assay, Seurat uses only the spatial images and the cell phenotypes (a column from the metadata)
-# Number of niche to calculate
-niches_nums <- c(6, 9, 12, 15)
+# Number of niche to calculate, if wanting more than 12 niches change the color palette below
+niches_nums <- c(6, 9, 12)
 ```
 
 ```{r}
@@ -4079,8 +4079,8 @@ col_niches_plot <- glue("niches_{niches_plot}")
 
 # Metadata column with the highest number of niches
 col_highest_niches_num <- glue("niches_{niches_nums[length(niches_nums)]}")
-# Create the color palette for the niches
-niches_color_palette <- generate_colors_lookup_table(
+# Create the color palette for the niches, maximum 12 colors are available in the brewer palette
+palette_niches <- generate_colors_lookup_table(
   breast_cancer_patients_analyze,
   cluster_column_name = col_highest_niches_num,
   color_palette = brewer.pal(12, name = "Set3"))
@@ -4097,7 +4097,7 @@ niches_stamps_plots <- generate_spatial_plots(
   cluster_var = col_niches_plot,
   cluster_name = "Seurat niches",
   legend_fill = "Niches",
-  color_lookup_table = niches_color_palette)
+  color_lookup_table = palette_niches)
 # Display the plots
 print(niches_stamps_plots)
 ```
@@ -4271,7 +4271,7 @@ niches_patient_dotplot <- niches_patient_counts %>%
     axis.text = element_text(size = 10),
     axis.title = element_text(size = 12),
   ) +
-  scale_color_manual(values = niches_color_palette)
+  scale_color_manual(values = palette_niches)
 # Add to list
 niches_patient_data[["niches_patient_dotplot"]] <- niches_patient_dotplot
 
@@ -4308,7 +4308,7 @@ niches_filtered_bar_plot <- niches_filtered %>%
     axis.title = element_text(size = 12),
   ) +
   # Keep only the colors for niches 1 and 8 from your palette
-  scale_fill_manual(values = niches_color_palette[c("1", "8")])
+  scale_fill_manual(values = palette_niches[c("1", "8")])
 niches_patient_data[["niches_filtered_bar_plot"]] <- niches_filtered_bar_plot
 
 # Print the list
@@ -4562,7 +4562,7 @@ cellchat_datatype = cellchat_datatypes[cellchat_datatype_index]
 # This involves interactions between cells and the extracellular matrix (ECM). Cells can bind to ECM components through specific receptors (like integrins), which triggers various cellular responses. These interactions are vital for cell adhesion, migration, and tissue maintenance.
 
 ### Cell-Cell contact (Juxtacrine signaling):
-#   This involves direct physical contact between cells, where membrane-bound ligands on one cell interact with receptors on an adjacent cell
+# This involves direct physical contact between cells, where membrane-bound ligands on one cell interact with receptors on an adjacent cell
 
 ### Non-protein Signaling:
 # This category includes signaling through non-protein molecules such as neurotransmitters, lipids, and other small molecules.
@@ -4855,7 +4855,7 @@ plot_list_cellchat <- c(plot_list_cellchat, plot_list_cellchat_pathways)
 # Show all the significant interactions (L-R pairs) from some cell groups to other cell groups
 netVisual_bubble(
   object = cellchat,
-  title.name = glue("Interaction strength\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
+  title.name = glue("Significant interactions\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
   sources.use = NULL,
   targets.use = NULL,
   remove.isolate = TRUE,
