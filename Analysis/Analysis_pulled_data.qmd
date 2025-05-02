@@ -3892,9 +3892,10 @@ for (cluster in names(GSEA_to_plot)) {
   # Prepare plot aesthetics
   GSEAtheme <- theme(
     plot.title = element_text(hjust = 0.5, size = 20),
-    plot.subtitle = element_text(hjust = 0.5, size = 15),
-    axis.text.x = element_text(angle = 0, size = 10),
-    axis.text.y = element_text(angle = 0, size = 9)
+    plot.subtitle = element_text(hjust = 0.5, size = 16),
+    plot.caption = element_text(size = 11),
+    axis.text.x = element_text(angle = 0, size = 12),
+    axis.text.y = element_text(angle = 0, size = 12)
   ) 
   # Make the GSEA plot
   GSEADotPlot <- dotplot(gsea_simplified, showCategory = 25) +
