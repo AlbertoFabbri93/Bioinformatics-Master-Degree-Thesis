@@ -4860,7 +4860,9 @@ netVisual_bubble(
   sources.use = NULL,
   targets.use = NULL,
   remove.isolate = TRUE,
-  signaling = NULL)
+  signaling = NULL,
+  font.size.title = 18,
+  font.size = 12)
 plot_list_cellchat[["cellchat_bubbleplot_interactions"]] <- recordPlot()
 ```
 
@@ -4950,7 +4952,7 @@ cellchat_pathway_network_attrs <- list(
 )
 cellchat_bubbleplot_attrs <- list(
   width = 28,
-  height = 15,
+  height = 16,
   units = "cm",
   dpi = 600
 )
