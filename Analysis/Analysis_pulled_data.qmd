@@ -2634,7 +2634,7 @@ fibroblast_cells_patient_id_plot <- DimPlot(
 fibroblast_cells_plots_to_save[["fibroblast_cells_patient_id_plot"]] <- fibroblast_cells_patient_id_plot
 
 # Chosen resolution
-chosen_fibroblast_cells_cluster_resolution <- 0.6
+chosen_fibroblast_cells_cluster_resolution <- 0.4
 # Chosen cluster
 col_fibroblast_cells_chosen_cluster <- glue::glue("{col_fibroblast_cells_clust_res_prefix}{chosen_fibroblast_cells_cluster_resolution}")
 # Set identity to other clusters
