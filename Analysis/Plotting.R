@@ -351,8 +351,8 @@ generate_spatial_plots <- function(
         cols = color_lookup_table) + theme(
           legend.text = element_text(size = 6),
           legend.title = element_text(size = 8),
-          legend.key.size = unit(0.5, 'lines'), # Adjust the size of the legend keys
-          legend.spacing = unit(0.5, 'lines') # Adjust the spacing between legend items
+          legend.key.size = unit(0.5, 'lines'),
+          legend.spacing = unit(0.5, 'lines')
         ) +
         labs(
           title = paste("Patient", patient_num, "Core", curr_core, ", Stamp", curr_stamp),
