@@ -4151,18 +4151,24 @@ for (niche in niches) {
   # Filter out cells in other niches and group the cells types below the cutoff together
   niche_stat <- cell_type_counts %>%
     dplyr::filter(!!sym(col_niches_plot) == niche) %>%
+    # Combine the cells whose cluster name starts with "Tumor"
     dplyr::mutate(
       !!sym(col_cell_tumor_cluster_subtype) := ifelse(
-        percentage >= niche_cell_type_cutoff,
-        !!sym(col_cell_tumor_cluster_subtype),
-        "Others")
+        grepl("^Tumor", !!sym(col_cell_tumor_cluster_subtype)),
+        "Malignant cell",
+        !!sym(col_cell_tumor_cluster_subtype)
+      )
     ) %>%
     dplyr::group_by(!!sym(col_cell_tumor_cluster_subtype), !!sym(col_niches_plot)) %>%
     dplyr::summarize(
       percentage = sum(percentage, na.rm = TRUE),
       count = sum(count, na.rm = TRUE),
       .groups = "drop"
-    )
+    ) %>%
+    # Filter out cells whose percentage is below the cutoff
+    dplyr::filter(percentage >= niche_cell_type_cutoff) %>%
+    # Filter out cells in the unknown cluster
+    dplyr::filter(!!sym(col_cell_tumor_cluster_subtype) != "Unknown")
   niches_data[[glue("Niche_{niche}_statistics")]] <- niche_stat
 }
 # Add niches data to print list
@@ -4200,20 +4206,26 @@ for (niche in niches) {
     labs(
       title = glue("Niche: {niche} of {niches_plot}"),
       subtitle = "Cell Type Distribution",
-      caption = glue(
-        "Cutoff value: {niche_cell_type_cutoff}%, the cells types with a percentage below the cutoff are grouped together as 'Others'.
-        The percentage of each cell type represents its proportion within the niche, with all percentages summing to 100%.
-        The count number above the bars represents the number of cells of each type."
-      ),
+      # caption = glue(
+      #   "Cutoff value: {niche_cell_type_cutoff}%, the cells types with a percentage below the cutoff are removed.
+      #   The percentage of each cell type represents its proportion within the niche, with all percentages summing to 100%.
+      #   The count number above the bars represents the number of cells of each type."
+      # ),
       x = "Cell Type",
       y = "Percentage (%)"
     ) +
-    # Make space for the count number above the bars
-    expand_limits(y = max(niche_data$percentage) * 1.04) +
+    # Hard-code the y axis limits
+    scale_y_continuous(limits = c(0, 100)) +
+    # Make space for the count number above the bars, not necessary if hard-coding the y axis limits
+    # expand_limits(y = max(niche_data$percentage) + 5) +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1),
-          # Move caption to the left
-          plot.caption = element_text(hjust = 0)) +
+    theme(
+      plot.title = element_text(size = 18),
+      plot.subtitle = element_text(size = 15),
+      axis.title = element_text(size = 12),
+      axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+      plot.caption = element_text(hjust = 0)
+    ) +
     scale_fill_manual(values = palette_all_cells_types) +
     NoLegend()
 
