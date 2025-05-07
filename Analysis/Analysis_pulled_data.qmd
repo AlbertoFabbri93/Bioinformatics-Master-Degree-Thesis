@@ -4812,17 +4812,20 @@ netVisual_circle(
   title.name = glue("Number of interactions\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
   margin = 0.2,
   vertex.label.cex = 0.8,
-  color.use = palette_cellchat)
+  color.use = palette_cellchat
+)
 plot_list_cellchat[["cellchat_circleplot_count"]] <- recordPlot()
 # Heatmap
 netVisual_heatmap(
   object = cellchat,
   measure = "count",
-  # Darker color for interactions close to 0
-  color.heatmap = c("#f0f8ff", "#2166ac"),
-  title.name = glue("Number of interactions\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
-  font.size = 7,
-  color.use = palette_cellchat)
+  title.name = glue("Number of interactions"),
+  font.size.title = 12,
+  font.size = 9,
+  color.use = palette_cellchat,
+  # Make the colors different between the two types of heatmap, darker color for interactions close to 0
+  color.heatmap = c("#f0f8ff", "#2166ac")
+)
 plot_list_cellchat[["cellchat_heatmap_count"]] <- recordPlot()
 
 # Plot the interaction strength
@@ -4834,15 +4837,18 @@ netVisual_circle(
   weight.scale = TRUE,
   label.edge= FALSE,
   title.name = glue("Interaction strength\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
-  color.use = palette_cellchat)
+  color.use = palette_cellchat
+)
 plot_list_cellchat[["cellchat_circleplot_weight"]] <- recordPlot()
 # Heatmap
 netVisual_heatmap(
   object = cellchat,
   measure = "weight",
-  title.name = glue("Interaction strength\n{cellchat_interactions_name}\n{cellchat_datatype_name}"),
-  font.size = 7,
-  color.use = palette_cellchat)
+  title.name = glue("Interaction strength"),
+  font.size.title = 12,
+  font.size = 9,
+  color.use = palette_cellchat
+)
 plot_list_cellchat[["cellchat_heatmap_weight"]] <- recordPlot()
 
 # Print signaling pathways showing significant communications
@@ -4869,7 +4875,8 @@ netVisual_bubble(
   remove.isolate = TRUE,
   signaling = NULL,
   font.size.title = 18,
-  font.size = 12)
+  font.size = 12
+)
 plot_list_cellchat[["cellchat_bubbleplot_interactions"]] <- recordPlot()
 ```
 
@@ -4940,7 +4947,7 @@ print(cellchat_dfs)
 
 # Define the saving attributes for the various cellchat plots
 cellchat_heatmap_attrs <- list(
-  width = 15,
+  width = 16,
   height = 14,
   units = "cm",
   dpi = 600
