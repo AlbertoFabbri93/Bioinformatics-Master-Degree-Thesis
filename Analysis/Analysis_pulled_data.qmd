@@ -239,6 +239,8 @@ saveRDS(breast_cancer_patients, file.path(gl_obj_dir, "breast_cancer_patients.rd
 
 ### Filter out anomalous cells
 
+Here, cells with low quality data are removed. First, cells that have been categorized as red blood cells according to a previous study are removed. Then, cells with a very low number of expressed genes and cells with an extremely high expression of any gene are removed.
+
 ```{r}
 #| label: load-filtered-cells-object
 
@@ -273,6 +275,8 @@ saveRDS(breast_cancer_patients_filt_cells, file.path(gl_obj_dir, "breast_cancer_
 ```
 
 ## ER status
+
+This code adds the ER (estrogen receptor) status of the patients to the metadata.
 
 ```{r}
 #| label: patients-groups-metadata-columns
@@ -313,6 +317,8 @@ breast_cancer_patients_filt_cells@meta.data %<>%
 ## Data overview
 
 ### Cell sizes
+
+The cell sizes are calculated from the metadata. The width is calculated from the height and the aspect ratio. The width and height are then converted from pixels to micrometers using the conversion factor provided by NanoString.
 
 ```{r}
 #| label: cells-size
@@ -582,6 +588,8 @@ save_data(TMA_info_to_save, file.path(gl_img_dir, "TMA"))
 
 ## Quality assurance
 
+Check for mitochondrial genes, there should not be any.
+
 ```{r}
 #| label: qa
 
@@ -596,8 +604,6 @@ if (mt_gene_count > 0) {
 
 ## Cell typing
 
-The clustering performed by Insitutype  uses the raw counts, therefore it is useless to use the integrated data because Seurat does not provide an adjusted count matrix.
-
 ```{r}
 #| label: ins-metadata-columns
 
@@ -611,6 +617,8 @@ dir_ist_plots <- file.path(gl_img_dir, "Insitutype")
 ```
 
 ### Insitutype Clustering
+
+Insitutype  uses the raw counts, therefore it is useless to use the integrated data because Seurat does not provide an adjusted count matrix. The cells are annotated with the cell types from the reference profiles. Finally, some cell types are manually merged together.
 
 ```{r}
 #| label: insitutype-load
@@ -764,6 +772,8 @@ breast_cancer_patients_analyze@meta.data %<>%
 
 ### Cell groups
 
+The cell types are grouped into larger groups (e.g. "Myeloids", "Stromal cells", etc.)
+
 ```{r}
 #| label: cell-groups-metadata-columns
 
@@ -838,6 +848,8 @@ breast_cancer_patients_analyze@meta.data %<>%
 
 ### Info
 
+Print some interactive tables with information about the cell typing done by Insitutyoe.
+
 ```{r}
 #| label: insitutype-info
 
@@ -894,6 +906,8 @@ save_data(ist_info, dir_ist_plots)
 ```
 
 ### SCTransform
+
+Normalize the data using the SCTransform method provided by Seurat. SCTransform is a method for normalizing single-cell data that uses a regularized negative binomial regression model to account for technical noise and biological variability.
 
 ```{r}
 #| label: rna-sctransform-calculate
@@ -1090,6 +1104,8 @@ print(patients_ist_sct)
 
 ### Standard normalization
 
+Try also the old Seurat normalization workflow. The data is normalized, scaled, and PCA is performed.
+
 ```{r}
 #| label: rna-standard-normalization-calculate
 #| eval: false
@@ -1207,6 +1223,8 @@ print(patients_ist_rna)
 
 ### Plot
 
+Visualize protein expression data of the Insitutype clusters.
+
 ```{r}
 #| label: insitutype-plot
 
@@ -1246,6 +1264,8 @@ print(insitutype_data)
 
 ### Stamps
 
+Plot the spatial plots with the cell types.
+
 ```{r}
 #| label: insistutype-spatial-clusters-plots
 
@@ -1283,7 +1303,7 @@ saveRDS(breast_cancer_patients_analyze, file.path(gl_obj_dir, "breast_cancer_pat
 
 ## Split
 
-Create two separate Seurat objects for tumor and normal cells using the Insitutype clusters
+Add the Insitutype metadata to the original Seurat object. The original Seurat object will be used to create the various Seurat subsets.
 
 ```{r}
 #| label: add-metadata-to-filt-cells
@@ -1326,6 +1346,8 @@ ist_ann_column <- FetchData(
 
 ## Normal cells
 
+The normal cells are the non-cancerous cells from the breast cancer patients.
+
 ```{r}
 #| label: normal-cells-load-metadata
 
@@ -1333,6 +1355,8 @@ normal_cells_dir <- file.path(gl_img_dir, "Normal cells")
 ```
 
 ### Compute
+
+Normalize the data and calculate the UMAP embeddings.
 
 ```{r}
 #| label: normal-cells-load
@@ -1384,6 +1408,8 @@ breast_cancer_patients_normal_cells <- RunUMAP(
 ```
 
 ### Plot
+
+Plot UMAPs and other plots showing the distribution of the non-malignant cells across patients.
 
 ```{r}
 #| label: normal-cells-plot
@@ -1671,6 +1697,8 @@ save_data(normal_cells_images, normal_cells_dir)
 
 ### Info
 
+Create interactive tables with the number of cells and the percentage of each cell type and group, globally and per patient.
+
 ```{r}
 #| label: insitutype-info
 
@@ -1728,6 +1756,8 @@ saveRDS(breast_cancer_patients_normal_cells, file.path(gl_obj_dir, "breast_cance
 ```
 
 ### Markers
+
+Find the markers of the non-malignant cells clusters. The markers are calculated using the Wilcoxon rank-sum test. Plot the most significant markers on a heatmap.
 
 ```{r}
 #| label: normal-cells-markers-load
@@ -1877,6 +1907,8 @@ save_data(normal_cells_complex_heatmap_list, normal_cells_dir)
 
 ## Macrophages
 
+The macrophages are a type of immune cell that play a key role in the immune response. Here I subset the main Seurat object to create a new one with only the macrophages.
+
 ```{r}
 #| label: macrophage-cells-load
 
@@ -1895,6 +1927,8 @@ breast_cancer_patients_macrophage_cells <-
 ```
 
 ### Cluster
+
+Do a subclustering of the macrophages to find different subtypes. Try different resolutions to find the best one.
 
 ```{r}
 #| label: macrophage-cells-metadata-columns
@@ -1973,6 +2007,8 @@ breast_cancer_patients_macrophage_cells <- RunUMAP(
 ```
 
 ### Plot
+
+Plot the UMAP of the macrophages with the different clustering resolutions.
 
 ```{r}
 #| label: macrophage-cells-plot
@@ -2109,6 +2145,8 @@ print(macrophage_cells_plots_to_save)
 
 ### Info
 
+Show tables with statistics about the macrophage clusters.
+
 ```{r}
 #| label: macrophage-cells-info
 
@@ -2150,6 +2188,8 @@ save_data(c(macrophage_cells_plots_to_save, macrophages_info), file.path(macroph
 ```
 
 ### Markers
+
+Find the markers of the macrophage clusters. The markers are calculated using the Wilcoxon rank-sum test. Plot the most significant markers on a heatmap.
 
 ```{r}
 #| label: macrophage-cells-markers-load
@@ -2362,6 +2402,8 @@ save_data(macrophage_cells_markers_to_save, macrophage_cells_markers_dir)
 
 ### Pseudotime
 
+Plot the cells on the UMAP according to their pseudotime, which is a measure of the progression of the cells through a biological process.
+
 ```{r}
 #| label: macrophage-cells-markers-load
 
@@ -2482,6 +2524,8 @@ save_data(macrophage_cells_pseudotime_images, file.path(macrophage_dir, "Pseudot
 
 ## Fibroblast
 
+The fibroblasts are a type of connective tissue cell that play a key role in the structure and function of tissues.
+
 ```{r}
 #| label: fibroblast-cells-metadata
 
@@ -2490,6 +2534,8 @@ fibroblast_dir <- file.path(gl_img_dir, "Fibroblasts")
 ```
 
 ### Compute
+
+Here I subset the main Seurat object to create a new one with only the fibroblasts.
 
 ```{r}
 #| label: fibroblast-cells-load
@@ -2507,6 +2553,8 @@ breast_cancer_patients_fibroblast_cells <-
 ```
 
 ### Cluster
+
+Do a subclustering of the fibroblasts to find different subtypes. Try different resolutions to find the best one.
 
 ```{r}
 #| label: fibroblast-cells-metadata-columns
@@ -2585,6 +2633,8 @@ breast_cancer_patients_fibroblast_cells <- RunUMAP(
 ```
 
 ### Plot
+
+Plot the UMAP of the fibroblasts with the different clustering resolutions. Also, plot the protein data and the distribution of clusters across patients.
 
 ```{r}
 #| label: fibroblast-cells-plot
@@ -2762,6 +2812,8 @@ print(fibroblast_cells_plots_to_save)
 
 ### Info
 
+Show tables with statistics about the fibroblast clusters.
+
 ```{r}
 #| label: fibroblast-cells-info
 
@@ -2823,6 +2875,8 @@ save_data(c(fibroblast_cells_plots_to_save, fibroblasts_info), file.path(fibrobl
 ```
 
 ### Markers
+
+Find the markers of the fibroblast clusters.Plot the most significant markers on a heatmap.
 
 ```{r}
 #| label: fibroblast-cells-markers-load
@@ -3035,6 +3089,8 @@ save_data(fibroblast_cells_markers_to_save, fibroblast_cells_markers_dir)
 
 ## Other cells
 
+The other cells are the cells that have not been identified by Seurat using the reference profiles. Most of these cells are expected to be malignant.
+
 ```{r}
 #| label: other-cells-load-metadata
 
@@ -3042,6 +3098,8 @@ other_cells_dir <- file.path(gl_img_dir, "Other cells")
 ```
 
 ### Cluster
+
+Here I subset the main Seurat object to create a new one with only the other cells. Then I run the clustering algorithm on the other cells.
 
 ```{r}
 #| label: other-cells-load
@@ -3135,6 +3193,8 @@ breast_cancer_patients_other_cells <- RunUMAP(
 ```
 
 ### Plot
+
+Generate plots to investigate the clusters.
 
 ```{r}
 #| label: other-cells-plot
@@ -3361,6 +3421,8 @@ saveRDS(breast_cancer_patients_other_cells, file.path(gl_obj_dir, "breast_cancer
 ```
 
 ### Markers
+
+Find the markers of the other cells clusters. Plot the most significant markers on a heatmap.
 
 ```{r}
 #| label: other-cells-markers-load
@@ -3772,7 +3834,11 @@ save_data(all_cells_images, file.path(gl_img_dir, "All cells annotated"))
 
 ## Gene Set Enrichment Analysis
 
+Gene Set Enrichment Analysis (GSEA) is a method to determine whether a set of genes shows statistically significant differences between two biological states. In this case, we will use GSEA to analyze the other cells clusters.
+
 ### GSEA objects
+
+Calculate the GSEA results for each tumor cluster. The results are saved in a list.
 
 ```{r}
 #| label: gsea-load-objects
@@ -3831,6 +3897,8 @@ saveRDS(GSEA_results, file.path(gl_obj_dir, "GSEA_results.rds"))
 ```
 
 ### GSEA plots
+
+Generate GSEA plot and dataframe for each tumor cluster. The plots and dataframes are saved in different lists.
 
 ```{r}
 #| message: false
@@ -3944,7 +4012,7 @@ saveRDS(GSEA_results, file.path(gl_obj_dir, "GSEA_results.rds"))
 
 ## Merge
 
-Merge normal and tumor subclusters
+Merge normal and tumor subclusters annotations.
 
 ```{r}
 #| label: merge-cells-metadata-columns
@@ -4027,7 +4095,11 @@ save_data(cell_types_stamps_plots, file.path(gl_img_dir, "Stamps_with_clusters")
 
 ## Spatial niches
 
+The spatial niches are areas in the cores that have a similar cell composition.
+
 ### Compute
+
+The niches are calculated using the spatial images and the cell phenotypes.
 
 ```{r}
 #| label: build-niches-params
@@ -4077,6 +4149,8 @@ saveRDS(breast_cancer_patients_analyze, file.path(gl_obj_dir, "breast_cancer_pat
 
 ### Metadata
 
+Set the metadata used for plotting.
+
 ```{r}
 #| label: spatial-niches-study-setup
 
@@ -4095,6 +4169,8 @@ palette_niches <- generate_colors_lookup_table(
 ```
 
 ### Spatial plots
+
+Plot the cores with the cells highlighted according to the niches they belong to.
 
 ```{r}
 #| label: spatial-niches-plots
@@ -4118,6 +4194,8 @@ save_data(niches_stamps_plots, file.path(gl_img_dir, glue("Stamps_with_{niches_p
 ```
 
 ### Statistics
+
+Calculate some statistics about the niches like the cell composition.
 
 ```{r}
 #| label: niches-statistics-calc
@@ -4348,7 +4426,11 @@ save_data(niches_patient_data, file.path(gl_img_dir, stat_niches_dir))
 
 ## CellChat
 
+CellChat is a tool for inferring and analyzing cell-cell communication networks from single-cell transcriptomic data. In this case, we will use CellChat to analyze the cell-cell communication between the different cell types.
+
 ### Distances
+
+Calculate the distances between the various non-malignant cell types and the closest tumor cells.
 
 ```{r}
 #| label: calculate-distances
@@ -4560,6 +4642,8 @@ for (stamp in names(core_stamp_distance_matrix)) {
 ```
 
 ### Cell-cell communication
+
+Infer the three types of cell-cell communication: secreted signaling, ECM-receptor signaling and cell-cell contact. Use both the RNA and the spatial data to infer the cell-cell communication.
 
 ```{r}
 #| label: load-cellchat
@@ -4793,6 +4877,8 @@ saveRDS(cellchat, file.path(gl_obj_dir, glue("cellchat_{cellchat_datatype}_{Cell
 ```
 
 ### Plot
+
+Plot the cell-cell communication network and the signaling pathways showing significant communications. Also, plot the interaction strength and the number of interactions between cell groups.
 
 ```{r}
 #| label: cellchat-palette
