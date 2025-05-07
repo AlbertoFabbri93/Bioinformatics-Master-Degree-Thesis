@@ -3727,6 +3727,7 @@ all_cells_percent_cell_groups_patients <-
 all_cells_images[["all_cells_percent_cell_groups_patients"]] <- all_cells_percent_cell_groups_patients
 
 # Plot the percentage of cells in each group per patient
+all_cells_percent_cell_groups_patients_plot <-
 all_cells_percent_cell_groups_patients %>%
   ggplot(
     aes(
@@ -3735,7 +3736,7 @@ all_cells_percent_cell_groups_patients %>%
       fill = !!sym(col_ist_merge_group)
     )
   ) +
-  geom_bar(stat = "identity", width = 0.7) +
+  geom_bar(stat = "identity", width = 0.7, color = NA) +
   scale_fill_manual(values = palette_cell_types) +
   labs(
     title = "Percentage of cells in each group per patient",
@@ -3744,13 +3745,19 @@ all_cells_percent_cell_groups_patients %>%
     fill = "Cell group") +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 0, hjust = 1, vjust = 0.5, size = 8),
+    axis.text.x = element_text(angle = 0, hjust = 1, vjust = 0.5, size = 11),
+    axis.text.y = element_text(size = 11),
     legend.position = "right",
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_rect(fill = NA, color = "black")
+    panel.border = element_blank(),
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 13),
+    legend.text = element_text(size = 10),
+    legend.title = element_text(size = 12, face = "bold"),
+    axis.ticks.length = unit(0, "mm")
   )
-all_cells_images[["all_cells_percent_cell_groups_patients_plot"]] <- recordPlot()
+all_cells_images[["all_cells_percent_cell_groups_patients_plot"]] <- all_cells_percent_cell_groups_patients_plot
 
 print(all_cells_images)
 ```
