@@ -35,7 +35,7 @@ To run this file it is necessary to have `quarto` installed. `quarto` is a softw
 [https://quarto.org]
 
 ::: {.content-hidden}
-### Load the necessary packages
+### Load packages
 :::
 
 ```{r}
@@ -272,7 +272,7 @@ breast_cancer_patients_filt_cells <- subset(breast_cancer_patients_filt_cells, c
 saveRDS(breast_cancer_patients_filt_cells, file.path(gl_obj_dir, "breast_cancer_patients_filt_cells.rds"))
 ```
 
-## Add metadata
+## ER status
 
 ```{r}
 #| label: patients-groups-metadata-columns
@@ -762,7 +762,7 @@ breast_cancer_patients_analyze@meta.data %<>%
   )
 ```
 
-### Add cell groups
+### Cell groups
 
 ```{r}
 #| label: cell-groups-metadata-columns
