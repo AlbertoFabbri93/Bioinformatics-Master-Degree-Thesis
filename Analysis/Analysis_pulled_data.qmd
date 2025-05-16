@@ -8,13 +8,13 @@ editor_options:
 
 # Brain metastaes from primary breast cancer
 
-This study aims to investigate the immune microenvironment of brain metastases from primary breast cancer. The analysis is performed on NanoString data from 7 patients.
+This study aims to investigate the immune microenvironment of brain metastases from primary breast cancer. The analysis is performed on NanoString CosMx data from 7 patients.
 
 ## Set up the environment
 
 ### Packages
 
-This analysis uses `renv` to manage the dependencies. `renv` is a normal R package that can be installed with:
+This analysis uses `renv` to manage the dependencies. `renv` is an R package that can be installed with:
 
 `install.packages("renv")`
 
@@ -1700,7 +1700,7 @@ save_data(normal_cells_images, normal_cells_dir)
 Create interactive tables with the number of cells and the percentage of each cell type and group, globally and per patient.
 
 ```{r}
-#| label: insitutype-info
+#| label: normal-cells-info
 
 normal_cells_info <- list()
 
@@ -1895,7 +1895,7 @@ normal_cells_complex_heatmap_list[["normal_cells_clust_diff_expr_genes_complex_h
 ```
 
 ```{r}
-#| label: normal-cells-markers-save
+#| label: normal-cells-markers-heatmap-save
 #| eval: false
 
 # Define and set complex heatmap attributes
@@ -1919,7 +1919,7 @@ macrophage_dir <- file.path(gl_img_dir, "Macrophages")
 ```
 
 ```{r}
-#| label: macrophage-cells-compute
+#| label: macrophage-cells-subset
 #| eval: false
 
 breast_cancer_patients_macrophage_cells <- 
@@ -2385,7 +2385,7 @@ for (i in seq_along(macrophage_cells_markers_list)) {
 ```
 
 ```{r}
-#| label: macrophage-cells-markers-save
+#| label: macrophage-cells-markers-heatmap-save
 #| eval: false
 
 # Other cells markers folder
@@ -2405,7 +2405,7 @@ save_data(macrophage_cells_markers_to_save, macrophage_cells_markers_dir)
 Plot the cells on the UMAP according to their pseudotime, which is a measure of the progression of the cells through a biological process.
 
 ```{r}
-#| label: macrophage-cells-markers-load
+#| label: macrophage-cells-cds-load
 
 # Load other cells object from memory
 macrophage_cds <- readRDS(file.path(gl_obj_dir, "macrophage_cds.rds"))
@@ -2545,7 +2545,7 @@ breast_cancer_patients_fibroblast_cells <- readRDS(file.path(gl_obj_dir, "breast
 ```
 
 ```{r}
-#| label: fibroblast-cells-compute
+#| label: fibroblast-cells-subset
 #| eval: false
 
 breast_cancer_patients_fibroblast_cells <- 
@@ -3072,7 +3072,7 @@ for (i in seq_along(fibroblast_cells_markers_list)) {
 ```
 
 ```{r}
-#| label: fibroblast-cells-markers-save
+#| label: fibroblast-cells-markers-heatmap-save
 #| eval: false
 
 # Other cells markers folder
@@ -3635,7 +3635,7 @@ print(main_markers_list)
 ```
 
 ```{r}
-#| label: other-cells-markers-save
+#| label: other-cells-markers-heatmap-save
 #| eval: false
 
 # Other cells markers folder
