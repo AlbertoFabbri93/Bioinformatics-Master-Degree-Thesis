@@ -26,6 +26,9 @@ Once `renv` is installed it can be used to install the necessary packages by run
 
 **Do not update the version of the packages if not absolutely necessary.**
 
+If you want to check for package updates without installing them use `renv::update(check=TRUE)`.
+If you want to install the updates use `renv::update()`.
+If you want to only update a specific package use `renv::update("package_name")`.
 If some packages have been update, run `renv::snapshot()` to update the `renv.lock` file.
 
 ### Quarto
